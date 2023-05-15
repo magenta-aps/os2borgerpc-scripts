@@ -13,7 +13,6 @@ SINK=$2
 PROPERTY_VALUE=$3
 
 OS2BORGERPC_PULSEAUDIO_CONFIG="/etc/pulse/default.pa.d/os2borgerpc.pa"
-OLD_OS2BORGERPC_PULSEAUDIO_CONFIG="/etc/pulse/profile.pa.d/os2borgerpc.pa"
 PROPERTY_VOLUME="set-sink-volume"
 PROPERTY_MUTE="set-sink-mute"
 MAX_INT_VOLUME=65356
@@ -36,6 +35,7 @@ fi
 # This function is shared between all the audio scripts
 create_os2borgerpc_pulseaudio_config_dir() {
   MAIN_PULSEAUDIO_CONFIG="/etc/pulse/default.pa"
+  OLD_OS2BORGERPC_PULSEAUDIO_CONFIG="/etc/pulse/profile.pa.d/os2borgerpc.pa"
 
   # Note: There needs to be at least ONE file in here, otherwise pulse will now crash
   # The file can be empty no problem. Therefore we always create the file regardless.

@@ -12,13 +12,13 @@ ACTIVATE=$1
 PROPERTY_VALUE=$2
 
 OS2BORGERPC_PULSEAUDIO_CONFIG="/etc/pulse/default.pa.d/os2borgerpc.pa"
-OLD_OS2BORGERPC_PULSEAUDIO_CONFIG="/etc/pulse/profile.pa.d/os2borgerpc.pa"
 PROPERTY="set-default-sink"
 
 # 20.04 backwards compatibility - in 22.04 the default.pa.d directory and the reference to it is already there
 # This function is shared between all the audio scripts
 create_os2borgerpc_pulseaudio_config_dir() {
   MAIN_PULSEAUDIO_CONFIG="/etc/pulse/default.pa"
+  OLD_OS2BORGERPC_PULSEAUDIO_CONFIG="/etc/pulse/profile.pa.d/os2borgerpc.pa"
 
   # Note: There needs to be at least ONE file in here, otherwise pulse will now crash
   # The file can be empty no problem. Therefore we always create the file regardless.
