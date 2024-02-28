@@ -30,6 +30,28 @@ chmod 700 "$CHECKIN_SCRIPT"
 
 sed --in-place "s/local\/bin\/jobmanager/share\/os2borgerpc\/bin\/check-in.sh/" $CRON_PATH
 
+# Computers installed from image 3.1.1 still check in at 5,10,15,etc.
+# Make sure that such computers are also randomized on minutes
+if grep -q "*/5" $CRON_PATH; then
+  INTERVAL=5
+  RANDOM_NUMBER=$((RANDOM%INTERVAL+0))
+  CRON_COMMAND="$RANDOM_NUMBER,"
+  while [ $((RANDOM_NUMBER+INTERVAL)) -lt 60 ]
+  do
+    RANDOM_NUMBER=$((RANDOM_NUMBER+INTERVAL))
+    if [ $((RANDOM_NUMBER+INTERVAL)) -ge 60 ]
+    then
+      CRON_COMMAND="$CRON_COMMAND$RANDOM_NUMBER * * * * root $CHECKIN_SCRIPT"
+    else
+      CRON_COMMAND="$CRON_COMMAND$RANDOM_NUMBER,"
+    fi
+  done
+  cat <<EOF > "$CRON_PATH"
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+$CRON_COMMAND
+EOF
+fi
+
 # Send info on PC Model, Manufacturer, CPUS and RAM
 
 if ! grep --quiet "pc_model" $CONF; then
