@@ -12,6 +12,37 @@ if [ "$CLIENT_VERSION_MAJOR" -ne 2 ]; then
   pip install --upgrade os2borgerpc-client
 fi
 
+# Block gnome-remote-desktop on 22.04
+if lsb_release -d | grep --quiet 22; then
+  DCONF_FILE="/etc/dconf/db/os2borgerpc.d/00-remote-desktop"
+  LOCK_FILE="/etc/dconf/db/os2borgerpc.d/locks/00-remote-desktop"
+
+  mkdir --parents "$(dirname $DCONF_FILE)" "$(dirname $LOCK_FILE)"
+
+  cat << EOF > "/etc/dconf/profile/user"
+user-db:user
+system-db:os2borgerpc
+EOF
+
+  cat << EOF > $DCONF_FILE
+[org/gnome/desktop/remote-desktop/rdp]
+enable=false
+view-only=true
+[org/gnome/desktop/remote-desktop/vnc]
+enable=false
+view-only=true
+EOF
+
+  cat << EOF > $LOCK_FILE
+/org/gnome/desktop/remote-desktop/rdp/enable
+/org/gnome/desktop/remote-desktop/vnc/enable
+/org/gnome/desktop/remote-desktop/rdp/view-only
+/org/gnome/desktop/remote-desktop/vnc/view-only
+EOF
+
+  dconf update
+fi
+
 # Generate a pseudo-random number between 0 and 59
 DELAY_IN_SECONDS=$((RANDOM%60))
 
