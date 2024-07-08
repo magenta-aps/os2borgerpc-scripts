@@ -63,6 +63,7 @@ sed --in-place "s/local\/bin\/jobmanager/share\/os2borgerpc\/bin\/check-in.sh/" 
 
 # Computers installed from image 3.1.1 still check in at 5,10,15,etc.
 # Make sure that such computers are also randomized on minutes
+# shellcheck disable=SC2063  # It's a literal *, not a glob
 if grep -q "*/5" $CRON_PATH; then
   INTERVAL=5
   RANDOM_NUMBER=$((RANDOM%INTERVAL+0))
