@@ -13,8 +13,9 @@
 #    Step one of the upgrade from 20.04 to 22.04.
 
 # Fail on machines that have already been upgraded
-if lsb_release -d | grep --quiet 22; then
-  echo "Denne maskine er allerede blevet opgraderet til Ubuntu 22.04."
+if ! lsb_release -d | grep --quiet 20; then
+  echo "Denne maskine anvender ikke Ubuntu 20.04."
+  echo "Dette script er kun beregnet til at opgradere fra Ubuntu 20.04 til Ubuntu 22.04."
   exit 1
 fi
 
