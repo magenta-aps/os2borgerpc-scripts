@@ -109,7 +109,11 @@ cat /usr/share/os2borgerpc/bin/start_chromium.sh
 ls -la /usr/share/os2borgerpc/bin/keyboard-button/
 
 text "bspwm_add_button.sh contents"
-cat /usr/share/os2borgerpc/bin/keyboard-button/bspwn_add_button.sh
+cat /usr/share/os2borgerpc/bin/keyboard-button/bspwm_add_button.sh
+
+
+header "Information for those using login.html"
+cat /home/chrome/login.html
 
 
 header "Print Xorg.log excerpt (fx. if Xorg fails to start)"
