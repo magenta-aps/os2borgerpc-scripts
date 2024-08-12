@@ -1,13 +1,13 @@
 #! /usr/bin/env sh
 
-# The only chromium specific logic is that we overwrite the startpage set in start_chromium.sh - otherwise it could work with any browser.
+# The only Chromium-specific logic is that we overwrite the startpage set in start_chromium.sh - otherwise it could work with any browser.
 
 ACTIVATE="$1"
 PASSWORD="$2"
 
 # NOTE: Ideally this would not be owned by chrome and in a dir not owned by chrome, but Chromium seems unable to read it from e.g. /usr/share/os2borgerpc,
-# getting file not found, and without ownership of the file it gets permission denied.
-# Maybe it's a snap issue?
+# getting file not found - and without ownership of the file, it gets "permission denied".
+# Maybe it's a snap/apparmor issue?
 #LOCAL_LOGIN_HTML_FILE="/usr/share/os2borgerpc/login.html"
 LOCAL_LOGIN_HTML_FILE="/home/chrome/login.html"
 START_CHROMIUM_SCRIPT="/usr/share/os2borgerpc/bin/start_chromium.sh"
@@ -23,7 +23,9 @@ replace_start_page() {
     sed --in-place "s@IURL=.*@IURL=\"$1\"@" $START_CHROMIUM_SCRIPT
 }
 
-if [ -f $LOCAL_LOGIN_HTML_FILE ]; then
+# If START_CHROMIUM_SCRIPT points to the login.html file we obtain the real startpage from the login.html file.
+# This is so that this script picks up the new start page, if chromium autostart has been rerun before rerunning this.
+if grep --quiet "$LOCAL_LOGIN_HTML_FILE" $START_CHROMIUM_SCRIPT; then
   REAL_STARTPAGE=$(grep "const redirect_url" $LOCAL_LOGIN_HTML_FILE | cut --delimiter '"' --fields 2)
 else
   REAL_STARTPAGE=$(grep "^IURL" $START_CHROMIUM_SCRIPT | cut --delimiter '"' --fields 2)
@@ -69,7 +71,7 @@ if [ "$ACTIVATE" = "True" ]; then
         window.location.replace(redirect_url)
       }
       else {
-        error_text_container.innerHTML="Forkert kodeord. Prøv et andet."
+        error_text_container.innerHTML = "Forkert kodeord. Prøv et andet."
       }
     }
     const el = document.getElementById("pw")
