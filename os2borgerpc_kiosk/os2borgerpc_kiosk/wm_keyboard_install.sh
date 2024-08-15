@@ -49,6 +49,14 @@ if [ "$ACTIVATE" = "True" ]; then
   # ran a previous version of that, so keeping it here too
   apt-get update
   apt-get install -y language-pack-da bspwm onboard lemonbar- dmenu-
+ 
+
+  # We experienced a bug when running the script on 24.04, where the keyboard would appear 
+  # but crash when trying to interact with it. We have at the moment not found any other solution, 
+  # than switching to GTK. Setting input source to GTK does not cause problems on 22.04.
+  # dbus-x11 is needed to set setting, and is not installed by default on 24.04  
+  apt-get install -y dbus-x11
+  runuser -u $USER dbus-launch gsettings set org.onboard.keyboard input-event-source 'GTK'
 
   cd /home/$USER || exit 1
   # Make the directory for the config
