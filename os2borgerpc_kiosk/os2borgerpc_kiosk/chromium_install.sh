@@ -17,7 +17,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update --assume-yes
 
 apt-get install --assume-yes xinit xserver-xorg-core x11-xserver-utils --no-install-recommends --no-install-suggests
-apt-get install --assume-yes xdg-utils xserver-xorg-video-qxl xserver-xorg-video-intel xserver-xorg-video-all xserver-xorg-input-all libleveldb-dev
+apt-get install --assume-yes xdg-utils xserver-xorg-video-qxl xserver-xorg-video-intel xserver-xorg-video-all xserver-xorg-input-all libleveldb-dev xbindkeys
 
 # This section is a workaround to handle an error in Ubuntu server 22.04
 # that causes certain snap installs to trigger DNS problems on wifi.

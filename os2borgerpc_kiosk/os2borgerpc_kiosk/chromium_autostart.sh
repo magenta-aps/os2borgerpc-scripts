@@ -16,11 +16,17 @@
 
 set -ex
 
+# Separates the programmatic value from the text description
+get_value_from_option() {
+  echo "$1" | cut --delimiter ":" --fields 1
+}
+
 TIME=$1
 URL=$2
 WIDTH=$3
 HEIGHT=$4
 ORIENTATION=$5
+LOCK_DOWN_KEYBINDS=$(get_value_from_option "$6")  # 0: No binds removed, 1: Most binds removed, 2: All binds removed (specifically most + binds for printing, reloading and changing zoom)
 
 CUSER="chrome"
 XINITRC="/home/$CUSER/.xinitrc"
@@ -34,6 +40,8 @@ AUTOLOGIN_COUNTER="/etc/os2borgerpc/login_counter.txt"
 COUNTER_RESET_SERVICE="/etc/systemd/system/reset_login_counter.service"
 REBOOT_SCRIPT="/usr/share/os2borgerpc/bin/chromium_error_reboot.sh"
 MAXIMUM_CONSECUTIVE_AUTOLOGINS=3
+# We use xbindkeys to disable some keyboard shortcuts in case people connect a keyboard to their Kiosk computer.
+XBINDKEYS_CONFIG=/home/$CUSER/.xbindkeysrc
 
 if ! get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   echo "Dette script er ikke designet til at blive anvendt på en regulær OS2borgerPC-maskine."
@@ -42,8 +50,9 @@ fi
 
 # Create user.
 # TODO: This is now built into the image instead, but for now it's kept here for backwards compatibility with old images
+# Remove this after 2025-04, when 20.04 is out of support.
 # useradd will fail on multiple runs, so prevent that
-if ! id $CUSER &>/dev/null; then
+if ! id $CUSER > /dev/null 2>&1; then
   useradd $CUSER --create-home --password 12345 --shell /bin/bash --user-group --comment "Chrome"
 fi
 
@@ -142,6 +151,7 @@ EOF
 
 chmod +x $ROTATE_SCREEN_SCRIPT_PATH
 
+
 # Kiosk mode cannot currently be set via policy
 # so we set the value in the environment file
 # To prevent overwriting changes made by other scripts
@@ -176,6 +186,100 @@ fi
 EOF
 chmod +x "$CHROMIUM_SCRIPT"
 
+if [ "$LOCK_DOWN_KEYBINDS" -lt "1" ]; then
+  rm --force $XBINDKEYS_CONFIG
+else
+  XBINDKEYS_MAYBE='xbindkeys &'
+  # Attempt at preventing everything except reload, print and zoom
+  cat << EOF > $XBINDKEYS_CONFIG
+# Prevent saving the page
+""
+  control + s
+
+# Prevent closing tabs/windows/the browser
+""
+  control + w
+""
+  control + shift + w
+
+# Prevent opening new tabs
+""
+  control + t
+""
+  control + shift + t
+
+# Prevent opening new windows
+""
+  control + n
+""
+  control + shift + n
+
+# Prevent opening the tab selection window
+""
+  control + shift + a
+
+# Prevent bookmarking
+""
+  control + d
+""
+  control + shift + d
+""
+  control + shift + o
+
+# Prevent opening a file from disk
+""
+  control + o
+
+# Prevent opening history
+""
+  control + h
+
+# Prevent opening download history
+""
+  control + j
+
+# Prevent closing the browser, f has to be uppercase for it to work
+""
+  alt + F4
+
+# Prevent selecting all text
+""
+  control + 7
+EOF
+  # Additionally prevent print, reload and zoom
+  if [ "$LOCK_DOWN_KEYBINDS" -gt "1" ]; then
+  cat << EOF >> $XBINDKEYS_CONFIG
+# Additionally prevent reloading, printing and changing zoom
+
+# Prevent reloading
+""
+  control + r
+
+# Prevent printing
+""
+  control + p
+
+# Prevent changing zoom
+""
+  control + 0
+""
+  control + shift + 0
+""
+  control + plus
+""
+  control + shift + plus
+""
+  control + minus
+""
+  control + shift + minus
+""
+  control + KP_Add
+""
+  control + KP_Subtract
+EOF
+  fi
+fi
+
 # Launch chromium upon starting up X
 cat << EOF > $XINITRC
 #!/bin/sh
@@ -184,11 +288,9 @@ xset s off
 xset s noblank
 xset -dpms
 
-# Dev note: We used to have "sleep 20" hardcoded here but we removed it.
-# Re-add if it causes timing issues. That said such potential issues should be
-# solveable simple by raising the sleep parameter to rotate_screen.sh
-
 $ROTATE_SCREEN_SCRIPT_PATH $TIME $ORIENTATION
+
+$XBINDKEYS_MAYBE
 
 # Launch chromium with its non-WM settings
 exec $CHROMIUM_SCRIPT nowm
