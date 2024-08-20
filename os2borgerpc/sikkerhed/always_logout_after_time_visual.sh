@@ -47,7 +47,7 @@ GRACE_PERIOD_MULTIPLIER="1.07" # The root timer has this added to it, to be more
 
 # EXTENSION ADDITIONAL SETTINGS:
 REPO_NAME="os2borgerpc-gnome-extensions"
-EXTENSION_GIT_URL=https://github.com/OS2borgerPC/$REPO_NAME/archive/refs/heads/main.zip
+EXTENSION_GIT_URL=https://github.com/magenta-aps/$REPO_NAME/archive/refs/heads/main.zip
 
 # TODO: Consider not handling this here, and instead running install.sh with False to remove an extension. But then the repo
 # either needs to remain on disk or be downloaded anew just to delete an extension...?

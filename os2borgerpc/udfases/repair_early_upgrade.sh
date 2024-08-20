@@ -210,7 +210,7 @@ dconf update
 BRANCH="master"
 SCRIPT_DIR="os2borgerpc-scripts-$BRANCH"
 rm --recursive --force "$SCRIPT_DIR"
-wget https://github.com/OS2borgerPC/os2borgerpc-scripts/archive/refs/heads/$BRANCH.zip
+wget https://github.com/magenta-aps/os2borgerpc-scripts/archive/refs/heads/$BRANCH.zip
 unzip $BRANCH.zip
 rm $BRANCH.zip
 

@@ -128,7 +128,7 @@ def sms_validate(phone_number, password):
         pc_name = None
 
     # Values it can return - see sms_login here:
-    # https://github.com/OS2borgerPC/admin-site/blob/master/admin_site/system/rpc.py
+    # https://github.com/magenta-aps/os2borgerpc-admin-site/blob/master/admin_site/system/rpc.py
     # For reference:
     #   time < 0: User is quarantined and may login in -time minutes. Alternatively,
     #             the next matching booking starts in -time minutes
