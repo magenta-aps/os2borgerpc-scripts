@@ -120,7 +120,7 @@ def quria_validate(loaner_number, pincode):
         value_dict["save_log"] = 1
 
     # Values it can return - see general_citizen_login here:
-    # https://github.com/OS2borgerPC/admin-site/blob/master/admin_site/system/rpc.py
+    # https://github.com/magenta-aps/os2borgerpc-admin-site/blob/master/admin_site/system/rpc.py
     # For reference:
     #   time < 0: User is quarantined and may login in -time minutes. Alternatively,
     #             the next booking starts in -time minutes (theirs or anothers)

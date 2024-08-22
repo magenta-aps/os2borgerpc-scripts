@@ -75,7 +75,7 @@ def cicero_validate(cicero_user, cicero_pass):
     pc_uid = check_output(["get_os2borgerpc_config", "uid"]).decode().strip()
 
     # Values it can return - see cicero_login here:
-    # https://github.com/OS2borgerPC/admin-site/blob/master/admin_site/system/rpc.py
+    # https://github.com/magenta-aps/os2borgerpc-admin-site/blob/master/admin_site/system/rpc.py
     # For reference:
     #   r < 0: User is quarantined and may login in -r minutes
     #   r = 0: Unable to authenticate.
