@@ -21,6 +21,9 @@ header "General information from only a basic setup"
 text "Information about the computer model"
 dmidecode --type 1
 
+text "Information about the BIOS and its version"
+dmidecode --type 0
+
 text "LAN or Wi-Fi?"
 ip link
 
