@@ -13,6 +13,9 @@ text() {
 header "Information about the computer model"
 dmidecode --type 1
 
+text "Information about the BIOS and its version"
+dmidecode --type 0
+
 header "Info about devices and drivers"
 lshw
 

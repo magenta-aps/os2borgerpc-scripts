@@ -2,6 +2,9 @@
 
 set -x
 
+printf "Check that the date and time on the computer makes sense\n"
+date
+
 printf "Check crontab for root\n"
 crontab -l
 
@@ -28,3 +31,10 @@ rtcwake -m show
 
 printf "\nCheck that rtcwake is in the expected location\n"
 which rtcwake
+
+printf "\nCheck rtcwake version\n"
+rtcwake --version
+
+printf "\nList supported suspend methods (shallow = standby (S1), deep = suspend to RAM (MEM, S3))\n"
+printf "The current default suspend method is shown in [brackets]\n"
+cat /sys/power/mem_sleep
