@@ -38,3 +38,15 @@ rtcwake --version
 printf "\nList supported suspend methods (shallow = standby (S1), deep = suspend to RAM (MEM, S3))\n"
 printf "The current default suspend method is shown in [brackets]\n"
 cat /sys/power/mem_sleep
+
+printf "\nCheck systemd version\n"
+systemctl --version
+
+printf "\nCheck the contents of /etc/systemd/sleep.conf. It specifies the defaults, and if things aren't working this might be worth experimenting with changes.\n"
+cat /etc/systemd/sleep.conf
+
+printf "See last logins via wtmp:"
+last -x | grep reboot | head --lines 100  # Alternately grep for shutdown to see when it's been off
+
+printf "See current uptime, in case wtmp has been rotated"
+uptime
