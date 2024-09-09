@@ -25,9 +25,15 @@ cleanup_mime_file() {
 
 make_okular_default() {
 
+	if [ ! -f $GLOBAL_MIME_FILE ]; then
+		cat <<- EOF > $GLOBAL_MIME_FILE
+			[Default Applications]
+		EOF
+	fi
+
 	cleanup_mime_file $GLOBAL_MIME_FILE
 
-  cat <<- EOF >> $GLOBAL_MIME_FILE
+	cat <<- EOF >> $GLOBAL_MIME_FILE
 		application/pdf=okularApplication_kimgio.desktop;
 		application/x-bzpdf=okularApplication_kimgio.desktop;
 		application/x-gzpdf=okularApplication_kimgio.desktop;
