@@ -172,16 +172,41 @@ mkdir --parents "$(dirname "$CHROMIUM_SCRIPT")"
 cat << EOF > "$CHROMIUM_SCRIPT"
 #!/bin/sh
 
+DIMENSIONS=\$(xrandr | grep '*' | awk '{print \$1}')
+
 WM=\$1
 IURL="$URL"
-IWIDTH="$WIDTH"
-IHEIGHT="$HEIGHT"
+
+# Check if WIDTH is provided; if not, fall back to default from xrandr
+if [ "$WIDTH" = "auto" ]; then
+    IWIDTH="\$(echo \$DIMENSIONS | cut -d'x' -f1)"
+else
+    IWIDTH="$WIDTH"
+fi
+
+# Check if HEIGHT is provided; if not, fall back to default from xrandr
+if [ "$HEIGHT" = "auto" ]; then
+    IHEIGHT="\$(echo \$DIMENSIONS | cut -d'x' -f2)"
+else
+    IHEIGHT="$HEIGHT"
+fi
+
 COMMON_SETTINGS="--password-store=basic --enable-offline-auto-reload"
-if [ "\$WM" == "wm" ]
-then
+
+
+if [ "$WIDTH" = "auto" ] || [ "$HEIGHT" = "auto" ]; then
+  if [ "$ORIENTATION" = "left" ] || [ "$ORIENTATION" = "right" ] ; then
+    TEMP=\$IWIDTH
+    IWIDTH=\$IHEIGHT
+    IHEIGHT=\$TEMP
+  fi
+fi
+
+
+if [ "\$WM" == "wm" ]; then
   chromium-browser "\$BPC_KIOSK" "\$IURL" "\$COMMON_SETTINGS"
 else
-  exec chromium-browser "\$BPC_KIOSK" "\$IURL" --window-size="\$IWIDTH","\$IHEIGHT" --window-position=0,0 "\$COMMON_SETTINGS"
+  exec chromium-browser "\$BPC_KIOSK" "\$IURL" --window-size="\$IWIDTH,\$IHEIGHT" --window-position=0,0 "\$COMMON_SETTINGS"
 fi
 EOF
 chmod +x "$CHROMIUM_SCRIPT"
