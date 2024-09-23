@@ -22,6 +22,7 @@
 set -x
 
 WAKE_PLAN_FILE=/etc/os2borgerpc/plan.json
+OUR_USER="user"
 
 if [ -f $WAKE_PLAN_FILE ]; then
   echo "Dette script kan ikke anvendes på en PC, der er tilknyttet en tænd/sluk tidsplan."
@@ -54,7 +55,7 @@ if [ "$1" != "--off" ]; then
 
     if [ $# == 2 ]; then
         HOURS=$1
-        MINUTES=$2
+        MINUTES=${2:-0}
         # Assume the parameters are already validated as integers.
         echo "$MINUTES $HOURS * * * /sbin/shutdown -P now" >> $ROOTCRON_TMP
 
@@ -72,12 +73,15 @@ if [ "$1" != "--off" ]; then
 fi
 
 # Update crontabs accordingly - either with an empty crontab or updated ones
-crontab $ROOTCRON_TMP
-crontab -u user $USERCRON
+crontab $ROOTCRON_TMP || exit 1
+
+if id $OUR_USER > /dev/null 2>&1; then
+  crontab -u $OUR_USER $USERCRON || exit 1
+fi
 
 # Ensure that user-cleanup resets the user crontab
 if [ -f "$USER_CLEANUP" ] && ! grep --quiet "crontab" "$USER_CLEANUP"; then
-  echo "crontab -u user $USERCRON" >> "$USER_CLEANUP"
+  echo "crontab -u $OUR_USER $USERCRON" >> "$USER_CLEANUP"
 fi
 
 rm --force $ROOTCRON_TMP
