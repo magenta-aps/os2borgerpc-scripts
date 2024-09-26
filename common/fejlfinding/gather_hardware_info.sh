@@ -16,6 +16,9 @@ dmidecode --type 1
 text "Information about the BIOS and its version"
 dmidecode --type 0
 
+header "Information about the kernel version"
+uname -r
+
 header "Info about devices and drivers"
 lshw
 
