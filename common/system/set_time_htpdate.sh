@@ -28,6 +28,7 @@ date
 for SERVER in $SERVERS_TO_CHECK; do
     if timeout --preserve-status 30s htpdate -s "$SERVER"; then
         echo "Synchronising time with the server $SERVER succeeded."
+        SUCCESS=1
         break
     else
         echo "The server $SERVER timed out. Trying the next one if there is one."
@@ -48,3 +49,8 @@ systemctl enable --now systemd-timesyncd
 # Clean up and remove htpdate, as otherwise it leaves a service running which continually syncs time
 # via htpdate
 apt-get remove --assume-yes htpdate
+
+if [ -z "$SUCCESS" ]; then
+    echo "Synchronisation failed with all the listed servers"
+    exit 1
+fi
