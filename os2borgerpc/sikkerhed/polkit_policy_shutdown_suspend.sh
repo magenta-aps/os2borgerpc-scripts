@@ -50,34 +50,57 @@ if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   exit 1
 fi
 
-POLICY="/etc/polkit-1/localauthority/90-mandatory.d/10-os2borgerpc-no-user-shutdown.pkla"
+DISABLE_SUSPEND=$1
+DISABLE_POWEROFF_RESTART=$2
 
-if [ ! -d "$(dirname "$POLICY")" ]; then
-    mkdir -p "$(dirname "$POLICY")"
-fi
+POLICY="/etc/polkit-1/rules.d/10-os2borgerpc-no-user-shutdown.rules"
+POLICY_LEGACY="/etc/polkit-1/localauthority/90-mandatory.d/10-os2borgerpc-no-user-shutdown.pkla"
+RELEASE=$(lsb_release --release --short)
 
-if [ "$1" = "False" ]; then
-  rm -f "$POLICY"
-elif [ "$1" = "True" ] && [ "$2" = "False" ]; then
-  cat > "$POLICY" <<END
-[Restrict system shutdown]
-Identity=unix-user:user;unix-user:lightdm
-Action=org.freedesktop.login1.hibernate*;org.freedesktop.login1.suspend*;org.freedesktop.login1.lock-sessions
-ResultAny=no
-ResultActive=no
-ResultInactive=no
-END
+mkdir --parents "$(dirname "$POLICY")" "$(dirname "$POLICY_LEGACY")"
+
+if [ "$DISABLE_SUSPEND" = "False" ]; then
+  rm --force "$POLICY" "$POLICY_LEGACY"
+elif [ "$DISABLE_SUSPEND" = "True" ] && [ "$DISABLE_POWEROFF_RESTART" = "False" ]; then
+  ACTIONS_22_04='org.freedesktop.login1.hibernate*;org.freedesktop.login1.suspend*;org.freedesktop.login1.lock-sessions'
+  ACTIONS_24_04='["org.freedesktop.login1.hibernate", "org.freedesktop.login1.suspend", "org.freedesktop.login1.lock-sessions"]'
 else
-  cat > "$POLICY" <<END
+  ACTIONS_22_04='org.freedesktop.login1.hibernate*;org.freedesktop.login1.power-off*;org.freedesktop.login1.reboot*;org.freedesktop.login1.suspend*;org.freedesktop.login1.lock-sessions;org.freedesktop.login1.set-reboot*'
+  ACTIONS_24_04='["org.freedesktop.login1.hibernate", "org.freedesktop.login1.power-off", "org.freedesktop.login1.reboot", "org.freedesktop.login1.suspend", "org.freedesktop.login1.lock-sessions", "org.freedesktop.login1.set-reboot"]'
+fi
+
+if [ "$DISABLE_SUSPEND" = "True" ]; then
+
+  if [ "$RELEASE" = "22.04" ] || [ "$RELEASE" = "20.04" ]; then  # 20.04 and 22.04 support
+  cat > "$POLICY_LEGACY" <<END
 [Restrict system shutdown]
 Identity=unix-user:user;unix-user:lightdm
-Action=org.freedesktop.login1.hibernate*;org.freedesktop.login1.power-off*;org.freedesktop.login1.reboot*;org.freedesktop.login1.suspend*;org.freedesktop.login1.lock-sessions;org.freedesktop.login1.set-reboot*
+Action=$ACTIONS_22_04
 ResultAny=no
 ResultActive=no
 ResultInactive=no
 END
-fi
+  else  # 24.04 support
+cat > "$POLICY" <<END
+polkit.addRule(function(action, subject) {
+    var users = ["user", "gdm", "lightdm"]
+    var actions = $ACTIONS_24_04
 
-# PolicyKit is supposed to monitor the /etc/polkit-1/localauthority folder, but
-# err on the side of caution and restart the service
-systemctl restart polkitd.service || systemctl restart polkit.service
+    if (users.indexOf(subject.user) >= 0) {
+      for (var i = 0; i < actions.length; i++) {
+        if (action.id.includes(actions[i])) return polkit.Result.NO
+      }
+    }
+    return polkit.Result.YES
+})
+END
+
+  rm --force $POLICY_LEGACY
+  fi
+ fi
+
+# Polkit successfully updates its rules when the files are changed in 24.04.
+# For 22.04 and earlier it should do that too, but err on the side of caution:
+if [ "$RELEASE" = "20.04" ] || [ "$RELEASE" = "22.04" ]; then
+  systemctl restart polkit.service polkitd.service || true  # NOTE: polkitd does not exist on 22.04 or later
+fi
