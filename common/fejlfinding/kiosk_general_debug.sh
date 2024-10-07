@@ -30,6 +30,10 @@ ip link
 text "List disk space usage"
 df -h
 
+text "Check the crontab"
+crontab -l
+crontab -u $USER -l
+
 text "Files under /usr/share/os2borgerpc/bin"
 ls -la /usr/share/os2borgerpc/bin/
 
