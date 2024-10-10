@@ -1,18 +1,19 @@
 #!/usr/bin/env sh
 
 # SYNOPSIS
-#    dconf_policy_desktop.sh [FILE]
+#    dconf_policy_desktop.sh [FILE] [PICTURE_OPTION]
 #
 # DESCRIPTION
 #    This script changes and locks the desktop background for all users on the
 #    system using a dconf lock.
 #
-#    It requires one parameter: the path to the desktop background.
-#	 The second parameter is optional and relates to picture option, it defaults to "zoom".
-#	 Picture options accept: zoom, centered, stretched, spanned, wallpaper, scaled
+#    It requires two parameters:
+#    1. The path to the desktop background.
+#    2. Picture options. The default in GNOME is "zoom".
+#       Other picture options are: zoom, centered, stretched, spanned, wallpaper, scaled, none
 #
 # IMPLEMENTATION
-#    copyright       Copyright 2022, Magenta ApS
+#    copyright       Magenta ApS
 #    license         GNU General Public License
 
 set -x
@@ -22,12 +23,8 @@ if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   exit 1
 fi
 
-lower() {
-	echo "$@" | tr '[:upper:]' '[:lower:]'
-}
-
 IMAGE_FILE=$1
-OPTION_VALUE=$(lower "$2")
+OPTION_VALUE=$2
 POLICY_FILE="/etc/dconf/db/os2borgerpc.d/00-background"
 POLICY_LOCK_FILE="/etc/dconf/db/os2borgerpc.d/locks/00-background"
 
@@ -35,15 +32,6 @@ POLICY_LOCK_FILE="/etc/dconf/db/os2borgerpc.d/locks/00-background"
 rm --force /etc/dconf/db/os2borgerpc.d/locks/background
 
 if [ -n "$IMAGE_FILE" ]; then
-
-	if [ -n "$OPTION_VALUE" ]; then
-		if ! echo "$OPTION_VALUE" | grep --ignore-case --extended-regexp "^(zoom|centered|stretched|wallpaper|scaled|none)$"; then
-			echo "The second parameter must be one of: zoom, centered, stretched, wallpaper, scaled, none"
-			exit 1
-		fi
-	else
-		OPTION_VALUE="zoom"
-	fi
 
 	# Copy the new desktop background into the appropriate folder
 	LOCAL_PATH="/usr/share/backgrounds/$(basename "$IMAGE_FILE")"
