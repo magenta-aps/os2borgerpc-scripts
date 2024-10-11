@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-"""
-Security Script for finding USB keyboard attachment events
-"""
+"""Security Script for finding USB keyboard attachment events."""
 
 import sys
 from datetime import datetime, timedelta
@@ -13,8 +11,7 @@ __license__ = "GPL"
 
 
 def log_read(last_security_check, log_name):
-    """Search a (system) log for events that occurred
-    between "last_security_check" and now."""
+    """Search a (system) log for events that occurred between "last_security_check" and now."""
     log_event_tuples = []
     now = datetime.now()
 
@@ -46,9 +43,7 @@ def csv_writer(security_events):
 
 
 def filter_duplicate_events(security_events):
-    """This function filters duplicate events related to
-    the same keyboard"""
-
+    """Filter duplicate events related to the same keyboard."""
     unique_tuples = []
     unique_keyboards = []
 

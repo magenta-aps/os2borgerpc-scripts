@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-# This is basically just a simple example for how to write a security script,
-# and also a way to test that the security system is working.
+"""An example of how to write a security script, useful for testing that the security system works."""
 
 from datetime import datetime
 

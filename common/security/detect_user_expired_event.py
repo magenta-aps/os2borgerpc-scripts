@@ -3,8 +3,7 @@
 """
 Security Script for finding user expired events.
 
-For use with the "lockdown_usb.sh" and "unexpire_user.sh"
-script.
+For use with the "lockdown_usb.sh" and "unexpire_user.sh" script.
 """
 
 
@@ -17,8 +16,7 @@ __license__ = "GPL"
 
 
 def log_read(last_security_check, log_name):
-    """Search a (system) log for events that occurred
-    between "last_security_check" and now."""
+    """Search a (system) log for events that occurred between "last_security_check" and now."""
     log_event_tuples = []
     now = datetime.now()
 
@@ -51,7 +49,7 @@ def csv_writer(security_events):
 
 # Sync these dates with the dates set in hard_shutdown_lockdown, lockdown_usb or any future script that may use this expiry mechanism
 def annotate_event_type(event):
-    """Adds the type of the security event (USB/Hard shutdown) to the start of the event, as inferred from the expiry date"""
+    """Add the type of the security event (USB/Hard shutdown) to the start of the event, as inferred from the expiry date."""
     if event.endswith("'1970-01-05'"):
         event = f"USB event detected: {event}"
     if event.endswith("'1970-01-04'"):
