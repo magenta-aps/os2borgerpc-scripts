@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 # Logout the user from the graphical user interface after N minutes.
 # Takes exactly one parameter.
 
@@ -7,78 +8,66 @@ if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   exit 1
 fi
 
-if [ $# -ne 1 ]
-then
+if [ $# -ne 1 ]; then
     echo "This job takes exactly one parameter."
     exit 1
 fi
 
+AUTO_LOGOUT_DESKTOP_FILE="/home/.skjult/.config/autostart/auto_logout.sh.desktop"
+AUTO_LOGOUT_SCHEDULE_SCRIPT="/usr/share/os2borgerpc/bin/auto_logout.sh"
+
+if grep "LANG=" /etc/default/locale | grep "da"; then
+  MESSAGE="Du vil blive logget ud om fem minutter"
+elif grep "LANG=" /etc/default/locale | grep "sv"; then
+  MESSAGE="Du kommer att loggas ut om fem minuter"
+else
+  MESSAGE="You will be logged out in five minutes"
+fi
 
 # Install at
-dpkg -l at > /dev/null 2>&1 
+dpkg -l at > /dev/null 2>&1
 HAS_AT=$?
 
-if [[ $HAS_AT == 1 ]]
-then
+if [[ $HAS_AT == 1 ]]; then
     export DEBIAN_FRONTEND=noninteractive
     apt-get update
-    apt-get install -y at
+    apt-get install --assume-yes at
 fi
 
-if [[ ($1 == "--disable") || ($1 == "0") ]]
-then
+if [[ ($1 == "--disable") || ($1 == "0") ]]; then
     # Clean up
-    rm -f /usr/share/os2borgerpc/bin/auto_logout.sh
-    rm -f /home/.skjult/.config/autostart/auto_logout.sh.desktop
-    QUEUED_JOBS=$(atq)
-    if [[ $QUEUED_JOBS ]]
-    then
-        # shellcheck disable=SC2046 # Possibly multiple jobs, so we actually want word splitting
-        atrm $(atq | awk '{ print $1; }')
-    fi
+    rm --force $AUTO_LOGOUT_SCHEDULE_SCRIPT $AUTO_LOGOUT_DESKTOP_FILE
+    atq | cut --fields 1 | xargs --no-run-if-empty atrm
     exit 0
-
 fi
 
-cat <<- EOF > /usr/share/os2borgerpc/bin/auto_logout.sh
+cat <<- EOF > $AUTO_LOGOUT_SCHEDULE_SCRIPT
 	#!/usr/bin/env bash
-	
-	atrm \$(atq | awk '{ print \$1; } ')
-	
+
+  atq | cut --fields 1 | xargs --no-run-if-empty atrm
+
 	TIME=$1
-	
-	if [ \$TIME -ge 5 ]
-	then
+
+	if [ \$TIME -ge 5 ]; then
 	    TM5=\$(expr \$TIME - 5)
-	    echo 'DISPLAY=:0.0 XAUTHORITY=/home/user/.Xauthority /usr/bin/zenity --warning --text="Du vil blive logget ud om fem minutter"' > /tmp/notify
-	     at -f /tmp/notify now + \$TM5 min 
+	    echo 'DISPLAY=:0.0 XAUTHORITY=/home/user/.Xauthority /usr/bin/zenity --warning --text="$MESSAGE"' | at now + \$TM5 min
 	fi
-	
-	echo 'kill -9 -1' > /tmp/quit
-	
-	at -f /tmp/quit now + \$TIME min
-	
-	exit 0
+
+	echo "kill -9 -1" | at now + \$TIME min
 EOF
 
-chmod +x /usr/share/os2borgerpc/bin/auto_logout.sh
+mkdir --parents /home/.skjult/.config/autostart
 
-mkdir -p /home/.skjult/.config/autostart
-
-cat <<- EOF > /home/.skjult/.config/autostart/auto_logout.sh.desktop
-	
+cat <<- EOF > $AUTO_LOGOUT_DESKTOP_FILE
 	[Desktop Entry]
 	Type=Application
-	Exec=/usr/share/os2borgerpc/bin/auto_logout.sh
+	Exec=$AUTO_LOGOUT_SCHEDULE_SCRIPT
 	Hidden=false
 	NoDisplay=false
 	X-GNOME-Autostart-enabled=true
-	Name[da_DK]=Autologud
 	Name=Autologud
-	Comment[da_DK]=
-	Comment=
 EOF
 
-chmod +x /home/.skjult/.config/autostart/auto_logout.sh.desktop
+chmod +x $AUTO_LOGOUT_DESKTOP_FILE $AUTO_LOGOUT_SCHEDULE_SCRIPT
 
 exit 0
