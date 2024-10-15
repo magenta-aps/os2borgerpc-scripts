@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-"""
-Security Script for finding sudo events
-"""
+"""Security Script for finding sudo events."""
 
 import sys
 from datetime import datetime, timedelta
@@ -13,8 +11,7 @@ __license__ = "GPL"
 
 
 def log_read(last_security_check, log_name):
-    """Search a (system) log for events that occurred
-    between "last_security_check" and now."""
+    """Search a (system) log for events that occurred between "last_security_check" and now."""
     log_event_tuples = []
     now = datetime.now()
 
