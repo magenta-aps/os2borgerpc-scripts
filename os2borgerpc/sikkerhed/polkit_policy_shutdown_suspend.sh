@@ -91,7 +91,6 @@ polkit.addRule(function(action, subject) {
         if (action.id.includes(actions[i])) return polkit.Result.NO
       }
     }
-    return polkit.Result.YES
 })
 END
 
