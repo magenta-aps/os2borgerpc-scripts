@@ -50,57 +50,56 @@ fi
 cat << EOF > "$POLICY_FILE"
 {
   "policies": {
+    "BlockAboutAddons": true,
+    "BlockAboutConfig": true,
+    "BlockAboutProfiles": true,
+    "BlockAboutSupport": true,
+    "DisableDeveloperTools": true,
+    "DisableFirefoxAccounts": true,
+    "DisableFormHistory": true,
+    "DisableProfileImport": true,
+    "DownloadDirectory": "/home/user/Hentet",
+    "EnableTrackingProtection": {
+      "Cryptomining": true,
+      "Fingerprinting": true,
+      "Locked": true,
+      "Value": true
+    },
     "Homepage": {
       "URL": "$STARTPAGE",
       "Locked": true,
       $PAGES_STRING
       "StartPage": "homepage"
     },
-    "DisableFirefoxAccounts": true,
     "InstallAddonsPermission": {
       "Default": false
     },
+    "OfferToSaveLogins": false,
+    "OfferToSaveLoginsDefault": false,
     "OverrideFirstRunPage": "",
     "OverridePostUpdatePage": "",
+    "PasswordManagerEnabled": false,
     "Preferences": {
       "datareporting.policy.dataSubmissionPolicyBypassNotification": true
     },
-    "BlockAboutAddons": true,
-    "BlockAboutConfig": true,
-    "BlockAboutProfiles": true,
-    "BlockAboutSupport": true,
-    "DownloadDirectory": "/home/user/Hentet",
     "PromptForDownloadLocation": false,
-    "DisableFirefoxAccounts": true,
-    "DisableFormHistory": true,
-    "DisableProfileImport": true,
-    "OfferToSaveLogins": false,
-    "OfferToSaveLoginsDefault": false,
-    "PasswordManagerEnabled": false,
     "SanitizeOnShutdown": {
       "Cache": true,
       "Cookies": true,
       "Downloads": false,
       "FormData": true,
       "History": true,
-      "Sessions": true,
-      "SiteSettings": true,
+      "Locked": true,
       "OfflineApps": true,
-      "Locked": true
+      "Sessions": true,
+      "SiteSettings": true
     },
     "SearchEngines": {
       "PreventInstalls": true
     },
-    "EnableTrackingProtection": {
-      "Value": true,
-      "Locked": true,
-      "Cryptomining": true,
-      "Fingerprinting": true
-    },
-    "DisableDeveloperTools": true
   }
 }
 EOF
 
-# Attempting to remove policy from former standard location.
+# Remove the policy from its former standard location if present.
 rm --force /usr/lib/firefox/distribution/policies.json
