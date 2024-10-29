@@ -45,6 +45,8 @@ add_to_desktop_files_ff_snap() {
   done
 }
 
+set -x
+
 if [ -d "/snap/firefox" ]; then
   ORIGINAL_FILE=$FIREFOX_DESKTOP_SNAP
   FIREFOX_DESKTOP_LOCAL_COPY="$LOCAL_COPY_DIR/firefox_firefox.desktop"

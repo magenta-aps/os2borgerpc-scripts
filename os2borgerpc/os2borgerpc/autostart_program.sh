@@ -21,7 +21,10 @@ PROGRAM="$1"
 ADD="$2"
 
 AUTOSTART_DIR="/home/.skjult/.config/autostart"
-LOCAL_COPY_DIR="/home.skjult/.local/share/applications"
+LOCAL_COPY_DIR="/home/.skjult/.local/share/applications"
+
+# The local copy was previously copied to the wrong place. Delete it.
+rm --recursive --force /home.skjult
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   echo "Dette script er ikke designet til at blive anvendt på en kiosk-maskine."
