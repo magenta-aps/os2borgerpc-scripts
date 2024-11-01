@@ -33,9 +33,10 @@ ADDITIONAL_PAGES="$2"
 
 POLICY_DIR="/etc/firefox/policies"
 POLICY_FILE="$POLICY_DIR/policies.json"
+GLOBAL_MIME_FILE="/etc/xdg/mimeapps.list"
 
 if [ -z "$STARTPAGE" ]; then
-  echo "WARNING: Missing <URL> argument. Not able to set Firefox startpage."
+  echo "WARNING: Missing <URL> argument. Unable to set Firefox startpage."
   exit 1
 fi
 
@@ -60,6 +61,7 @@ cat << EOF > "$POLICY_FILE"
     "BlockAboutConfig": true,
     "BlockAboutProfiles": true,
     "BlockAboutSupport": true,
+    "DisableBuiltinPDFViewer": true,
     "DisableDeveloperTools": true,
     "DisableFirefoxAccounts": true,
     "DisableFormHistory": true,
@@ -69,6 +71,20 @@ cat << EOF > "$POLICY_FILE"
       "Fingerprinting": true,
       "Locked": true,
       "Value": true
+    },
+    "FirefoxHome": {
+      "SponsoredTopSites": false,
+      "Pocket": false,
+      "SponsoredPocket": false,
+      "Locked": true
+    },
+    "Handlers": {
+      "extensions": {
+         "pdf": {
+            "action": "useSystemDefault",
+            "ask": false
+        }
+      }
     },
     "Homepage": {
       "URL": "$STARTPAGE",
@@ -104,6 +120,26 @@ cat << EOF > "$POLICY_FILE"
   }
 }
 EOF
+
+# Force Okular OR Evince to be the only PDF applications listed for the PDF filetypes,
+# to prevent programs like firefox from making gnome-desktop-portal prompt for which application to open the PDF with, when Firefox is set to use the external PDF reader
+# The contents of this section is shared by the firefox and okular scripts
+# Ideally crudini could create these sections and be idempotent about it, but it seems it doesn't have that feature
+if ! grep "Removed Associations" $GLOBAL_MIME_FILE; then
+	cat <<- EOF >> "$GLOBAL_MIME_FILE"
+		[Removed Associations]
+	EOF
+fi
+if ! grep "$PDF_TYPE_1=$PROGRAMS_TO_REMOVE" $GLOBAL_MIME_FILE; then
+  PROGRAMS_TO_REMOVE="libreoffice-draw.desktop;google-chrome.desktop;microsoft-edge.desktop;chromium_chromium.desktop;firefox_firefox.desktop"
+	cat <<- EOF >> "$GLOBAL_MIME_FILE"
+		$PDF_TYPE_1=$PROGRAMS_TO_REMOVE
+		$PDF_TYPE_2=$PROGRAMS_TO_REMOVE
+		$PDF_TYPE_3=$PROGRAMS_TO_REMOVE
+		$PDF_TYPE_4=$PROGRAMS_TO_REMOVE
+		$PDF_TYPE_5=$PROGRAMS_TO_REMOVE
+	EOF
+fi
 
 # Remove the policy from its former standard location if present.
 rm --force /usr/lib/firefox/distribution/policies.json

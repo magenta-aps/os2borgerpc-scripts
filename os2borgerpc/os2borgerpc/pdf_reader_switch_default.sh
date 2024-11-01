@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 # SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
 #
@@ -6,74 +6,123 @@
 #
 # SPDX-FileContributor: Carsten Agger, Heini Leander Ovason, Marcus Funch
 
-ENABLE=$1
-
-set -x
+PDF_READER_TO_SWITCH_TO=$1
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   echo "Dette script er ikke designet til at blive anvendt på en kiosk-maskine."
   exit 1
 fi
 
+set -x
+
+if [ "$PDF_READER_TO_SWITCH_TO" != "evince" ] && [ "$PDF_READER_TO_SWITCH_TO" != "okular" ]; then
+  echo "Currently this script only supports evince and okular, so specify either of those."
+  echo "Exiting."
+  exit 1
+fi
+
 export DEBIAN_FRONTEND=noninteractive
-GLOBAL_MIME_FILE="/usr/share/applications/defaults.list"
+GLOBAL_MIME_FILE="/etc/xdg/mimeapps.list"
+OLD_GLOBAL_MIME_FILE="/usr/share/applications/defaults.list"
 OKULAR_CONFIG_1="/home/.skjult/.config/okularpartrc"
 OKULAR_CONFIG_2="/home/.skjult/.local/share/kxmlgui5/okular/part.rc"
 
-cleanup_mime_file() {
-	MIME_FILE=$1
+PDF_TYPE_1=application/pdf
+PDF_TYPE_2=application/x-bzpdf
+PDF_TYPE_3=application/x-gzpdf
+PDF_TYPE_4=application/x-lzpdf
+PDF_TYPE_5=application/x-xzpdf
 
-	sed --in-place "\@application/pdf@d" "$MIME_FILE"
-	sed --in-place "\@application/x-bzpdf@d" "$MIME_FILE"
-	sed --in-place "\@application/x-gzpdf@d" "$MIME_FILE"
-	sed --in-place "\@application/x-xzpdf@d" "$MIME_FILE"
+# Removes PDF programs from the Default Applications section in the specified file
+cleanup_mime_file_default() {
+  MIME_FILE=$1
+  crudini --del $GLOBAL_MIME_FILE "Default Applications" $PDF_TYPE_1
+  crudini --del $GLOBAL_MIME_FILE "Default Applications" $PDF_TYPE_2
+  crudini --del $GLOBAL_MIME_FILE "Default Applications" $PDF_TYPE_3
+  crudini --del $GLOBAL_MIME_FILE "Default Applications" $PDF_TYPE_4
+  crudini --del $GLOBAL_MIME_FILE "Default Applications" $PDF_TYPE_5
+
+  # Crudini adds a space before and after the equals sign but otherwise it matches ini/toml. Remove those spaces.
+  sed --in-place "s/ = /=/" "$MIME_FILE"
 }
 
-make_okular_default() {
+set_default_pdf_reader() {
 
-	if [ ! -f $GLOBAL_MIME_FILE ]; then
+  PROGRAM=$1
+
+  [ "$PROGRAM" = "okular" ] && DESKTOP_FILE=okularApplication_kimgio.desktop
+  [ "$PROGRAM" = "evince" ] && DESKTOP_FILE=org.gnome.Evince.desktop
+  DESKTOP_FILE_PATH="/usr/share/applications/$DESKTOP_FILE"
+
+  # Idempotency and cleanup
+  cleanup_mime_file_default $GLOBAL_MIME_FILE
+  cleanup_mime_file_default $OLD_GLOBAL_MIME_FILE
+
+  # Clean up from earlier versions of this script
+  OLD_USER_MIME_FILE="/home/.skjult/.config/mimeapps.list"
+  [ -f $OLD_USER_MIME_FILE ] && cleanup_mime_file_default $OLD_USER_MIME_FILE
+
+  if [ ! -f $GLOBAL_MIME_FILE ]; then
 		cat <<- EOF > $GLOBAL_MIME_FILE
 			[Default Applications]
 		EOF
-	fi
+  fi
 
-	cleanup_mime_file $GLOBAL_MIME_FILE
+  SECTION="Default Applications"
+  crudini --set $GLOBAL_MIME_FILE "$SECTION" $PDF_TYPE_1 "$DESKTOP_FILE_PATH"
+  crudini --set $GLOBAL_MIME_FILE "$SECTION" $PDF_TYPE_2 "$DESKTOP_FILE_PATH"
+  crudini --set $GLOBAL_MIME_FILE "$SECTION" $PDF_TYPE_3 "$DESKTOP_FILE_PATH"
+  crudini --set $GLOBAL_MIME_FILE "$SECTION" $PDF_TYPE_4 "$DESKTOP_FILE_PATH"
+  crudini --set $GLOBAL_MIME_FILE "$SECTION" $PDF_TYPE_5 "$DESKTOP_FILE_PATH"
 
-	cat <<- EOF >> $GLOBAL_MIME_FILE
-		application/pdf=okularApplication_kimgio.desktop;
-		application/x-bzpdf=okularApplication_kimgio.desktop;
-		application/x-gzpdf=okularApplication_kimgio.desktop;
-		application/x-xzpdf=okularApplication_kimgio.desktop;
-	EOF
+  # Crudini adds a space before and after the equals sign but otherwise it matches ini/toml. Remove those spaces.
+  sed --in-place "s/ = /=/" $GLOBAL_MIME_FILE
 }
 
-apt-get update --assume-yes
+# SCRIPT PROPER
 
-# Clean up from earlier versions of this script
-PREVIOUS_MIME_FILE="/home/.skjult/.config/mimeapps.list"
-[ -f $PREVIOUS_MIME_FILE ] && cleanup_mime_file $PREVIOUS_MIME_FILE
+apt-get update
 
-if [ "$ENABLE" = "True" ]; then
+# The mime file has different sections we interact with which is kinda annoying to handle with sed/cat eof - crudini understands ini/toml files which is close to the format the desktop files use.
+apt-get install --assume-yes crudini
 
-	apt-get remove --assume-yes evince # Unfortunately removing this alone does not mean Okular becomes default. Instead LibreOffice Draw becomes default.
-	apt-get install --assume-yes okular
+# Force Okular OR Evince to be the only PDF applications listed for the PDF filetypes,
+# to prevent programs like firefox from making gnome-desktop-portal prompt for which application to open the PDF with, when Firefox is set to use the external PDF reader
+# The contents of this section is shared by the firefox and okular scripts
+# Ideally crudini could create these sections and be idempotent about it, but it seems it doesn't have that feature
+if ! grep "Removed Associations" $GLOBAL_MIME_FILE; then
+	cat <<- EOF >> "$GLOBAL_MIME_FILE"
+		[Removed Associations]
+	EOF
+fi
+if ! grep "$PDF_TYPE_1=$PROGRAMS_TO_REMOVE" $GLOBAL_MIME_FILE; then
+  PROGRAMS_TO_REMOVE="libreoffice-draw.desktop;google-chrome.desktop;microsoft-edge.desktop;chromium_chromium.desktop;firefox_firefox.desktop"
+	cat <<- EOF >> "$GLOBAL_MIME_FILE"
+		$PDF_TYPE_1=$PROGRAMS_TO_REMOVE
+		$PDF_TYPE_2=$PROGRAMS_TO_REMOVE
+		$PDF_TYPE_3=$PROGRAMS_TO_REMOVE
+		$PDF_TYPE_4=$PROGRAMS_TO_REMOVE
+		$PDF_TYPE_5=$PROGRAMS_TO_REMOVE
+	EOF
+fi
 
-	make_okular_default
+if [ "$PDF_READER_TO_SWITCH_TO" = "okular" ]; then
+
+  apt-get install --assume-yes okular
+  apt-get remove --assume-yes evince  # Unfortunately removing evince alone does not mean Okular becomes default. Instead, LibreOffice Draw becomes default.
+  set_default_pdf_reader "$PDF_READER_TO_SWITCH_TO"
 
 	cat <<- EOF > $OKULAR_CONFIG_1
-
 	[General]
 	ttsEngine=flite
 
 	[Reviews]
 	AnnotationTools=<tool type="typewriter" id="1"><engine type="PickPoint" block="true"><annotation type="Typewriter" width="0" textColor="#ff000000" color="#00ffffff"/></engine><shortcut>1</shortcut></tool>,<tool type="note-linked" id="2"><engine type="PickPoint" hoverIcon="tool-note" color="#ffffff00"><annotation type="Text" color="#ffffff00" icon="Note"/></engine><shortcut>2</shortcut></tool>,<tool type="note-inline" id="3"><engine type="PickPoint" hoverIcon="tool-note-inline" color="#ffffff00" block="true"><annotation type="FreeText" color="#ffffff00"/></engine><shortcut>3</shortcut></tool>,<tool type="ink" id="4"><engine type="SmoothLine" color="#ff00ff00"><annotation type="Ink" width="2" color="#ff00ff00"/></engine><shortcut>4</shortcut></tool>,<tool type="highlight" id="5"><engine type="TextSelector" color="#ffffff00"><annotation type="Highlight" color="#ffffff00"/></engine><shortcut>5</shortcut></tool>,<tool type="straight-line" id="6"><engine type="PolyLine" color="#ffffe000" points="2"><annotation type="Line" width="1" color="#ffffe000"/></engine><shortcut>6</shortcut></tool>,<tool type="polygon" id="7"><engine type="PolyLine" color="#ff007eee" points="-1"><annotation type="Line" width="1" color="#ff007eee"/></engine><shortcut>7</shortcut></tool>,<tool type="stamp" id="8"><engine type="PickPoint" hoverIcon="okular" size="64" block="true"><annotation type="Stamp" icon="okular"/></engine><shortcut>8</shortcut></tool>,<tool type="underline" id="9"><engine type="TextSelector" color="#ff000000"><annotation type="Underline" color="#ff000000"/></engine><shortcut>9</shortcut></tool>,<tool type="ellipse" id="10"><engine type="PickPoint" color="#ff00ffff" block="true"><annotation type="GeomCircle" width="5" color="#ff00ffff"/></engine></tool>
-
 	EOF
 
-	mkdir --parents "$(dirname $OKULAR_CONFIG_2)"
+  mkdir --parents "$(dirname $OKULAR_CONFIG_2)"
 
 	cat <<- EOF > $OKULAR_CONFIG_2
-
 	<!DOCTYPE kpartgui>
 	<kpartgui name="okular_part" version="42">
 	 <MenuBar>
@@ -201,7 +250,9 @@ if [ "$ENABLE" = "True" ]; then
 	</kpartgui>
 	EOF
 else
-	apt-get remove --assume-yes okular
-	apt-get install --assume-yes evince # Hopefully this means evince is automatically set as the default reader for its types, so we don't have to handle that manually
-	rm --force $OKULAR_CONFIG_1 $OKULAR_CONFIG_2
+  apt-get install --assume-yes evince
+  apt-get remove --assume-yes okular
+  set_default_pdf_reader "$PDF_READER_TO_SWITCH_TO"
+
+  rm --force $OKULAR_CONFIG_1 $OKULAR_CONFIG_2
 fi
