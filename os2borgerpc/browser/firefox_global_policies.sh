@@ -96,7 +96,7 @@ cat << EOF > "$POLICY_FILE"
     },
     "SearchEngines": {
       "PreventInstalls": true
-    },
+    }
   }
 }
 EOF
