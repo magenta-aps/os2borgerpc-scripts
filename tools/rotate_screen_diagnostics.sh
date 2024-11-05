@@ -13,7 +13,7 @@ su --login $OUR_USER --command "xrandr --listactivemonitors -display :0"
 
 # Maybe we want wordsplitting below here, or maybe it doesn't matter.
 # shellcheck disable=SC2207
-active_monitors=$(su --login $OUR_USER --command "xrandr --listactivemonitors -display :0 | grep -v Monitors | awk '{ print $4; }'") # SC
+active_monitors=$(su --login $OUR_USER --command "xrandr --listactivemonitors -display :0 | grep -v Monitors | awk '{ print $4; }'")
 
 for monitor in "${active_monitors[@]}"; do
   echo "$monitor"
