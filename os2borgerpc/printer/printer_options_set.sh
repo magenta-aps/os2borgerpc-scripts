@@ -70,5 +70,5 @@ fi
 
 echo "Finally list all the settings after the changes, for verification that the changes succeeded:"
 lpoptions -p "$PRINTER" -l
-echo "Contents of $CUPS_PRINTER_CONF:"
-cat $CUPS_PRINTER_CONF
+echo "Contents of $CUPS_PRINTER_CONF, if it exists:"
+[ -f $CUPS_PRINTER_CONF ] && cat $CUPS_PRINTER_CONF
