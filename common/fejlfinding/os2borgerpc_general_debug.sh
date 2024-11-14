@@ -36,6 +36,9 @@ dmidecode --type 0
 text "LAN or Wi-Fi?"
 ip link
 
+text "List disk space usage"
+df -h
+
 text "OS2borgerPC configuration file"
 cat /etc/os2borgerpc/os2borgerpc.conf
 
