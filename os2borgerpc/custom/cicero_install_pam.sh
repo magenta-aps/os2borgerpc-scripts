@@ -11,6 +11,9 @@
 set -x
 
 ACTIVATE=$1
+AGE_LIMIT=${2:-0}
+NO_AGE_LIMIT_START_TIME=${3:-7:0}
+NO_AGE_LIMIT_END_TIME=${4:-17:0}
 
 export DEBIAN_FRONTEND=noninteractive
 LIGHTDM_PAM=/etc/pam.d/lightdm
@@ -50,6 +53,12 @@ if [ "$ACTIVATE" = 'True' ]; then
   deluser user nopasswdlogin
   sed --in-place "/autologin-user/d" $LIGHTDM_CONFIG
 
+  # Set up age limit
+  set_os2borgerpc_config cicero_age_limit "$AGE_LIMIT"
+  set_os2borgerpc_config cicero_no_age_limit_start_time "$NO_AGE_LIMIT_START_TIME"
+  set_os2borgerpc_config cicero_no_age_limit_end_time "$NO_AGE_LIMIT_END_TIME"
+  os2borgerpc_push_config_keys cicero_age_limit cicero_no_age_limit_start_time cicero_no_age_limit_end_time
+
 # Separated out because the pam module cannot run if you import the admin_client
 cat << EOF > $CICERO_INTERFACE_PYTHON3
 #! /usr/bin/env python3
@@ -74,6 +83,8 @@ def cicero_validate(cicero_user, cicero_pass):
     # and remove the trailing newline
     pc_uid = check_output(["get_os2borgerpc_config", "uid"]).decode().strip()
 
+    value_dict = {"citizen_identifier":cicero_user,"pincode":cicero_pass}
+
     # Values it can return - see cicero_login here:
     # https://github.com/magenta-aps/os2borgerpc-admin-site/blob/master/admin_site/system/rpc.py
     # For reference:
@@ -82,7 +93,7 @@ def cicero_validate(cicero_user, cicero_pass):
     #   r > 0: The user is allowed r minutes of login time.
     admin = admin_client.OS2borgerPCAdmin(host_address + "/admin-xml/")
     try:
-        time, citizen_hash = admin.citizen_login(cicero_user, cicero_pass, pc_uid, prevent_dual_login=True)
+        time, citizen_hash, _ = admin.general_citizen_login(pc_uid, "cicero", value_dict)
     except (socket.gaierror, TimeoutError, ConnectionError):
         return ""
 
@@ -127,7 +138,7 @@ def cicero_logout():
         )
         admin = admin_client.OS2borgerPCAdmin(host_address + "/admin-xml/")
         try:
-            result = admin.citizen_logout(citizen_hash)
+            result = admin.general_citizen_logout(citizen_hash, "")
         except (socket.gaierror, TimeoutError, ConnectionError):
             result = ""
 
@@ -199,6 +210,15 @@ def pam_sm_authenticate(pamh, flags, argv):
         result_msg = pamh.Message(
             pamh.PAM_ERROR_MSG,
             "Du er allerede logget ind på en anden maskine."
+        )
+        pamh.conversation(result_msg)
+
+        return pamh.PAM_AUTH_ERR
+
+    if citizen_hash == "too_young":
+        result_msg = pamh.Message(
+            pamh.PAM_ERROR_MSG,
+            "Du er under aldersgrænsen for denne maskine."
         )
         pamh.conversation(result_msg)
 
