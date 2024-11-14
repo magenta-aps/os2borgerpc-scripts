@@ -12,12 +12,14 @@ PRINCH_ID="$2"
 DESCRIPTION="$3"
 SET_STANDARD="$4"
 
+PRINCH_PPD="/usr/share/ppd/princh/princheu.ppd"
+
 # Delete the printer if a printer already exists by that NAME
 lpadmin -x "$NAME" || true
 
 # No princh-cloud-printer binary in path, so checking for princh-setup
 if which princh-setup > /dev/null; then
-   lpadmin -p "$NAME" -v "princh:$PRINCH_ID" -D "$DESCRIPTION" -E -P /usr/share/ppd/princh/princheu.ppd -L "$DESCRIPTION"
+   lpadmin -p "$NAME" -v "princh:$PRINCH_ID" -D "$DESCRIPTION" -E -P $PRINCH_PPD -L "$DESCRIPTION"
 else
    echo "Princh is not installed. Please run the script that installs Princh before this one."
    exit 1

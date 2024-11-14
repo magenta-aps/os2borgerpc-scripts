@@ -17,6 +17,10 @@ ORIENTATION="$5"
 
 CUPS_PRINTER_CONF="/etc/cups/printers.conf"
 
+lower() {
+    echo "$@" | tr '[:upper:]' '[:lower:]'
+}
+
 if [ -n "$PAGE_SIZE" ]; then
     # lpoptions can also take a printer as an argument, but when setting options it seems to have no effect anyway - it's globally configured for all printers
     lpoptions -o PageSize="$PAGE_SIZE"
@@ -30,13 +34,26 @@ if [ -n "$PAGE_SIZE" ]; then
 fi
 
 if [ -n "$COLOR" ]; then
-    # Some printers may call it ColorModel while others call it DefaultColorSpace.
+    # Some printers may call it ColorModel while others call it DefaultColorModel.
     # Attempt to set both, as it seems that setting a nonexisting option has no effect.
-    lpadmin -p "$PRINTER" -o ColorModel="$COLOR"
-    lpadmin -p "$PRINTER" -o DefaultColorSpace="$COLOR"
+    lpadmin -p "$PRINTER" -o ColorModel="$COLOR" -o DefaultColorModel="$COLOR"
+
+    # Also set the color model globally in case the above has no effect
+    lpoptions -o ColorModel="$COLOR" -o DefaultColorModel="$COLOR"
+
+    # A third approach to setting color, as it seemed that sometimes the above weren't enough
+    # Lowercasing for case insensitivity
+    COLOR_LOWERCASED=$(lower "$COLOR")
+    if [ "$COLOR_LOWERCASED" = "rgb" ] || [ "$COLOR_LOWERCASED" = "color" ]; then
+      # More info on this option: https://github.com/OpenPrinting/cups/issues/421
+      lpadmin -p "$PRINTER" -o print-color-mode-default=color
+    else
+      lpadmin -p "$PRINTER" -o print-color-mode-default=monochrome
+    fi
 fi
 
 if [ -n "$DUPLEX" ]; then
+    # This effectively writes it to printers.conf for the specific printer
     lpadmin -p "$PRINTER" -o Duplex="$DUPLEX"
 fi
 
@@ -59,16 +76,26 @@ if [ -n "$ORIENTATION" ]; then
         ;;
     esac
 
+    lpadmin -p "$PRINTER" -o "orientation-requested=$ORIENTATION"
+
+    # The previous approach to setting orientation - should no longer be needed:
     # NOTE: This currently sets the orientation for ALL connected printers, which may not be ideal in all situations.
     # printers.conf says to not edit it while CUPS is running, so stop it first
-    systemctl stop cups
-    # Delete any occurrence of orientation already in the file, then add it to all printers in the file, each within an XML tag
-    sed --in-place "/orientation-requested [0-9]/d" $CUPS_PRINTER_CONF
-    sed --in-place "/<\/[A-Za-z]\+>/iOption orientation-requested $ORIENTATION" $CUPS_PRINTER_CONF
-    systemctl start cups
+    #systemctl stop cups
+    ## Delete any occurrence of orientation already in the file, then add it to all printers in the file, each within an XML tag
+    #sed --in-place "/orientation-requested [0-9]/d" $CUPS_PRINTER_CONF
+    #sed --in-place "/<\/[A-Za-z]\+>/iOption orientation-requested $ORIENTATION" $CUPS_PRINTER_CONF
+    #systemctl start cups
 fi
 
 echo "Finally list all the settings after the changes, for verification that the changes succeeded:"
-lpoptions -p "$PRINTER" -l
+
+echo "These options are set for all printers according to lpoptions"
+lpoptions -l
+
+echo "The specified printer has this configuration according to lpstat:"
+lpstat -slp "$PRINTER"
+
+echo "Contents of $CUPS_PRINTER_CONF:"
 echo "Contents of $CUPS_PRINTER_CONF, if it exists:"
 [ -f $CUPS_PRINTER_CONF ] && cat $CUPS_PRINTER_CONF
