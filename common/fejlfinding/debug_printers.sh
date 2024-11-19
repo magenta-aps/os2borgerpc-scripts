@@ -10,6 +10,9 @@ text() {
   printf "\n%s\n" "### $MSG: ###"
 }
 
+PRINCH_PPD="/usr/share/ppd/princh/princheu.ppd"
+PRINTERS_CONF="/etc/cups/printers.conf"
+
 text "Check the version of hplip"
 dpkg -l hplip | cat  # Piping to cat because otherwise it seems to open "less"
 
@@ -26,13 +29,22 @@ text "Global standard paper size is set to"
 paperconf
 # The related command "paperconfig" can set the default paper size.
 
+text "These options are set for all printers according to lpoptions:"
+lpoptions -l
+
 header "Current printer settings for all added printers"
 
 for printer in $(lpstat -a | cut  --delimiter ' ' --fields 1); do
-  text "Printer name: \"$printer\" has these options set:"
-  lpoptions -l -p "$printer"
+  text "The printer \"$printer\" has this configuration according to lpstat:"
+  lpstat -slp "$printer"
+
+  text "The printer \"$printer\" has this configuration in its PPD, if it exists"
+  lpstat -slp "$printer" | grep "Interface" | cut --delimiter ' ' --fields 2 | xargs --no-run-if-empty cat
   echo ""
 done
 
-header "Print contents of /etc/cups/printers.conf"
-cat /etc/cups/printers.conf
+header "Print contents of $PRINTERS_CONF, if it exists"
+[ -f $PRINTERS_CONF ] && cat $PRINTERS_CONF
+
+header "Print contents of $PRINCH_PPD, if it exists"
+[ -f $PRINCH_PPD ] && cat $PRINCH_PPD
