@@ -77,6 +77,7 @@ if [ -n "$ORIENTATION" ]; then
     esac
 
     lpadmin -p "$PRINTER" -o "orientation-requested=$ORIENTATION"
+    lpoptions -o "orientation-requested=$ORIENTATION"
 
     # The previous approach to setting orientation - should no longer be needed:
     # NOTE: This currently sets the orientation for ALL connected printers, which may not be ideal in all situations.
