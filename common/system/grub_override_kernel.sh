@@ -8,6 +8,7 @@ REQUESTED_KERNEL_VERSION="$2"  # E.g.: 5.15.0-84-generic
 export DEBIAN_FRONTEND=noninteractive
 GRUB_DEFAULTS="/etc/default/grub"
 GRUB_CONFIG="/boot/grub/grub.cfg"
+GRUB_CONFIG_ENTRIES="/etc/grub.d/10_linux"
 # NOTE: Question: Should we also install and pin linux-modules (not extra)? If it's a dependency it shouldn't be necessary
 PKGS="linux-image-$REQUESTED_KERNEL_VERSION linux-modules-extra-$REQUESTED_KERNEL_VERSION linux-headers-$REQUESTED_KERNEL_VERSION"
 
@@ -29,6 +30,12 @@ if [ "$OVERRIDE_KERNEL_VERSION" = "False" ]; then
   echo "No longer ensure that the specified kernel $OVERRIDE_KERNEL_VERSION is kept installed:"
   # shellcheck disable=SC2086  # We want word-splitting
   apt-mark unhold $PKGS
+  # Restore restrictions on selecting anything but the default kernel, by removing "--unrestricted" from the entries
+  # Restrict "Advanced options"
+  sed --in-place --regexp-extended 's/(echo "submenu.*) --unrestricted \{"/\1 \{"/' $GRUB_CONFIG_ENTRIES
+  # Restrict entries within advanced options
+  # shellcheck disable=SC2016 # We don't want the $ expanded
+  sed --in-place --regexp-extended 's/(menuentry '\''\$\(echo "\$title.*) --unrestricted (\{.*)/\1 \2/' $GRUB_CONFIG_ENTRIES
 else
 
   # If the kernel version isn't already installed: Attempt to install it
@@ -40,6 +47,21 @@ else
       echo "Failed to install the specified kernel. Exiting."
       exit 1
     fi
+  fi
+
+  # Ensure the chosen kernel version can be selected without a password prompt, by appending "--unrestricted" to the entries
+
+  # Unrestrict "Advanced options"
+  # Line to match: echo "submenu '$(gettext_printf "Advanced options for %s" "${OS}" | grub_quote)' \$menuentry_id_option 'gnulinux-advanced-$boot_device_id' {"
+  if ! grep --quiet 'echo "submenu.* --unrestricted' $GRUB_CONFIG_ENTRIES; then  # Idempotency check
+    sed --in-place --regexp-extended 's/(echo "submenu.*) \{"/\1 --unrestricted \{"/' $GRUB_CONFIG_ENTRIES
+  fi
+
+  # Unrestrict entries within Advanced options
+  # Line to match: echo "menuentry '$(echo "$title" | grub_quote)' ${CLASS} \$menuentry_id_option 'gnulinux-$version-$type-$boot_device_id' {" | sed "s/^/$submenu_indentation/"
+  # shellcheck disable=SC2016 # We don't want the $ expanded
+  if ! grep --quiet 'menuentry '\''\$(echo "\$title.* --unrestricted' $GRUB_CONFIG_ENTRIES; then  # Idempotency check
+    sed --in-place --regexp-extended 's/(menuentry '\''\$\(echo "\$title.*) (\{".*)/\1 --unrestricted \2/' $GRUB_CONFIG_ENTRIES
   fi
 
   # This 1 below assumes "Advanced options" is the second item in the list (it's zero indexed)
@@ -58,8 +80,8 @@ else
   apt-mark hold $PKGS
 fi
 
-echo "Show full GRUB config after:"
-cat $GRUB_DEFAULTS
-
 # Now update GRUB with the new settings
 update-grub
+
+echo "Show full GRUB config after:"
+cat $GRUB_DEFAULTS
