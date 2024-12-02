@@ -1,4 +1,4 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
 set -ex
 
@@ -29,15 +29,15 @@ if  [ "$PRINCH_VERSION_AVAILABLE" != "$PRINCH_VERSION_INSTALLED" ]; then
    # predictable for the command to install it below
    curl $URL --output $FILE
    dpkg --install $FILE
-
+   rm $FILE
 else
     printf '%s\n' "Princh is already installed and in the most recent version."
 fi
 
 # Create Princh autostart
-princh_autostart_dir=/home/.skjult/.config/autostart
+PRINCH_AUTOSTART_DIR=/home/.skjult/.config/autostart
 
-mkdir --parents $princh_autostart_dir
+mkdir --parents $PRINCH_AUTOSTART_DIR
 
 # This will fail if the symlink already exists, but the exit status is still 0 so no problem
-ln -sf /usr/share/applications/com-princh-print-daemon.desktop $princh_autostart_dir
+ln -sf /usr/share/applications/com-princh-print-daemon.desktop $PRINCH_AUTOSTART_DIR
