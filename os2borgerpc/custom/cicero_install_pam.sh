@@ -12,8 +12,8 @@ set -x
 
 ACTIVATE=$1
 AGE_LIMIT=${2:-0}
-NO_AGE_LIMIT_START_TIME=${3:-7:0}
-NO_AGE_LIMIT_END_TIME=${4:-17:0}
+NO_AGE_LIMIT_START_TIMES=${3:-7,7,7,7,7,7,7}
+NO_AGE_LIMIT_END_TIMES=${4:-17,17,17,17,17,17,17}
 
 export DEBIAN_FRONTEND=noninteractive
 LIGHTDM_PAM=/etc/pam.d/lightdm
@@ -55,9 +55,9 @@ if [ "$ACTIVATE" = 'True' ]; then
 
   # Set up age limit
   set_os2borgerpc_config cicero_age_limit "$AGE_LIMIT"
-  set_os2borgerpc_config cicero_no_age_limit_start_time "$NO_AGE_LIMIT_START_TIME"
-  set_os2borgerpc_config cicero_no_age_limit_end_time "$NO_AGE_LIMIT_END_TIME"
-  os2borgerpc_push_config_keys cicero_age_limit cicero_no_age_limit_start_time cicero_no_age_limit_end_time
+  set_os2borgerpc_config cicero_no_age_limit_start_times "$NO_AGE_LIMIT_START_TIMES"
+  set_os2borgerpc_config cicero_no_age_limit_end_times "$NO_AGE_LIMIT_END_TIMES"
+  os2borgerpc_push_config_keys cicero_age_limit cicero_no_age_limit_start_times cicero_no_age_limit_end_times
 
 # Separated out because the pam module cannot run if you import the admin_client
 cat << EOF > $CICERO_INTERFACE_PYTHON3
