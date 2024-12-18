@@ -64,6 +64,12 @@ apt-get --assume-yes autoremove
 # Remove local repository of retrieved package files
 apt-get --assume-yes clean
 
+# Update config for last full update
+# The output from "date --iso-8601='minutes'" has the format 2024-12-03T15:45+01:00
+UPDATE_TIME="$(date --iso-8601='minutes' | tr 'T' ' ' | cut --delimiter '+' --fields 1)"
+set_os2borgerpc_config _last_full_update_time "$UPDATE_TIME"
+os2borgerpc_push_config_keys _last_full_update_time
+
 rm --force $PREVIOUS_STEP_DONE
 
 touch /etc/os2borgerpc/second_upgrade_step_done
