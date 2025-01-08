@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -x
+set -ex
 
 # Scanner software: https://download3.ebz.epson.net/dsc/f/03/00/15/47/63/01144a0c8e0b24754bde315b7621a90662107e95/epsonscan2_e.pdf
 
@@ -9,7 +9,7 @@ FILE1="epsonscan2.deb.tar.gz"
 SCANNER_FOLDER="epsonscan2-scanner-software"
 
 # Download the scanner software
-wget -T 10 -nd --no-cache "https://download.ebz.epson.net/dsc/du/02/DriverDownloadInfo.do?LG2=JA&CN2=US&CTI=171&PRN=Linux%20deb%2064bit%20package&OSC=LX&DL" -O $FILE1
+wget -T 10 -nd --user-agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:133.0) Gecko/20100101 Firefox/133.0" --no-cache "https://download.ebz.epson.net/dsc/du/02/DriverDownloadInfo.do?LG2=JA&CN2=US&CTI=171&PRN=Linux%20deb%2064bit%20package&OSC=LX&DL" -O $FILE1
 
 # Unpack the zipped files
 tar -xzf $FILE1 --transform "s:^[^/]*:$SCANNER_FOLDER:"
