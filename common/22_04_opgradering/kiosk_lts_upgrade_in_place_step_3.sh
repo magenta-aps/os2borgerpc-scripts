@@ -83,8 +83,8 @@ fi
 
 # Update the os_release config
 RELEASE=$(lsb_release --release --short)
-set_os2borgerpc_config os_release "$RELEASE"
-os2borgerpc_push_config_keys os_release
+set_os2borgerpc_config _os_release "$RELEASE"
+os2borgerpc_push_config_keys _os_release
 
 rm --force $PREVIOUS_STEP_DONE
 
