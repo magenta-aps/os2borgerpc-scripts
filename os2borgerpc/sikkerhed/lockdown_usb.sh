@@ -104,18 +104,20 @@ def main():
             devices_before_event = get_current_devices()
             with open(PIPE, "rt") as fp:
                 # Reading from a FIFO should block until the udev helper script
-                # gives us a signal. Lock the system immediately when that
-                # happens and then write the log
+                # gives us a signal. When that happens, check that a change in
+                # USB devices has actually occurred before locking the system
+                # and writing the log
                 content = fp.read()
-                lockdown()
                 devices_after_event = get_current_devices()
                 changed_device = list(set(devices_before_event).symmetric_difference(set(devices_after_event)))
                 entries = ""
                 for device in changed_device:
                     entry = make_log_entry(device)
                     entries += entry
-                with open(USB_EVENT_LOG, "a") as log:
-                    log.write(entries)
+                if entries:
+                    lockdown()
+                    with open(USB_EVENT_LOG, "a") as log:
+                        log.write(entries)
     finally:
         unlink(PIPE)
 
