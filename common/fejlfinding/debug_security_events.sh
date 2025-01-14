@@ -6,10 +6,10 @@ help() {
   printf '%s\n' "This script helps debug security events." \
                 "Available options:" \
                 "  No arguments: Runs everything below" \
-                "  authlog: Prints the 500 last lines of auth.log" \
-                "  syslog: Prints the 500 last lines of syslog" \
-                "  sudo: Prints all sudo entries in auth.log" \
-                "  usermod: Prints all usermod entries in auth.log"
+                "  authlog: Prints the chosen number of lines from auth.log" \
+                "  syslog: Prints the chosen number of lines from syslog" \
+                "  sudo: Prints the chosen number of sudo entries from auth.log" \
+                "  usermod: Prints the chosen number of usermod entries from auth.log"
   exit
 }
 
@@ -33,6 +33,15 @@ print_authlog() {
 print_syslog() {
     printf "\n\n%s\n\n" "PRINTING THE $NUM_ENTRIES LAST LINES OF SYSLOG"
     tail --lines="$NUM_ENTRIES" /var/log/syslog
+}
+
+print_usb_event_log() {
+    if [ -f "/var/log/usb-events.log" ]; then
+      printf "\n\n%s\n\n" "PRINTING THE $NUM_ENTRIES LAST LINES OF USB-EVENTS.LOG"
+      tail --lines="$NUM_ENTRIES" /var/log/usb-events.log
+    else
+      printf "\n\n%s\n\n" "USB-EVENTS.LOG DOES NOT EXIST"
+    fi
 }
 
 # Older log files are gzipped automatically. Unzip them first.
@@ -74,6 +83,7 @@ print_usermod_entries() {
 run_all() {
     print_authlog
     print_syslog
+    print_usb_event_log
     print_sudo_entries
     print_usermod_entries
 }
@@ -98,13 +108,15 @@ cat $SECURITY_EVENTS
 if [ "$COMMAND" = "all" ]; then
   run_all
 elif [ "$COMMAND" = "authlog" ]; then
-  print_authlog "$NUM_ENTRIES"
+  print_authlog
 elif [ "$COMMAND" = "syslog" ]; then
-  print_syslog "$NUM_ENTRIES"
+  print_syslog
+elif [ "$COMMAND" = "usb-events" ]; then
+  print_usb_event_log
 elif [ "$COMMAND" = "sudo" ]; then
-  print_sudo_entries "$NUM_ENTRIES"
+  print_sudo_entries
 elif [ "$COMMAND" = "usermod" ]; then
-  print_usermod_entries "$NUM_ENTRIES"
+  print_usermod_entries
 else
   help
 fi
