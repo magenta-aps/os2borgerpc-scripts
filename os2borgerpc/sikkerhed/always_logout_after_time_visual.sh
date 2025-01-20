@@ -38,12 +38,16 @@ OUR_USER="user"
 # LOGOUT_TIMER_ACTUAL:
 LOGOUT_TIMER_ACTUAL="/usr/share/os2borgerpc/bin/logout_timer_actual.sh"
 LOGOUT_TIMER_ACTUAL_LAUNCHER="/usr/share/os2borgerpc/bin/logout_timer_actual_launcher.sh"
-# They might have automatic login enabled or not. We add it to all lightdm programs just in case.
+DEFAULT_DM_FILE="/etc/X11/default-display-manager"
+# They might have automatic login enabled or not. We add it to all lightdm or gdm programs just in case.
 LIGHTDM_PAM="/etc/pam.d/lightdm"
 LIGHTDM_GREETER_PAM="/etc/pam.d/lightdm-greeter"
 LIGHTDM_AUTOLOGIN_PAM="/etc/pam.d/lightdm-autologin"
 LIGHTDM_FILES="$LIGHTDM_PAM $LIGHTDM_GREETER_PAM $LIGHTDM_AUTOLOGIN_PAM"
-GRACE_PERIOD_MULTIPLIER="1.07" # The root timer has this added to it, to be more certain that it doesn't run out before the gnome extension. Effectively this means thta if the logout timer is set to 60 minutes, the root timer will ensure the user is logged out after around 64 minutes
+GDM_PASSWORD_PAM="/etc/pam.d/gdm-password"
+GDM_AUTOLOGIN_PAM="/etc/pam.d/gdm-autologin"
+GDM_FILES="$GDM_AUTOLOGIN_PAM $GDM_PASSWORD_PAM"
+GRACE_PERIOD="30" # The root timer has this added to it, to be more certain that it doesn't run out before the gnome extension.
 
 # EXTENSION ADDITIONAL SETTINGS:
 REPO_NAME="os2borgerpc-gnome-extensions"
@@ -62,6 +66,14 @@ sed --in-place "/pkill -f $(basename $LOGOUT_TIMER_ACTUAL)/d" $SESSION_CLEANUP_F
 sed --in-place "/pkill -f logout_timer_visual.sh/d" $SESSION_CLEANUP_FILE
 
 [ $# -lt 2 ] && printf "%s\n" "This script takes at least 2 arguments. Exiting." && exit 1
+
+if cat $DEFAULT_DM_FILE | grep --quiet gdm3; then
+  PAM_FILES=$GDM_FILES
+  CHECK_FILE=$GDM_PASSWORD_PAM
+else
+  PAM_FILES=$LIGHTDM_FILES
+  CHECK_FILE=$LIGHTDM_GREETER_PAM
+fi
 
 if [ "$ACTIVATE" = 'True' ]; then
 	# TODO: Do we need to install bc or is come preinstalled?
@@ -86,22 +98,22 @@ if [ "$ACTIVATE" = 'True' ]; then
 
 	# A backup timer used to logout if the user-run gnome extension is disabled/killed, running as root
 	cat <<- EOF > $LOGOUT_TIMER_ACTUAL
-		#! /usr/bin/env sh
+		#! /usr/bin/env bash
 
 		TIME_MINUTES=\$(jq < $LOGOUT_TIMER_CONF '.timeMinutes')
 
 		# Adding a little to this so they're warned a bit before they're actually logged out
 		# This is even more important since currently the timers might get out of sync
-		COUNT=\$(bc <<< "\$TIME_MINUTES * 60 * $GRACE_PERIOD_MULTIPLIER")
+		COUNT=\$(bc <<< "\$TIME_MINUTES * 60 + $GRACE_PERIOD")
+		# Ensure that COUNT is an integer
+		COUNT=\$(echo \$COUNT | cut --delimiter '.' --fields 1)
 
 		until [ "\$COUNT" -eq "0" ]; do                                # Countdown loop.
 		    COUNT=\$((COUNT-1))                                        # Decrement seconds.
 		    sleep 1
 		done
 
-		runuser --login user --command "XDG_RUNTIME_DIR=/run/user/$(id -u user) gnome-session-quit --logout --no-prompt"
-		# Alternate, less graceful approaches:
-		# 1. PID=who -u && kill <PID-OBTAINED> OR killall lightdm OR killall gnome-session
+		pkill -KILL -u user
 	EOF
 
 	# Simply a small script that launches the timer in the background and immediately exits
@@ -116,8 +128,8 @@ if [ "$ACTIVATE" = 'True' ]; then
 
 	# Make PAM run LOGOUT_TIMER_ACTUAL_LAUNCHER for user, so it's run as root
 	# Idempotency: Don't add it multiple times if this script is run more than once
-  if ! grep -q "# OS2borgerPC Timer" $LIGHTDM_GREETER_PAM; then
-  	for f in $LIGHTDM_FILES; do
+  if ! grep -q "# OS2borgerPC Timer" $CHECK_FILE; then
+  	for f in $PAM_FILES; do
   		sed --in-place "/@include common-session/i# OS2borgerPC Timer\nsession [success=1 default=ignore] pam_succeed_if.so user != user\nsession optional pam_exec.so $LOGOUT_TIMER_ACTUAL_LAUNCHER" "$f"
   	done
   fi
@@ -149,7 +161,7 @@ else # Stop the timers and delete everything related to them
 	#	Alternate solution: Kill all processes started by user in user-cleanup.sh? Maybe that's a better idea anyway,
 	#	which we should do for everyone in the future?
 
-	for f in $LIGHTDM_FILES; do
+	for f in $PAM_FILES; do
 		sed --in-place "/# OS2borgerPC Timer/d" "$f"
 		sed --in-place "/session \[success=1 default=ignore\] pam_succeed_if.so user != user/d" "$f"
 		sed --in-place "\@session optional pam_exec.so $LOGOUT_TIMER_ACTUAL_LAUNCHER@d" "$f"
