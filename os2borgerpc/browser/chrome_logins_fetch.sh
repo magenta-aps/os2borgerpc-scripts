@@ -16,6 +16,12 @@ fi
 OUR_USER="user"
 LOGINS="/home/$OUR_USER/.config/google-chrome/Default/Login Data"
 
+if [ ! -d "/home/user/.config/google-chrome" ]; then
+  echo "Chrome folder not found!"
+  echo "Remember to start Chrome and perform the desired logins before running this script."
+  exit 1
+fi
+
 if [ -f "$LOGINS" ]; then
   echo "This is the file, base64 encoded to prevent issues with special characters (empty lines not included):"
   printf "\n\n"
