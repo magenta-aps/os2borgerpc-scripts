@@ -30,6 +30,8 @@ LOANER_PIN_LENGTH=4
 
 export DEBIAN_FRONTEND=noninteractive
 LIGHTDM_PAM=/etc/pam.d/lightdm
+GDM_PAM=/etc/pam.d/gdm-password
+DEFAULT_DM_FILE="/etc/X11/default-display-manager"
 # Put our module where PAM modules normally are
 PAM_PYTHON_MODULE=/usr/lib/x86_64-linux-gnu/security/os2borgerpc-custom-login-pam-module.py
 # Keep this in sync with the extensions name as given in the os2borgerpc-gnome-extensions repo!
@@ -40,11 +42,22 @@ LOGOUT_TIMER_CONF="/usr/share/gnome-shell/extensions/$EXTENSION_NAME/config.json
 QURIA_LOGIN_INTERFACE_PYTHON3=/usr/share/os2borgerpc/bin/quria_login_interface_python3.py
 CITIZEN_HASH_FILE="/etc/os2borgerpc/citizen_hash.txt"
 LOG_ID_FILE="/etc/os2borgerpc/login_log_id.txt"
-LOGOUT_SCRIPT="/etc/lightdm/greeter-setup-scripts/general_citizen_logout.py"
+LOGOUT_SCRIPT_LIGHTDM="/etc/lightdm/greeter-setup-scripts/general_citizen_logout.py"
+LOGOUT_SCRIPT_GDM="/etc/os2borgerpc/post-session-scripts/general_citizen_logout.py"
 LOGOUT_SERVICE="/etc/systemd/system/general_citizen_logout.service"
 GREETER_SETUP_SCRIPT="/etc/lightdm/greeter_setup_script.sh"
 GREETER_SETUP_DIR="/etc/lightdm/greeter-setup-scripts"
 LIGHTDM_CONFIG="/etc/lightdm/lightdm.conf"
+GDM_CONFIG="/etc/gdm3/custom.conf"
+POST_SESSION_FILE="/etc/gdm3/PostSession/Default"
+
+if grep --quiet gdm3 $DEFAULT_DM_FILE; then
+  PAM_FILE=$GDM_PAM
+  LOGOUT_SCRIPT=$LOGOUT_SCRIPT_GDM
+else
+  PAM_FILE=$LIGHTDM_PAM
+  LOGOUT_SCRIPT=$LOGOUT_SCRIPT_LIGHTDM
+fi
 
 if [ "$ACTIVATE" = "True" ]; then
   apt-get update --assume-yes
@@ -55,17 +68,19 @@ if [ "$ACTIVATE" = "True" ]; then
 
   # Two blocks to ensure:
   # Idempotency: Don't add it multiple times if run multiple times
-  if ! grep -q "pam_python" "$LIGHTDM_PAM"; then
+  if ! grep -q "pam_python" "$PAM_FILE"; then
     # 1. User skips regular login and only uses Quria.
-    sed -i '/common-auth/i# OS2borgerPC custom login\nauth [success=4 default=ignore] pam_succeed_if.so user = user' $LIGHTDM_PAM
+    sed -i "/common-auth/i# OS2borgerPC custom login\nauth [success=4 default=ignore] pam_succeed_if.so user = user" $PAM_FILE
 
     # 2. All other users use regular login and conversely skip Quria
-    sed -i "/include common-account/i# OS2borgerPC custom login\nauth [success=1 default=ignore] pam_succeed_if.so user != user\nauth required pam_python.so $PAM_PYTHON_MODULE" $LIGHTDM_PAM
+    sed -i "/include common-account/i# OS2borgerPC custom login\nauth [success=1 default=ignore] pam_succeed_if.so user != user\nauth required pam_python.so $PAM_PYTHON_MODULE" $PAM_FILE
   fi
 
   # Disable automatic login
   deluser user nopasswdlogin
   sed --in-place "/autologin-user/d" $LIGHTDM_CONFIG
+  sed --in-place "/AutomaticLogin/d" $GDM_CONFIG
+  sed --in-place "/gdm-automatic-login/d" $POST_SESSION_FILE
 
 # Separated out because the pam module cannot run if you import the admin_client or re
 cat << EOF > $QURIA_LOGIN_INTERFACE_PYTHON3
@@ -406,10 +421,10 @@ pip install --upgrade os2borgerpc-client
 
 else # Cleanup and remove the Quria/booking integration
   # Remove Quria/booking integration from /etc/pam.d/ files
-  sed -i '/pam_succeed_if.so user = user/d' $LIGHTDM_PAM
-  sed -i '/# OS2borgerPC custom login/d' $LIGHTDM_PAM
-  sed -i '/pam_succeed_if.so user != user/d' $LIGHTDM_PAM
-  sed -i "\@auth required pam_python.so@d" $LIGHTDM_PAM
+  sed -i '/pam_succeed_if.so user = user/d' $PAM_FILE
+  sed -i '/# OS2borgerPC custom login/d' $PAM_FILE
+  sed -i '/pam_succeed_if.so user != user/d' $PAM_FILE
+  sed -i "\@auth required pam_python.so@d" $PAM_FILE
 
   systemctl disable "$(basename $LOGOUT_SERVICE)"
 

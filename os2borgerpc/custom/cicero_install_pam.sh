@@ -23,6 +23,8 @@ NO_AGE_LIMIT_END_TIMES=${4:-17,17,17,17,17,17,17}
 
 export DEBIAN_FRONTEND=noninteractive
 LIGHTDM_PAM=/etc/pam.d/lightdm
+GDM_PAM=/etc/pam.d/gdm-password
+DEFAULT_DM_FILE="/etc/X11/default-display-manager"
 # Put our module where PAM modules normally are
 PAM_PYTHON_MODULE=/usr/lib/x86_64-linux-gnu/security/os2borgerpc-cicero-pam-module.py
 # Keep this in sync with the extensions name as given in the os2borgerpc-gnome-extensions repo!
@@ -32,11 +34,22 @@ EXTENSION_NAME='logout-timer@os2borgerpc.magenta.dk'
 LOGOUT_TIMER_CONF="/usr/share/gnome-shell/extensions/$EXTENSION_NAME/config.json"
 CICERO_INTERFACE_PYTHON3=/usr/share/os2borgerpc/bin/cicero_interface_python3.py
 CITIZEN_HASH_FILE="/etc/os2borgerpc/citizen_hash.txt"
-CICERO_LOGOUT_SCRIPT="/etc/lightdm/greeter-setup-scripts/cicero_logout.py"
+CICERO_LOGOUT_LIGHTDM="/etc/lightdm/greeter-setup-scripts/cicero_logout.py"
+CICERO_LOGOUT_GDM="/etc/os2borgerpc/post-session-scripts/cicero_logout.py"
 CICERO_LOGOUT_SERVICE="/etc/systemd/system/cicero_logout.service"
 GREETER_SETUP_SCRIPT="/etc/lightdm/greeter_setup_script.sh"
 GREETER_SETUP_DIR="/etc/lightdm/greeter-setup-scripts"
 LIGHTDM_CONFIG="/etc/lightdm/lightdm.conf"
+GDM_CONFIG="/etc/gdm3/custom.conf"
+POST_SESSION_FILE="/etc/gdm3/PostSession/Default"
+
+if grep --quiet gdm3 $DEFAULT_DM_FILE; then
+  PAM_FILE=$GDM_PAM
+  CICERO_LOGOUT_SCRIPT=$CICERO_LOGOUT_GDM
+else
+  PAM_FILE=$LIGHTDM_PAM
+  CICERO_LOGOUT_SCRIPT=$CICERO_LOGOUT_LIGHTDM
+fi
 
 if [ "$ACTIVATE" = "True" ]; then
   apt-get update --assume-yes
@@ -47,17 +60,19 @@ if [ "$ACTIVATE" = "True" ]; then
 
   # Two blocks to ensure:
   # Idempotency: Don't add it multiple times if run multiple times
-  if ! grep -q "pam_python" "$LIGHTDM_PAM"; then
+  if ! grep -q "pam_python" "$PAM_FILE"; then
     # 1. User skips regular login and only uses Cicero.
-    sed -i '/common-auth/i# OS2borgerPC Cicero\nauth [success=4 default=ignore] pam_succeed_if.so user = user' $LIGHTDM_PAM
+    sed -i "/common-auth/i# OS2borgerPC Cicero\nauth [success=4 default=ignore] pam_succeed_if.so user = user" $PAM_FILE
 
     # 2. All other users use regular login and conversely skip Cicero
-    sed -i "/include common-account/i# OS2borgerPC Cicero\nauth [success=1 default=ignore] pam_succeed_if.so user != user\nauth required pam_python.so $PAM_PYTHON_MODULE" $LIGHTDM_PAM
+    sed -i "/include common-account/i# OS2borgerPC Cicero\nauth [success=1 default=ignore] pam_succeed_if.so user != user\nauth required pam_python.so $PAM_PYTHON_MODULE" $PAM_FILE
   fi
 
   # Disable automatic login
   deluser user nopasswdlogin
   sed --in-place "/autologin-user/d" $LIGHTDM_CONFIG
+  sed --in-place "/AutomaticLogin/d" $GDM_CONFIG
+  sed --in-place "/gdm-automatic-login/d" $POST_SESSION_FILE
 
   # Set up age limit
   set_os2borgerpc_config cicero_age_limit "$AGE_LIMIT"
@@ -277,10 +292,10 @@ EOF
 
 else # Cleanup and remove the Cicero integration
   # Remove Cicero interegration from /etc/pam.d/ files
-  sed -i '/pam_succeed_if.so user = user/d' $LIGHTDM_PAM
-  sed -i '/# OS2borgerPC Cicero/d' $LIGHTDM_PAM
-  sed -i '/pam_succeed_if.so user != user/d' $LIGHTDM_PAM
-  sed -i "\@auth required pam_python.so@d" $LIGHTDM_PAM
+  sed -i '/pam_succeed_if.so user = user/d' $PAM_FILE
+  sed -i '/# OS2borgerPC Cicero/d' $PAM_FILE
+  sed -i '/pam_succeed_if.so user != user/d' $PAM_FILE
+  sed -i "\@auth required pam_python.so@d" $PAM_FILE
 
   systemctl disable "$(basename $CICERO_LOGOUT_SERVICE)"
 
