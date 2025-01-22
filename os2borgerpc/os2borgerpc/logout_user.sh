@@ -17,11 +17,6 @@ if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   exit 1
 fi
 
-user=$(who | grep -wo 'user')
-
-if [ -z "$user" ]; then
-    echo "User is not logged in..."
-else
-    pkill -KILL -u "$user"
-    echo "User $user is now logged out."
-fi
+OUR_USER="user"
+pkill -KILL -u $OUR_USER || true
+echo "User $OUR_USER is now logged out."
