@@ -51,6 +51,7 @@ SUNDAY_STOP=${14}
 CUSTOM_DATES=${15}
 MODE=${16}
 
+OUR_USER="user"
 WAKE_PLAN_FILE=/etc/os2borgerpc/plan.json
 SCHEDULE_CREATION_SCRIPT="/usr/local/lib/os2borgerpc/make_schedule_plan.py"
 ON_OFF_SCHEDULE_SERVICE="/etc/systemd/system/os2borgerpc-set_on-off_schedule.service"
@@ -60,6 +61,9 @@ USERCRON="/etc/os2borgerpc/usercron"
 USER_CLEANUP="/usr/share/os2borgerpc/bin/user-cleanup.bash"
 
 mkdir -p /usr/local/lib/os2borgerpc
+
+# Get the product type
+PRODUCT=$(get_os2borgerpc_config os2_product)
 
 # Ensure that the usercron-file exists and has the correct permissions
 touch $USERCRON
@@ -76,7 +80,6 @@ cat <<EOF > $SCHEDULE_CREATION_SCRIPT
 
 import json
 import datetime
-from os2borgerpc.client.config import get_config
 
 FILE = "/etc/os2borgerpc/plan.json"
 
@@ -121,9 +124,8 @@ def make_schedule():
                 date = date + datetime.timedelta(days=1)
     plan['custom_dates'] = custom_dict
 
-    # Check the product type and include it in the plan
-    product = get_config("os2_product")
-    plan['product'] = product
+    # Include the product type in the plan
+    plan['product'] = "$PRODUCT"
 
     # Save the plan
     with open(FILE, 'w') as file:
@@ -157,6 +159,7 @@ import datetime
 import subprocess
 import os
 
+OUR_USER = "$OUR_USER"
 FILE = "$WAKE_PLAN_FILE" # "/etc/os2borgerpc/" + "$PLAN_NAME"
 MODE = "$MODE".lower()
 LOCALE_FILE = "/etc/default/locale"
@@ -356,8 +359,9 @@ def main():
         # Add notification for next shutdown
         with open(USERCRON, 'a') as cronfile:
             cronfile.write(f"{notify_time.minute} {notify_time.hour} {notify_time.day} {notify_time.month} *"
-                           f" export DISPLAY=:0 && /usr/bin/zenity --warning --text '<big>{MESSAGE}</big>'\n")
-        subprocess.run(["crontab", "-u", "user", USERCRON])
+                           f" DISPLAY=\$(who | grep -w '{OUR_USER}' | sed -rn 's/.*\((:[0-9]*)\).*/\\\\1/p')"
+                           f" /usr/bin/zenity --warning --text '<big>{MESSAGE}</big>'\n")
+        subprocess.run(["crontab", "-u", OUR_USER, USERCRON])
 
 if __name__ == "__main__":
     main()
