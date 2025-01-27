@@ -13,6 +13,8 @@ Policies we want to use. Until then there will be set some default static
 Policies with OS2borgerPC in mind.
 
 Author: Heini L. Ovason
+
+TODO: Add some background for why we have each policy
 COMMENT
 
 set -x
@@ -58,7 +60,6 @@ cat << EOF > "$POLICY_FILE"
     "DisableFirefoxAccounts": true,
     "DisableFormHistory": true,
     "DisableProfileImport": true,
-    "DownloadDirectory": "/home/user/Hentet",
     "EnableTrackingProtection": {
       "Cryptomining": true,
       "Fingerprinting": true,
@@ -82,7 +83,6 @@ cat << EOF > "$POLICY_FILE"
     "Preferences": {
       "datareporting.policy.dataSubmissionPolicyBypassNotification": true
     },
-    "PromptForDownloadLocation": false,
     "SanitizeOnShutdown": {
       "Cache": true,
       "Cookies": true,
