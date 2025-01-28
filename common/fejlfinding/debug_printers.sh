@@ -46,5 +46,9 @@ done
 header "Print contents of $PRINTERS_CONF, if it exists"
 [ -f $PRINTERS_CONF ] && cat $PRINTERS_CONF
 
+# PRINCH RELATED
+
+dpkg -l | grep princh
+
 header "Print contents of $PRINCH_PPD, if it exists"
 [ -f $PRINCH_PPD ] && cat $PRINCH_PPD
