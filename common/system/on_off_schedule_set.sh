@@ -376,4 +376,6 @@ ExecStart=$ON_OFF_SCHEDULE_SCRIPT
 WantedBy=multi-user.target
 EOF
 
-systemctl enable --now "$(basename $ON_OFF_SCHEDULE_SERVICE)"
+systemctl enable "$(basename $ON_OFF_SCHEDULE_SERVICE)"
+
+$ON_OFF_SCHEDULE_SCRIPT
