@@ -78,7 +78,7 @@ security_problem_uid_template_var = "%SECURITY_PROBLEM_UID%"
 # Example event:
 # Jul 13 11:50:20 bpc usermod[328713]: change user 'user' expiration from 'never' to '1970-01-02'
 regexes = [
-    (r"(usermod\[[0-9]+\]: change user 'user' expiration from 'never' to '[0-9-]+')")
+    r"(usermod\[[0-9]+\]: change user 'user' expiration from 'never' to '[0-9-]+')"
 ]
 
 # Filter log_event_tuples based on regex matches and put them

@@ -48,4 +48,4 @@ Lint python scripts:
     - apk add --no-cache --virtual .deps gcc musl-dev
     - pip install black
   script:
-    - black --check --diff --exclude=migrations .
+    - black --check --diff .
