@@ -1,4 +1,4 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
 export DEBIAN_FRONTEND=noninteractive
 
