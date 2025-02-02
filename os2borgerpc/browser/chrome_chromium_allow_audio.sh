@@ -1,9 +1,14 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # AutoplayAllowed should enable autoplay globally while the other makes an exception and allows it for a specific
 # webpage. So really, both shouldn't be needed.
-# AudioOutputAllowed is probably irrelevant, but might as well start out with the sledge hammer approach and then refine
-# from there
+# AudioOutputAllowed is probably irrelevant, but might as well start out with the sledge hammer approach and then refine from there
 
 ACTIVATE="$1"
 URL_1="$2"

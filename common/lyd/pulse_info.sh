@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch
+
 pulseaudio_initial_setup() {
     # Hacky workaround to be able to run pactl as root
     # https://stackoverflow.com/a/64932897/1172409

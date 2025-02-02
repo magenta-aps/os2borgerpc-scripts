@@ -1,11 +1,17 @@
 #!/bin/sh
 
-# DESCRIPTION
-# This script will enable running scripts when lightdm reaches greeter setup
-# All scripts in the SCRIPT_DIR will be run.
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
 #
-# PARAMETERS
-# 1. Checkbox. If checked empties the SCRIPT_DIR
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Emil Nordahn Andersen, Marcus Funch, Andreas Poulsen
+#
+# Description:
+#   This script will enable running scripts when lightdm reaches greeter setup
+#   All scripts in the SCRIPT_DIR will be run.
+#
+# Arguments:
+#   1. Checkbox. If checked empties the SCRIPT_DIR
 
 CLEANUP_LIGHTDM_GREETER_SETUP_SCRIPTS_DIR=$1
 

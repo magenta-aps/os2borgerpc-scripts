@@ -1,4 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Heini Leander Ovason
 
 set -x
 
@@ -17,9 +23,7 @@ if [ -z "$DEFAULT_STORE" ] && [ -z "$STORE_NAME" ]; then
     exit 1
 fi
 
-if [ ! -d "$STORE_DIR" ]; then
-    mkdir -p "$STORE_DIR"
-fi
+mkdir --parents "$STORE_DIR"
 
 if [ ! -f "$STORE_DIR/StoreCache.ctx" ]; then
     touch "$STORE_DIR/StoreCache.ctx"
@@ -38,8 +42,4 @@ cat << EOF > "$STORE_DIR/StoreCache.ctx"
         <Store name="$STORE_NAME" type="DS" gatewaystore="" internalbeacon="" externalbeacon="" storeservice="OnPremStore">$DEFAULT_STORE</Store>
     </VisibleStores>
 </StoreCache>
-
 EOF
-
-
-

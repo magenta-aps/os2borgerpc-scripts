@@ -1,5 +1,11 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # General information script for OS2borgerPC, useful for debugging
 # Feel very free to add steps that gather additional, relevant information and commit the changes!
 

@@ -1,29 +1,17 @@
 #!/usr/bin/env bash
-#================================================================
-# HEADER
-#================================================================
-#% SYNOPSIS
-#+    os2borgerpc_lts_upgrade_in_place_step_4.sh
-#%
-#% DESCRIPTION
-#%    Step four of the upgrade from 20.04 to 22.04.
-#%    Designed for regular OS2borgerPC machines
-#%
-#================================================================
-#- IMPLEMENTATION
-#-    version         os2borgerpc_lts_upgrade_in_place_step_4.sh 0.0.1
-#-    author          Andreas Poulsen
-#-    copyright       Copyright 2022, Magenta Aps
-#-    license         BSD/MIT
-#-    email           info@magenta.dk
-#-
-#================================================================
-#  HISTORY
-#     2022/09/15 : ap : Script creation.
+
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
 #
-#================================================================
-# END_OF_HEADER
-#================================================================
+# SPDX-License-Identifier: BSD/MIT
+#
+# SPDX-FileContributor: Andreas Poulsen
+#
+# SYNOPSIS
+#    os2borgerpc_lts_upgrade_in_place_step_4.sh
+#
+# DESCRIPTION
+#    Step four of the upgrade from 20.04 to 22.04.
+#    Designed for regular OS2borgerPC machines
 
 set -ex
 
@@ -63,7 +51,7 @@ os2borgerpc_push_config_keys distribution
 # Change the release-upgrade prompt back to never.
 # This should prevent future popups regarding updates
 release_upgrades_file=/etc/update-manager/release-upgrades
-sed -i "s/Prompt=.*/Prompt=never/" $release_upgrades_file
+sed --in-place "s/Prompt=.*/Prompt=never/" $release_upgrades_file
 
 # Enable FSCK automatic fixes
 sed --in-place "s/FSCKFIX=no/FSCKFIX=yes/" /lib/init/vars.sh
@@ -71,7 +59,7 @@ sed --in-place "s/FSCKFIX=no/FSCKFIX=yes/" /lib/init/vars.sh
 # Remove the old client
 NEW_CLIENT="/usr/local/lib/python3.10/dist-packages/os2borgerpc/client/jobmanager.py"
 if [ -f $NEW_CLIENT ]; then
-  rm -rf /usr/local/lib/python3.8/
+  rm --recursive --force /usr/local/lib/python3.8/
 fi
 
 # Overwrite the desktop icons policy file with the new expected format
@@ -159,7 +147,7 @@ fi
 # The upgrade changes firefox to a snap called firefox_firefox.desktop so rename the related entry if it exists
 FILE="/usr/share/applications/defaults.list"
 if grep --quiet 'x-scheme-handler/https=firefox' $FILE; then
-  sed -i "s/=firefox.desktop/=firefox_firefox.desktop/" "$FILE"
+  sed --in-place "s/=firefox.desktop/=firefox_firefox.desktop/" "$FILE"
 fi
 
 # Remove lightdm access to network settings and maintain user access to network settings, if they had been given
@@ -284,7 +272,7 @@ rm --force /home/$SHADOW/.config/autostart/gio-fix-desktop-file-permissions.desk
 # Script that actually runs gio as the user and kills the dbus session it creates to do so
 # afterwards
 cat << EOF > "$GIO_SCRIPT"
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
 # gio needs to run as the user + dbus-launch, we have this script to create it and kill it afterwards
 export \$(dbus-launch)
@@ -305,7 +293,7 @@ EOF
 # Script to activate programs on the desktop
 # (equivalent to right-click -> Allow Launching)
 cat << EOF > "$GIO_LAUNCHER"
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
 # Determine the name of the user desktop directory. This is done via xdg-user-dir,
 # which checks the /home/user/.config/user-dirs.dirs file. To ensure this file exists,
@@ -341,7 +329,7 @@ sed --in-place "\@$GIO_LAUNCHER@d" $USER_CLEANUP
 
 # Make sure to insert this line before the desktop is made immutable
 # in case desktop_toggle_writable has already been run
-sed -i "/chown -R \$USERNAME:\$USERNAME \/home\/\$USERNAME/a $GIO_LAUNCHER" $USER_CLEANUP
+sed --in-place "/chown -R \$USERNAME:\$USERNAME \/home\/\$USERNAME/a $GIO_LAUNCHER" $USER_CLEANUP
 
 # Remove user write access to desktop
 export "$(grep LANG= /etc/default/locale | tr -d '"')"
@@ -366,7 +354,7 @@ mkdir --parents "/home/.skjult/$(basename "$DESKTOP")"
 # Undo write access removal - always do this to prevent adding the same lines multiple times (idempotency)
 make_desktop_writable
 
-sed -i "/USERNAME=\"$USERNAME\"/a \
+sed --in-place "/USERNAME=\"$USERNAME\"/a \
 export \$(grep LANG= \/etc\/default\/locale | tr -d \'\"\')\n\
 runuser -u $USERNAME xdg-user-dirs-update\n\
 DESKTOP=\$(runuser -u $USERNAME xdg-user-dir DESKTOP)\n\
@@ -448,7 +436,7 @@ fi
 POLICY="/etc/polkit-1/localauthority/90-mandatory.d/10-os2borgerpc-no-user-shutdown.pkla"
 if [ ! -f $POLICY ]; then
   if [ ! -d "$(dirname "$POLICY")" ]; then
-    mkdir -p "$(dirname "$POLICY")"
+    mkdir --parents "$(dirname "$POLICY")"
   fi
   cat > "$POLICY" <<END
 [Restrict system shutdown]
@@ -495,7 +483,7 @@ fi
 POLICY_DIR="/etc/firefox/policies"
 POLICY_FILE="policies.json"
 
-mkdir -p "$POLICY_DIR";
+mkdir --parents "$POLICY_DIR";
 
 PAGES_STRING=""
 if [ -n "$ADDITIONAL_PAGES" ]; then
@@ -569,7 +557,7 @@ EOF
 # Attempting to remove policy from former standard location.
 OLD_POLICY="/usr/lib/firefox/distribution/policies.json"
 if [ -f "$OLD_POLICY" ]; then
-    rm -f "$OLD_POLICY"
+    rm --force "$OLD_POLICY"
 fi
 
 # Disable libreoffice Tip of the day
@@ -580,9 +568,9 @@ fi
 CONFIG_DIR="/home/.skjult/.config/libreoffice/4/user/"
 FILE_PATH=$CONFIG_DIR"registrymodifications.xcu"
 
-mkdir -p $CONFIG_DIR
+mkdir --parents $CONFIG_DIR
 
-rm -f $FILE_PATH
+rm --force $FILE_PATH
 
 cat << EOF >> $FILE_PATH
 <?xml version="1.0" encoding="UTF-8"?>
@@ -610,7 +598,7 @@ if [ ! -f "$UNATTENDED_UPGRADES_FILE" ]; then
   export DEBIAN_FRONTEND=noninteractive
   CONF="/etc/apt/apt.conf.d/90os2borgerpc-automatic-upgrades"
   if ! dpkg -s unattended-upgrades > /dev/null 2>&1; then
-    apt-get -y install unattended-upgrades
+    apt-get --assume-yes install unattended-upgrades
   fi
   cat > "$CONF" <<-END
 APT::Periodic::Enable "1";
@@ -751,11 +739,11 @@ fi
 
 # If they're using on/off schedules, change the schedule to use the usercron-file
 if [ -f "$ON_OFF_SCHEDULE_SCRIPT" ] && grep --quiet "/tmp/usercron" $ON_OFF_SCHEDULE_SCRIPT; then
-  sed -i "s@USERCRON = \"/tmp@USERCRON = \"/etc/os2borgerpc@" $ON_OFF_SCHEDULE_SCRIPT
-  sed -i "0,/with open(USERCRON, 'w') as cronfile/{//d}" $ON_OFF_SCHEDULE_SCRIPT
-  sed -i "/subprocess\.run(\[\"crontab\", \"-u\", \"user\", \"-l\"/d" $ON_OFF_SCHEDULE_SCRIPT
-  sed -i "/os\.path\.exists(USERCRON)/d" $ON_OFF_SCHEDULE_SCRIPT
-  sed -i "/os\.remove(USERCRON)/d" $ON_OFF_SCHEDULE_SCRIPT
+  sed --in-place "s@USERCRON = \"/tmp@USERCRON = \"/etc/os2borgerpc@" $ON_OFF_SCHEDULE_SCRIPT
+  sed --in-place "0,/with open(USERCRON, 'w') as cronfile/{//d}" $ON_OFF_SCHEDULE_SCRIPT
+  sed --in-place "/subprocess\.run(\[\"crontab\", \"-u\", \"user\", \"-l\"/d" $ON_OFF_SCHEDULE_SCRIPT
+  sed --in-place "/os\.path\.exists(USERCRON)/d" $ON_OFF_SCHEDULE_SCRIPT
+  sed --in-place "/os\.remove(USERCRON)/d" $ON_OFF_SCHEDULE_SCRIPT
 fi
 
 # Restore crontab and reenable potential wake plans
@@ -763,7 +751,7 @@ TMP_ROOTCRON=/etc/os2borgerpc/tmp_rootcronfile
 if [ -f "$TMP_ROOTCRON" ]; then
   crontab $TMP_ROOTCRON
   crontab -u user $TMP_USERCRON
-  rm -f $TMP_ROOTCRON $TMP_USERCRON
+  rm --force $TMP_ROOTCRON $TMP_USERCRON
 fi
 if [ -f /etc/os2borgerpc/plan.json ]; then
   systemctl enable --now os2borgerpc-set_on-off_schedule.service

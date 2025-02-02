@@ -1,8 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Søren Howe Gersager, Heini Leander Ovason
+#
 # Updates Sane scanner drivers. http://sane-project.org/
-# Author: shg@magenta.dk
 
-add-apt-repository -y ppa:sane-project/sane-release
+add-apt-repository --yes ppa:sane-project/sane-release
 apt-get update
-apt install -y libsane
+apt install --assume-yes libsane

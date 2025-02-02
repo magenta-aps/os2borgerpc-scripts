@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 
-set -ex
-
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Andreas Poulsen
+#
 # Scanner software: https://download3.ebz.epson.net/dsc/f/03/00/15/47/63/01144a0c8e0b24754bde315b7621a90662107e95/epsonscan2_e.pdf
+
+set -ex
 
 FILE1="epsonscan2.deb.tar.gz"
 
@@ -25,4 +31,4 @@ chmod 644 /usr/share/applications/epsonscan2.desktop
 
 # Cleanup
 rm $FILE1
-rm -R $SCANNER_FOLDER
+rm --recursive $SCANNER_FOLDER

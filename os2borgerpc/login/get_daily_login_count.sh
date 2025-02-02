@@ -1,4 +1,10 @@
-#!/bin/sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Andreas Poulsen
 
 set -x
 
@@ -15,7 +21,7 @@ mkdir --parents "$(dirname $LOGIN_COUNT_SCRIPT)" "$(dirname $DATE_FILE)"
 
 crontab -l > $ROOTCRON_TMP
 
-sed -i "/count_daily_logins/d" $ROOTCRON_TMP
+sed --in-place "/count_daily_logins/d" $ROOTCRON_TMP
 
 if [ "$ACTIVATE" = "False" ]; then
   systemctl disable "$(basename $LOGIN_COUNT_SERVICE)"

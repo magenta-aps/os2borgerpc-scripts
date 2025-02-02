@@ -1,4 +1,10 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch
 
 if ! get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   echo "This script is not designed to be run on a a regular OS2borgerPC machine."
@@ -21,7 +27,7 @@ if [ "$ACTIVATE" = "True" ]; then
   apt-get install --assume-yes xdotool
 
   cat << EOF > $AUTO_LOGIN_SCRIPT
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
 REMEMBER_LOGIN="$REMEMBER_LOGIN"
 

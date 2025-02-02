@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Heini Leander Ovason
+
 set -x
 
 STARTPAGE="$1"
@@ -41,5 +47,4 @@ cat << EOF > "$POLICIES_DIR/$POLICY"
     }
   }
 }
-
 EOF

@@ -1,29 +1,17 @@
 #!/usr/bin/env bash
-#================================================================
-# HEADER
-#================================================================
-#% SYNOPSIS
-#+    repair_early_upgrade.sh
-#%
-#% DESCRIPTION
-#%    Repairs OS2borgerPC machines where the prompt to upgrade to Ubuntu 22.04 was accepted.
-#%    Introduces the same settings as the upgrade scripts.
-#%
-#================================================================
-#- IMPLEMENTATION
-#-    version         repair_early_upgrade.sh 0.0.1
-#-    author          Andreas Poulsen
-#-    copyright       Copyright 2022, Magenta Aps
-#-    license         BSD/MIT
-#-    email           info@magenta.dk
-#-
-#================================================================
-#  HISTORY
-#     2022/09/15 : ap : Script creation
+
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
 #
-#================================================================
-# END_OF_HEADER
-#================================================================
+# SPDX-License-Identifier: BSD/MIT
+#
+# SPDX-FileContributor: Andreas Pulsen
+#
+# SYNOPSIS
+#    repair_early_upgrade.sh
+#
+# DESCRIPTION
+#    Repairs OS2borgerPC machines where the prompt to upgrade to Ubuntu 22.04 was accepted.
+#    Introduces the same settings as the upgrade scripts.
 
 set -ex
 

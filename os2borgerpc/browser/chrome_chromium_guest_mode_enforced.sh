@@ -1,4 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Heini Leander Ovason
 
 set -x
 
@@ -19,5 +25,5 @@ if [ "$ACTIVATE" = "True" ]; then
 EOF
 
 else
-  rm -f "$POLICY"
+  rm --force "$POLICY"
 fi

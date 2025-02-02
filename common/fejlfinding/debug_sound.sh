@@ -1,5 +1,11 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # This scripts prints out various pieces of information to help debug sound issues.
 # This script is both compatible with OS2borgerPC and Kiosk, once Pulseaudio has been installed on Kiosk.
 

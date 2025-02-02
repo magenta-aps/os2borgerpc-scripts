@@ -1,29 +1,17 @@
 #!/usr/bin/env bash
-#================================================================
-# HEADER
-#================================================================
-#% SYNOPSIS
-#+    kiosk_lts_upgrade_in_place_step_3.sh
-#%
-#% DESCRIPTION
-#%    Step three of the upgrade from 20.04 to 22.04.
-#%    Designed for Kiosk machines
-#%
-#================================================================
-#- IMPLEMENTATION
-#-    version         kiosk_lts_upgrade_in_place_step_3.sh 0.0.1
-#-    author          Andreas Poulsen
-#-    copyright       Copyright 2022, Magenta Aps
-#-    license         BSD/MIT
-#-    email           info@magenta.dk
-#-
-#================================================================
-#  HISTORY
-#     2022/12/08 : ap : Script creation
+
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
 #
-#================================================================
-# END_OF_HEADER
-#================================================================
+# SPDX-License-Identifier: BSD/MIT
+#
+# SPDX-FileContributor: Andreas Poulsen
+#
+# SYNOPSIS
+#    kiosk_lts_upgrade_in_place_step_3.sh
+#
+# DESCRIPTION
+#    Step three of the upgrade from 20.04 to 22.04.
+#    Designed for Kiosk machines
 
 set -ex
 
@@ -57,7 +45,7 @@ apt-mark hold python3.8
 # Also set the prompt to lts so that the upgrader will only look for lts releases
 release_upgrades_file=/etc/update-manager/release-upgrades
 
-sed -i "s/Prompt=.*/Prompt=lts/" $release_upgrades_file
+sed --in-place "s/Prompt=.*/Prompt=lts/" $release_upgrades_file
 
 # Perform the actual upgrade with some error handling
 do-release-upgrade -f DistUpgradeViewNonInteractive >  /var/log/os2borgerpc_upgrade_1.log || true

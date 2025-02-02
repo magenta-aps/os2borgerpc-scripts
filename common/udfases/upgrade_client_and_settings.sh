@@ -1,5 +1,11 @@
 #!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch, Andreas Poulsen
+#
 # Updates the OSborgerPC client and settings
 # Not relevant for new machines as they have saner defaults, but it's a good idea when upgrading older machines (machines instaled from images 3.1.0 (maybe even 3.1.1) or older)
 

@@ -1,4 +1,10 @@
 #!/bin/sh
+
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch, Sebastian Heiberg
 #
 # Description: This script is used to hide the mouse cursor when it is inactive, both in kiosk and borgerpc.
 # The default time for the cursor to be hidden is 5 seconds.

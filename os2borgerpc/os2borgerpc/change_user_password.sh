@@ -1,18 +1,23 @@
 #!/usr/bin/env sh
-# 
+
+# SPDX-FileCopyrightText: 2013 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Carsten Agger, Marcus Funch, Sebastian Heiberg
+#
 # This script will change the audience user password on a OS2borgerPC machine.
 #
 # Expects exactly two input parameters
-
-set -e
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   echo "Dette script er ikke designet til at blive anvendt på en kiosk-maskine."
   exit 1
 fi
 
-if [ $# -ne 2 ]
-then
+set -e
+
+if [ $# -ne 2 ]; then
     printf '%s\n' "usage: $(basename "$0") <password> <confirmation>"
     exit 1
 fi
@@ -30,7 +35,7 @@ if [ "$1" = "$2" ]; then
 
     # If the password is encrypted, it will just pass through the checks for chpasswd
     ENCRYPTED_CODE=$(echo "$1" | mkpasswd --method=Yescrypt --stdin)
-    
+
     # The chpasswd always return exit code 0, even when it fails.
     # We therefore need to check if there is a text, only failure to change the password generates text.
     # The -e flag is used for pre-encrypted passwords

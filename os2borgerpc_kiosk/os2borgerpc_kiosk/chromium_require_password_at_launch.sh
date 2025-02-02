@@ -1,5 +1,11 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # The only Chromium-specific logic is that we overwrite the startpage set in start_chromium.sh - otherwise it could work with any browser.
 
 ACTIVATE="$1"

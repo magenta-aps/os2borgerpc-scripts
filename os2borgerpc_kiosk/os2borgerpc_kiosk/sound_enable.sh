@@ -1,11 +1,18 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
-set -x
-
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # Activate sound in OS2BorgerPC Booking (Ubuntu Server)
 # Reboot afterwards for it to take effect.
+#
 # Arguments:
 #   1. What command to run: 0-1
+
+set -x
 
 ACTIVATE=$1
 

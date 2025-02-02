@@ -1,5 +1,11 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2019 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Alexander Faithful, Heini Leander Ovason, Marcus Funch
+#
 # Sets new background image on login-screen
 
 set -x
@@ -24,7 +30,7 @@ POLICY_FILE="/etc/dconf/db/os2borgerpc.d/06-login-screen-bg-image"
 POLICY_LOCK_FILE="/etc/dconf/db/os2borgerpc.d/locks/06-login-screen-bg-image"
 
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
 
 	cat > "$POLICY_FILE" <<-END
 		[$POLICY_PATH]

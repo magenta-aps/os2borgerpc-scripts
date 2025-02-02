@@ -1,5 +1,11 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL
+#
+# SPDX-FileContributor: Søren Howe Gersager
+#
 # SYNOPSIS
 #    hard_shutdown_lockdown.sh [ENFORCE]
 #
@@ -22,19 +28,15 @@
 #    For use with the "unexpire_user.sh" and
 #    "detect_user_expired_event.py" script
 #
-# IMPLEMENTATION
-#    copyright       Copyright 2021 Magenta ApS
-#    license         GNU General Public License
-
 # TECHNICAL NOTES
 #    You can check whether a user has been expired by checking the last column for the user in /etc/shadow
-
-set -x
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   echo "Dette script er ikke designet til at blive anvendt på en kiosk-maskine."
   exit 1
 fi
+
+set -x
 
 ACTIVATE=$1
 

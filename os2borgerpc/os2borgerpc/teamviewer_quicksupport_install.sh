@@ -1,4 +1,10 @@
-#! /bin/bash
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Heini Leander Ovason
 
 set -x
 
@@ -14,8 +20,7 @@ ARCHIVE=$(basename "$URL")
 INSTALL_TEMP_PATH="/home/user/.local/opt"
 INSTALL_PATH="/home/.skjult/.local/opt"
 
-if [ "$ACTIVATE" = 'True' ]; then
-
+if [ "$ACTIVATE" = "True" ]; then
     # Download teamviewer quick support (distributed as an archive).
     curl -L -O $URL
 
@@ -32,10 +37,7 @@ if [ "$ACTIVATE" = 'True' ]; then
     chown -R root:root $INSTALL_PATH/teamviewerqs
 
     cp $INSTALL_PATH/teamviewerqs/teamviewer.desktop /usr/share/applications/
-
 else
-
     rm -Rf $INSTALL_TEMP_PATH/teamviewerqs $INSTALL_PATH/teamviewerqs
     rm /usr/share/applications/teamviewer.desktop
-
 fi

@@ -1,8 +1,14 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch
 
 # Places a shortcut on the Desktop to any directory on the file system
 #
-# Parameters:
+# Arguments:
 #   1: Whether to add or remove the shortcut
 #   2: The path to the directory you want a shortcut to
 #   3: The name of the shortcut on the Desktop

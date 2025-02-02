@@ -1,5 +1,11 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2017 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Danni Als, Carsten Agger, Marcus Funch
+#
 # This script will change the name of the computer, it will not
 # change how it looks in the admin. There is no validation that this parameter is a valid name.
 # Requirements for a valid hostname: https://www.man7.org/linux/man-pages/man7/hostname.7.html
@@ -20,7 +26,7 @@ fi
 hostnamectl set-hostname "$NEW_COMPUTER_NAME"
 
 # Also update the name in /etc/hosts
-sed -i "s/$OLD_COMPUTER_NAME/$NEW_COMPUTER_NAME/g" $PREFS_FILE
+sed --in-place "s/$OLD_COMPUTER_NAME/$NEW_COMPUTER_NAME/g" $PREFS_FILE
 
 # Also update the name in the computer's Configuration in OS2borgerPC locally
 set_os2borgerpc_config hostname "$NEW_COMPUTER_NAME"

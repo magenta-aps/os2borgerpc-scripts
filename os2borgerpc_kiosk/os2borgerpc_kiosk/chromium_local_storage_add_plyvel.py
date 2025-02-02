@@ -1,4 +1,10 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch with credits to Danni Als
 
 import os
 from urllib.parse import urlparse

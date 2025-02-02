@@ -1,35 +1,22 @@
 #!/bin/sh
 
-#================================================================
-# HEADER
-#================================================================
-#% SYNOPSIS
-#+    protect_config_files.sh
-#%
-#% DESCRIPTION
-#%    This script installs or removes pre- and post-checkin hooks that
-#%    together prevent OS2borgerPC configuration files from being modified.
-#%
-#%    It takes one boolean as a parameter, a checked box protects the config files
-#%    an unchecked removes the safeguarding
-#%
-#%    It is only useful as an extra safeguard during certain remote upgrades.
-#%
-#================================================================
-#- IMPLEMENTATION
-#-    version         protect_config_files.sh (magenta.dk) 1.0.0
-#-    author          Alexander Faithfull
-#-    copyright       Copyright 2021, Magenta ApS
-#-    license         GNU General Public License
-#-    email           af@magenta.dk
-#-
-#================================================================
-#  HISTORY
-#     2021/03/15 : af : Script created
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
 #
-#================================================================
-# END_OF_HEADER
-#================================================================
+# SPDX-License-Identifier: GPL
+#
+# SPDX-FileContributor: Alexander Faithful
+#
+# SYNOPSIS
+#    protect_config_files.sh
+#
+# DESCRIPTION
+#    This script installs or removes pre- and post-checkin hooks that
+#    together prevent OS2borgerPC configuration files from being modified.
+#
+#    It takes one boolean as a parameter, a checked box protects the config files
+#    an unchecked removes the safeguarding
+#
+#    It is only useful as an extra safeguard during certain remote upgrades.
 
 set -x
 

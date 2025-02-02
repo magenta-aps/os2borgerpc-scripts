@@ -1,11 +1,16 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch
 
 # Lists programs available, programs on the desktop or in the launcher
-# Author: mfm@magenta.dk
 #
 # Arguments
-# 1: Default is to print programs available/installed. Write 'skrivebord' to list
-#    programs already on the desktop, or "menu" to list programs in the launcher.
+#   1: Default is to print programs available/installed. Write 'skrivebord' to list
+#      programs already on the desktop, or "menu" to list programs in the launcher.
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   echo "Dette script er ikke designet til at blive anvendt på en kiosk-maskine."

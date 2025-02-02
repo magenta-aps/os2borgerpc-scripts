@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch, Andreas Poulsen
+#
 # This script will set up a VNC server to listen on display :0 and will
 # set a password given in the first parameter.
 

@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Andreas Poulsen
+
 set -x
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
@@ -19,7 +25,7 @@ fi
 chmod 700 $USERCRON
 
 # Remove all lines not containing notify-send or zenity, which all of ours do
-sed -i "/notify-send\|zenity/! d" $USERCRON
+sed --in-place "/notify-send\|zenity/! d" $USERCRON
 
 # Check the contents of the file
 cat $USERCRON
@@ -61,9 +67,9 @@ fi
 
 # If they're using on/off schedules, change the schedule to use the usercron-file
 if [ -f "$ON_OFF_SCHEDULE_SCRIPT" ] && grep --quiet "/tmp/usercron" $ON_OFF_SCHEDULE_SCRIPT; then
-  sed -i "s@USERCRON = \"/tmp@USERCRON = \"/etc/os2borgerpc@" $ON_OFF_SCHEDULE_SCRIPT
-  sed -i "0,/with open(USERCRON, 'w') as cronfile/{//d}" $ON_OFF_SCHEDULE_SCRIPT
-  sed -i "/subprocess\.run(\[\"crontab\", \"-u\", \"user\", \"-l\"/d" $ON_OFF_SCHEDULE_SCRIPT
-  sed -i "/os\.path\.exists(USERCRON)/d" $ON_OFF_SCHEDULE_SCRIPT
-  sed -i "/os\.remove(USERCRON)/d" $ON_OFF_SCHEDULE_SCRIPT
+  sed --in-place "s@USERCRON = \"/tmp@USERCRON = \"/etc/os2borgerpc@" $ON_OFF_SCHEDULE_SCRIPT
+  sed --in-place "0,/with open(USERCRON, 'w') as cronfile/{//d}" $ON_OFF_SCHEDULE_SCRIPT
+  sed --in-place "/subprocess\.run(\[\"crontab\", \"-u\", \"user\", \"-l\"/d" $ON_OFF_SCHEDULE_SCRIPT
+  sed --in-place "/os\.path\.exists(USERCRON)/d" $ON_OFF_SCHEDULE_SCRIPT
+  sed --in-place "/os\.remove(USERCRON)/d" $ON_OFF_SCHEDULE_SCRIPT
 fi

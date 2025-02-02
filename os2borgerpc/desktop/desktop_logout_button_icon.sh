@@ -1,10 +1,16 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch, Emil Nordahn Andersen, Andreas Poulsen
 
 # Arguments:
-# 1: A boolean to decide whether to add or remove the button
-# 2: The name the shortcut should have on the desktop.
-# 3: A boolean to decide whether to prompt before logging out or log out immediately
-# 4: An optional icon to use for the shortcut. Ideally SVG, but PNG and JPG work as well.
+#   1: A boolean to decide whether to add or remove the button
+#   2: The name the shortcut should have on the desktop.
+#   3: A boolean to decide whether to prompt before logging out or log out immediately
+#   4: An optional icon to use for the shortcut. Ideally SVG, but PNG and JPG work as well.
 
 set -x
 
@@ -32,7 +38,7 @@ DESKTOP_FILE=/home/.skjult/"$DESKTOP"/logout.desktop
 
 rm --force "$OLD_DESKTOP_FILE"
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
 
   mkdir --parents "$(dirname "$DESKTOP_FILE")"
 

@@ -1,13 +1,17 @@
-#! /bin/bash
+#!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Heini Leander Ovason
+#
 # Ref: https://chromeenterprise.google/policies/#ExtensionSettings
-
+#
 # This script can:
 # 1. Create an ExtensionSettings policy if none exists.
 # 2. Add/remove a list(1..*) of Chrome Extensions to/from the ExtensionSettings file.
 # 3. Remove the ExtensionSettings policy.
-
-# Authors: Heini Leander Ovason
 
 set -x
 
@@ -22,7 +26,7 @@ EXTENSIONS_ARRAY=$2
 POLICIES_DIR="/etc/opt/chrome/policies/managed"
 POLICY_FILE="os2borgerpc-extension-settings.json"
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
 
   if [ ! -d "$(dirname "$POLICY_FILE")" ]; then
     mkdir --parents "$(dirname "$POLICY_FILE")"

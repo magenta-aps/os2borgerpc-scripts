@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2017 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL
+#
+# SPDX-FileContributor: Danni Als, Alexander Faithful, Carsten Agger, Marcus Funch, Søren Howe Gersager, Andreas Poulsen
+
 """Security Script for finding USB keyboard attachment events."""
 
 import sys

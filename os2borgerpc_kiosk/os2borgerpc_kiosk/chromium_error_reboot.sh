@@ -1,4 +1,10 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Andreas Poulsen
 
 set -x
 
@@ -56,7 +62,7 @@ EOF
 fi
 
 cat <<EOF > $REBOOT_SCRIPT
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 
 COUNTER=\$(cat $COUNTER_FILE)
 COUNTER=\$((COUNTER+1))
@@ -69,7 +75,7 @@ EOF
 chmod 755 $REBOOT_SCRIPT
 
 cat <<EOF > $RESET_COUNTER_SCRIPT
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 
 sleep 120
 

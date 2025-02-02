@@ -1,10 +1,16 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # Note: /etc/lighdm/users.conf has a setting to hide a user via this line:
 # hidden-users=nobody user2 user3
 # HOWEVER this doesn't work if an AccountService has been installed, and it has on Ubuntu incl. BorgerPC.
 # Hence we change it in the AccountService config instead.
-
+#
 # Reboot or run "systemctl restart lightdm" (which logs you out immediately) for it to take effect.
 
 HIDE_SUPERUSER=$1
@@ -32,9 +38,9 @@ sed --in-place "s/SystemAccount=$FROM/SystemAccount=$TO/" $ACCOUNT_SERVICE_SUPER
 if [ "$SHOW_CUSTOM_LOGIN_FIELD" = "True" ]; then
 
   # Idempotency: Don't add it if it's already there
-  if ! grep -q -- "greeter-show-manual-login" "$LIGHTDM_CONFIG"; then
-    sed -i '$ a greeter-show-manual-login=true' $LIGHTDM_CONFIG
+  if ! grep --quiet -- "greeter-show-manual-login" "$LIGHTDM_CONFIG"; then
+    sed --in-place '$ a greeter-show-manual-login=true' $LIGHTDM_CONFIG
   fi
 else
-  sed -i '/greeter-show-manual-login/d' $LIGHTDM_CONFIG
+  sed --in-place '/greeter-show-manual-login/d' $LIGHTDM_CONFIG
 fi

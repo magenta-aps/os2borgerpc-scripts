@@ -1,4 +1,10 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch, Emil Nordahn Andersen
 
 # Creates a customly named shortcut on the desktop for the normal user, which
 # opens the URL given as an argument in the default browser.
@@ -7,13 +13,11 @@
 # take effect.
 #
 # Arguments:
-# 1: A boolean to decide whether to add or not. A checked box will
-# add the shortcut and an unchecked will remove it
-# 2: The URL to visit when clicked
-# 3: The name the shortcut should have - it needs to be a valid filename!
-# 4: The path to an icon. If empty an icon from the current theme is used, specified below
-
-set -x
+#   1: A boolean to decide whether to add or not. A checked box will
+#   add the shortcut and an unchecked will remove it
+#   2: The URL to visit when clicked
+#   3: The name the shortcut should have - it needs to be a valid filename!
+#   4: The path to an icon. If empty an icon from the current theme is used, specified below
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   echo "Dette script er ikke designet til at blive anvendt på en kiosk-maskine."
@@ -24,6 +28,8 @@ ACTIVATE=$1
 URL=$2
 SHORTCUT_NAME="$3"
 ICON_UPLOAD="$4"
+
+set -x
 
 # Determine the name of the user desktop directory. This is done via xdg-user-dir,
 # which checks the /home/user/.config/user-dirs.dirs file. To ensure this file exists,
@@ -37,7 +43,7 @@ DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
 SHADOW=".skjult"
 DESKTOP_FILE="/home/$SHADOW/$DESKTOP/$SHORTCUT_NAME.desktop"
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
 
   if [ -z "$ICON_UPLOAD" ]; then
     ICON="preferences-system-network"

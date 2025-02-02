@@ -1,7 +1,13 @@
 #!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2019 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL
+#
+# SPDX-FileContributor: Alexander Faithful, Marcus Funch
+
 # SYNOPSIS
-#    dconf_policy_a11y.sh [ENFORCE]
+#    dconf_a11y.sh [ENFORCE]
 #
 # DESCRIPTION
 #    This script installs a policy that forces the Universal Access menu to be
@@ -9,10 +15,6 @@
 #
 #    Use a boolean to decide whether to enforce or not. An unchecked box will
 #    remove the policy and a checked one will enforce it.
-#
-# IMPLEMENTATION
-#    copyright       Copyright 2022, Magenta ApS
-#    license         GNU General Public License
 
 set -x
 
@@ -34,7 +36,7 @@ ACTIVATE=$1
 # Delete the previous lock file (its name has changed)
 rm --force /etc/dconf/db/os2borgerpc.d/locks/accessibility
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
 
 	cat > "$POLICY_FILE" <<-END
 		[$POLICY_PATH]

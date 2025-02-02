@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Andreas Poulsen
+#
 # Manuals for the three separate drivers:
 # Printer driver: https://download3.ebz.epson.net/dsc/f/03/00/15/47/96/48c7ca288d9541e0fd0e1445e7a13cc605906505/escpr_e.pdf
 # Scanner driver: https://download3.ebz.epson.net/dsc/f/03/00/15/47/63/01144a0c8e0b24754bde315b7621a90662107e95/epsonscan2_e.pdf
 # Utility driver: https://download3.ebz.epson.net/dsc/f/03/00/15/37/37/3740a2986228a23c80b241ba919fe5595653ab9e/printerutility_e.pdf
 #
 # The scanner software is called epsonscan2.desktop
+
 set -x
 
 # lpadmin doesn't like spaces

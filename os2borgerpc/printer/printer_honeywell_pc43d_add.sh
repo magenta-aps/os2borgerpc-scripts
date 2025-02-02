@@ -1,11 +1,17 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # This script is based off their own install guide
 # https://prod-edam.honeywell.com/content/dam/honeywell-edam/sps/ppr/en-us/public/products/printers/common/documents/sps-ppr-prt-cups-en-ab.pdf?download=false
 # Their page about the printer: https://sps.honeywell.com/us/en/products/productivity/printers/desktop/pc43d-desktop-direct-thermal-barcode-printer
 # The driver is downloaded here, and it requires an account. The download itself is performed by their dedicated Windows program.
 # https://hsmftp.honeywell.com/
-
+#
 # NOTE: Their install script automatically adds the printer as a USB device, with the following name:
 # HLL8260CDW
 

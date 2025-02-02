@@ -1,26 +1,32 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch, Andreas Poulsen
+#
 # DESCRIPTION
 #
-# This script will log out the user and suspend the PC after a given period of inactivity.
-# A configurable warning is shown before the user is logged out and the pc suspended.
+#   This script will log out the user and suspend the PC after a given period of inactivity.
+#   A configurable warning is shown before the user is logged out and the pc suspended.
 #
-# The script will also suspend the PC after the same period of inactivity on the login screen.
-# This second part of the script requires "lightdm_greeter_setup_scripts" to be run and enabled to take effect
+#   The script will also suspend the PC after the same period of inactivity on the login screen.
+#   This second part of the script requires "lightdm_greeter_setup_scripts" to be run and enabled to take effect
 #
-# The script is designed to wake up the PC 1 minute before a potential scheduled shutdown (on/off-schedule)
-# so that it can be shut down as planned.
-# If no scheduled shutdown exists, it will suspend the PC until it is woken manually.
+#   The script is designed to wake up the PC 1 minute before a potential scheduled shutdown (on/off-schedule)
+#   so that it can be shut down as planned.
+#   If no scheduled shutdown exists, it will suspend the PC until it is woken manually.
 #
-# This script and "inactivity_logout_after_time.sh" are mutually exclusive, and each of them
-# are written to overwrite each other, so whichever was the last of them run takes effect.
+#   This script and "inactivity_logout_after_time.sh" are mutually exclusive, and each of them
+#   are written to overwrite each other, so whichever was the last of them run takes effect.
 #
-# PARAMETERS
-# 1. Checkbox. Enables/disables the script.
-# 2. Integer. How many minutes to wait before showing the warning dialog
-# 3. Integer. How many minutes to wait before logging out and suspending
-# 4. String. (optional) The text to be shown in the warning dialog. If no input is given, a default is used
-# 5. String. (optional) The text to be shown on the dialog button. If no input is given, a default is used
+# ARGUMENTS
+#   1. Checkbox. Enables/disables the script.
+#   2. Integer. How many minutes to wait before showing the warning dialog
+#   3. Integer. How many minutes to wait before logging out and suspending
+#   4. String. (optional) The text to be shown in the warning dialog. If no input is given, a default is used
+#   5. String. (optional) The text to be shown on the dialog button. If no input is given, a default is used
 
 set -x
 

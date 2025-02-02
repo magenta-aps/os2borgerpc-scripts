@@ -1,5 +1,11 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL
+#
+# SPDX-FileContributor: Søren Howe Gersager
+#
 # SYNOPSIS
 #    change_admin_site args $(admin site url) $(site UID)
 #
@@ -9,12 +15,6 @@
 #    This involves changing the admin site url and (optionally)
 #    the site uid in the os2borgerpc config file and
 #    re-registering. The script works for both BorgerPC and Kiosk.
-#
-# IMPLEMENTATION
-#    version         change_admin_site (magenta.dk) 1.0.0
-#    author          Søren Howe Gersager
-#    copyright       Copyright 2022, Magenta Aps"
-#    license         GNU General Public License
 
 ADMIN_SITE_URL=$1
 SITE_UID=$2

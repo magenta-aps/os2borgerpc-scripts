@@ -1,20 +1,24 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch, Andreas Poulsen, Sebastian Heiberg
+#
 # Chrome launch maximized, fullscreen or kiosk by default
 # Applies to both the general .desktop file,
 # the .desktop file that may have been added to the desktop
 # and the .desktop file that may be used to autostart chrome.
 #
 # Arguments:
-# 1:
-#   Disable
-#   Maximized
-#   Fullscreen
-#   Kiosk
+#   1.
+#     Disable
+#     Maximized
+#     Fullscreen
+#     Kiosk
 #
 # Takes effect after logout / restart.
-#
-# Author: mfm@magenta.dk
 
 set -x
 

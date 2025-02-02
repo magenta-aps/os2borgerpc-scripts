@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL
+#
+# SPDX-FileContributor: Søren Howe Gersager, Marcus Funch, Andreas Poulsen
+
 """
 Security Script for finding user expired events.
 
 For use with the "lockdown_usb.sh" and "unexpire_user.sh" script.
 """
 
-
 import sys
 from datetime import datetime, timedelta
 import re
 
-__copyright__ = "Copyright 2017-2024 Magenta ApS"
+__copyright__ = "Copyright 2022-2024 Magenta ApS"
 __license__ = "GPL"
 
 

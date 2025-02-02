@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Heini Leander Ovason, Marcus Funch
+
 : << 'COMMENT'
-Policy-script developed by Magenta ApS for Aarhus Municipal.
+Policy-script developed by Magenta ApS for Aarhus Municipality.
 
 Learn more about Firefox "Policy Names" here:
 https://github.com/mozilla/policy-templates/blob/master/README.md
@@ -11,8 +17,6 @@ should have to evolve to be a more dynamic solution if we want to be
 able to, e.g. use the same script across machines and handpick which
 Policies we want to use. Until then there will be set some default static
 Policies with OS2borgerPC in mind.
-
-Author: Heini L. Ovason
 
 TODO: Add some background for why we have each policy
 COMMENT

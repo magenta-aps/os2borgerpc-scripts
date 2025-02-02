@@ -1,11 +1,16 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch, Emil Nordahn Andersen, Andreas Poulsen
 
 # Adds/Removes programs from the launcher (menu) in Ubuntu 20.04
-# Author: mfm@magenta.dk
 #
 # Arguments:
-# 1: Use a boolean, if left unchecked the script removes the given program shortcut.
-# 2: The name of the program you want to add/remove.
+#   1: Use a boolean, if left unchecked the script removes the given program shortcut.
+#   2: The name of the program you want to add/remove.
 
 ADD=$1
 PROGRAM=$2

@@ -1,4 +1,11 @@
-#!/bin/sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Andreas Poulsen
+#
 # Script for removing the on/off schedule and the related services/crontab entries from a computer
 
 set -x

@@ -1,6 +1,10 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
-set -x
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch
 
 BASE_URL="https://os2borgerpc-media.magenta.dk/parameter_uploads/"
 EXAMPLE_PARAMETER="86538woqsoed1tky1yndnkdxlz7srb7a/1415012771076_wps_1_A_giant_AT_AT_Walker_towe.jpg"

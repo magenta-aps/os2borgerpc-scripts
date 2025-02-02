@@ -1,5 +1,11 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # This script is for diagnostics purposes only - change and add commads
 # as needed.
 # Currently it lists active monitors, information about them and it then attempts to rotate them

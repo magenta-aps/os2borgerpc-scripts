@@ -1,4 +1,10 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -11,7 +17,7 @@ fi
 
 PKG="linux-generic-hwe-$(lsb_release --release --short)"
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
   apt-get install --assume-yes "$PKG"
 else
   apt-get remove --assume-yes "$PKG"

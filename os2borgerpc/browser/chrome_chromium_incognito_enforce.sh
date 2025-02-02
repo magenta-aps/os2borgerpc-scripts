@@ -1,5 +1,11 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Heini Leander Ovason, Sebastian Heiberg
+#
 # Reference: https://chromeenterprise.google/policies/#IncognitoModeAvailability
 
 set -x
@@ -36,7 +42,6 @@ if [ "$ACTIVATE" = "True" ]; then
 }
 
 EOF
-
 else
-    rm $POLICY
+    rm --force $POLICY
 fi

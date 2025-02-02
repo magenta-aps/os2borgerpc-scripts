@@ -1,4 +1,10 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch
 
 set -ex
 
@@ -29,7 +35,7 @@ else
   echo "0" > $REBOOT_COUNTER
 
   cat << EOF > $SCRIPT
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
 # This script attempts to detect a flicker error:
 # 1. If it detects flicker it increments a counter and reboots if the counter is less than $MAXIMUM_CONSECUTIVE_REBOOTS

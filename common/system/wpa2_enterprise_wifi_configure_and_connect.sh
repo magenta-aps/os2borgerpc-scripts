@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Heini Leander Ovason
+
 set -x
 
 SSID="$1"
@@ -16,16 +22,16 @@ nmcli connection delete "$SSID"
 
 # Create network configuration
 nmcli connection add \
-con-name "$SSID" \
-type wifi \
-ifname "$IFNAME" \
-ssid "$SSID" \
-wifi-sec.key-mgmt "$KEYMGMT" \
-wifi-sec.auth-alg "$AUTHALG" \
-802-1x.eap "$EAP" \
-802-1x.phase2-auth "$PHASE2AUTH" \
-802-1x.identity "$USERNAME" \
-802-1x.password "$PASSWORD"
+      con-name "$SSID" \
+      type wifi \
+      ifname "$IFNAME" \
+      ssid "$SSID" \
+      wifi-sec.key-mgmt "$KEYMGMT" \
+      wifi-sec.auth-alg "$AUTHALG" \
+      802-1x.eap "$EAP" \
+      802-1x.phase2-auth "$PHASE2AUTH" \
+      802-1x.identity "$USERNAME" \
+      802-1x.password "$PASSWORD"
 
 # Connect to network
 nmcli connection up "$SSID"

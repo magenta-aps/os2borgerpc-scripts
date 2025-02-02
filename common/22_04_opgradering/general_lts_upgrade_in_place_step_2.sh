@@ -1,28 +1,16 @@
 #!/usr/bin/env bash
-#================================================================
-# HEADER
-#================================================================
-#% SYNOPSIS
-#+    general_lts_upgrade_in_place_step_2.sh
-#%
-#% DESCRIPTION
-#%    Step two of the upgrade from 20.04 to 22.04.
-#%
-#================================================================
-#- IMPLEMENTATION
-#-    version         general_lts_upgrade_in_place_step_2.sh 0.0.1
-#-    author          Andreas Poulsen
-#-    copyright       Copyright 2022, Magenta Aps
-#-    license         BSD/MIT
-#-    email           info@magenta.dk
-#-
-#================================================================
-#  HISTORY
-#     2022/09/15 : ap : Script creation
+
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
 #
-#================================================================
-# END_OF_HEADER
-#================================================================
+# SPDX-License-Identifier: BSD/MIT
+#
+# SPDX-FileContributor: Andreas Poulsen
+#
+# SYNOPSIS
+#    general_lts_upgrade_in_place_step_2.sh
+#
+# DESCRIPTION
+#    Step two of the upgrade from 20.04 to 22.04.
 
 set -ex
 
@@ -63,7 +51,7 @@ apt-get --assume-yes update
 apt-get --assume-yes --fix-broken install
 
 # Remove unnecessary applications
-apt-get -y remove --purge remmina transmission-gtk apport whoopsie
+apt-get --assume-yes remove --purge remmina transmission-gtk apport whoopsie
 
 # Run available updates in preparation for the release-upgrade
 apt-get --assume-yes upgrade

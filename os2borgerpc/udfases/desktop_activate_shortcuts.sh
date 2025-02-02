@@ -1,4 +1,10 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch, Søren Howe Gersager, Andreas Poulsen
 
 set -x
 
@@ -19,7 +25,7 @@ rm --force /home/$SHADOW/.config/autostart/gio-fix-desktop-file-permissions.desk
 # Script that actually runs gio as the user and kills the dbus session it creates to do so
 # afterwards
 cat << EOF > "$GIO_SCRIPT"
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
 # gio needs to run as the user + dbus-launch, we have this script to create it and kill it afterwards
 export \$(dbus-launch)
@@ -40,7 +46,7 @@ EOF
 # Script to activate programs on the desktop
 # (equivalent to right-click -> Allow Launching)
 cat << EOF > "$GIO_LAUNCHER"
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
 # Determine the name of the user desktop directory. This is done via xdg-user-dir,
 # which checks the /home/user/.config/user-dirs.dirs file. To ensure this file exists,
@@ -77,4 +83,4 @@ sed --in-place "\@$GIO_LAUNCHER@d" $USER_CLEANUP
 # Make sure to insert this line before the desktop is made immutable
 # in case desktop_toggle_writable has already been run
 # Also make sure to only insert the line once
-sed -i "0,\@chown -R \$USERNAME:\$USERNAME /home/\$USERNAME@ s@@&\n$GIO_LAUNCHER@" $USER_CLEANUP
+sed --in-place "0,\@chown -R \$USERNAME:\$USERNAME /home/\$USERNAME@ s@@&\n$GIO_LAUNCHER@" $USER_CLEANUP

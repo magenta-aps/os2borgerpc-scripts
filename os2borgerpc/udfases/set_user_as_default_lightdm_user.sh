@@ -1,5 +1,11 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Søren Howe Gersager, Marcus Funch, Andreas Poulsen
+#
 # Inspiration: https://askubuntu.com/questions/59199/can-i-set-a-default-user-in-lightdm
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
@@ -13,7 +19,7 @@ FILE=/var/lib/lightdm/.cache/unity-greeter/state
 
 mkdir --parents "$(dirname "$FILE")"
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
   cat <<- EOF > "$FILE"
 [greeter]
 last-user=$USER

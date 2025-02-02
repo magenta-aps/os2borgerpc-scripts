@@ -1,16 +1,20 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
-set -x
-
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch, Emil Nordahn Andersen, Andreas Poulsen
+#
 # This will not work if they have disabled user cleanup,
 # at least not if lightdm is configured to not use it
-
+#
 # Use a boolean as parameter. A checked box will restrict write access
 # an unchecked will restore default
-
+#
 # Why not use a .config/autostart file? Because the user isn't allowed to chown to root
 # ...even if they are the current owner.
-
+#
 # chattr on DESKTOP is to prevent mv'ing DESKTOP to another name, and then creating a new one
 # which they DO have write permissions to
 # Another option considered was chowning /home/user itself (not recursively),
@@ -20,6 +24,8 @@ if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   echo "Dette script er ikke designet til at blive anvendt på en kiosk-maskine."
   exit 1
 fi
+
+set -x
 
 USERNAME="user"
 # Determine the name of the user desktop directory. This is done via xdg-user-dir,
@@ -51,10 +57,10 @@ mkdir --parents "/home/.skjult/$(basename "$DESKTOP")"
 # Undo write access removal - always do this to prevent adding the same lines multiple times (idempotency)
 make_desktop_writable
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
 	# Prepend temporarily setting DESKTOP mutable before copying new files in, as otherwise that will fail
 	# We first determine the name of the user desktop directory as before
-	sed -i "/USERNAME=\"$USERNAME\"/a \
+	sed --in-place "/USERNAME=\"$USERNAME\"/a \
 export \$(grep LANG= \/etc\/default\/locale | tr -d \'\"\')\n\
 runuser -u $USERNAME xdg-user-dirs-update\n\
 DESKTOP=\$(runuser -u $USERNAME xdg-user-dir DESKTOP)\n\

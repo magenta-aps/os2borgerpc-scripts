@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2020 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL
+#
+# SPDX-FileContributor: Danni Als, Heini Leander Ovason, Marcus Funch. Credits to Søren Howe Gersager and Allan Grauenkjaer.
+#
 # """
 # Activates an OS2display screen.
 # Arguments: [url, activation_code]
 # """
 #
-# __copyright__  = "Copyright 2022, Magenta Aps"
-# __credits__    = ["Allan Grauenkjaer"]
-# __license__    = "GPL"
-
 # What it does:
 # When activating a screen you type in an activation code and a token and
 # a uuid is saved to local storage, and as a result the slideshow starts
 # and it will persist across reboots.
 # This script replicates that with a POST request, and saving it to Chromiums
 # storage via plyvel.
-
+#
 # Ideas for changes: If updating from 16.04 .config/chromium can be deleted.
 
 import os

@@ -1,15 +1,21 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0
+#
+# SPDX-FileContributor: Marcus Funch, Emil Nordahn Andersen, Andreas Poulsen
+#
 # Sets up two-factor authentication for Ubuntu using the open standard used by
 # google-authenticator, which many apps support, such as:
 # Duo Mobile, Authy, Microsoft Authenticator
 # and of course Google Authenticator itself.
-
+#
 # Arguments
-# 1: Whether to enable or disable two factor authentication for the user
-# 2: The secret to use, as we need the same secret across multiple machines.
-#    A valid value is 26 characters consisting of A-Z 0-9
-#   (at least that's the format /usr/bin/google-authenticator generates)
+#   1. Whether to enable or disable two factor authentication for the user
+#   2. The secret to use, as we need the same secret across multiple machines.
+#      A valid value is 26 characters consisting of A-Z 0-9
+#     (at least that's the format /usr/bin/google-authenticator generates)
 
 set -x
 
@@ -28,7 +34,7 @@ export DEBIAN_FRONTEND=noninteractive
 # If you want to generate a code with google-authenticator to see what format the config should be:
 #  google-authenticator --time-based --window-size 5 --force --disallow-reuse --rate-limit 3 \
 #  --rate-time 30 --emergency-codes 1 2>/dev/null
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
 
   apt-get update --assume-yes
   apt-get install --assume-yes libpam-google-authenticator
