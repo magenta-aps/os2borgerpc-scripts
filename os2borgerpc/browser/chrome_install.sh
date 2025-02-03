@@ -64,6 +64,7 @@ setup_policies() {
 
   # Create the new policies
   POLICY="/etc/opt/chrome/policies/managed/os2borgerpc-defaults.json"
+  SKELETON=".skjult"
 
   mkdir --parents "$(dirname "$POLICY")"
 
@@ -169,9 +170,9 @@ DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
 
 DESKTOP_FILE_PATH_1=/usr/share/applications/google-chrome.desktop
 # In case a Chrome shortcut has been added to the desktop
-DESKTOP_FILE_PATH_2=/home/$USER/$DESKTOP/google-chrome.desktop
+DESKTOP_FILE_PATH_2=/home/$SKELETON/$DESKTOP/google-chrome.desktop
 # In case chrome_autostart.sh has been executed
-DESKTOP_FILE_PATH_3=/home/$USER/.config/autostart/chrome.desktop
+DESKTOP_FILE_PATH_3=/home/$SKELETON/.config/autostart/chrome.desktop
 FILES="$DESKTOP_FILE_PATH_1 $DESKTOP_FILE_PATH_2 $DESKTOP_FILE_PATH_3"
 
 PACKAGE="google-chrome-stable"
