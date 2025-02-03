@@ -2,7 +2,7 @@
 
 # SPDX-FileCopyrightText: 2019 Magenta ApS <info@magenta.dk>, portions copyright 2015 Ryan Sawhill Aroha <rsaw@redhat.com>
 #
-# SPDX-License-Identifier: GPL v3+
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 # SPDX-FileContributor: Alexander Faithful
 #

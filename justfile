@@ -1,4 +1,3 @@
-
 alias fp := fix-permissions
 
 @default:
@@ -10,3 +9,6 @@ fix-permissions:
 
 black:
   black .
+
+reuse:
+  reuse lint

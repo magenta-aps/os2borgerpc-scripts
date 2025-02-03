@@ -2,7 +2,7 @@
 
 # SPDX-FileCopyrightText: 2017 Magenta ApS <info@magenta.dk>
 #
-# SPDX-License-Identifier: GPL-3.0
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 # SPDX-FileContributor: Danni Als
 

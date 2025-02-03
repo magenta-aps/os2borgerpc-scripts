@@ -2,7 +2,7 @@
 
 # SPDX-FileCopyrightText: 2017 Magenta ApS <info@magenta.dk>
 #
-# SPDX-License-Identifier: GPL
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 # SPDX-FileContributor: Danni Als, Alexander Faithful, Carsten Agger, Marcus Funch, Søren Howe Gersager, Andreas Poulsen
 
@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 import re
 
 __copyright__ = "Copyright 2017-2024 Magenta ApS"
-__license__ = "GPL"
+__license__ = "GPL-3.0-or-later"
 
 
 def log_read(last_security_check, log_name):

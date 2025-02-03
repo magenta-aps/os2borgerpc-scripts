@@ -2,7 +2,7 @@
 
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
-# SPDX-License-Identifier: BSD/MIT
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 # SPDX-FileContributor: Andreas Poulsen
 #

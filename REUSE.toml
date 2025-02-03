@@ -1,0 +1,17 @@
+version = 1
+SPDX-PackageName = "OS2borgerPC Scripts"
+SPDX-PackageSupplier = "Magenta ApS <info@magenta.dk>"
+
+[[annotations]]
+path = [
+  ".flake8",
+  "justfile",
+  ".gitignore",
+  ".gitlab-ci.yml",
+  "README.md",
+  "common/security/README.md",
+  "REUSE.toml",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 Magenta ApS <info@magenta.dk>"
+SPDX-License-Identifier = "GPL-3.0-or-later"

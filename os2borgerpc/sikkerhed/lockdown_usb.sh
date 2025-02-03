@@ -2,7 +2,7 @@
 
 # SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
 #
-# SPDX-License-Identifier: GPL
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 # SPDX-FileContributor: Søren Howe Gersager Marcus Funch, Andreas Poulsen
 #
