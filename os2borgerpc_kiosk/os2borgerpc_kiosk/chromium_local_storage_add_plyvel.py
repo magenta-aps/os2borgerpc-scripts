@@ -13,7 +13,9 @@ from time import sleep
 import sys
 
 if b"kiosk" not in check_output(["get_os2borgerpc_config", "os2_product"]):
-    print("This script is not designed to be run on a a regular OS2borgerPC machine.")
+    print(
+        "This script has not been designed to run on a regular OS2borgerPC machine. Exiting."
+    )
     sys.exit(1)
 
 EXPECTED_ARG_COUNT = 4

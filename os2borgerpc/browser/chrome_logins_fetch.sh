@@ -9,7 +9,7 @@
 # Fetches the logins file from a logged in user and sends them to the adminsite
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
-  echo "This script has not been designed to be run on a Kiosk-machine. Exiting."
+  echo "This script has not been designed to run on a Kiosk-machine. Exiting."
   exit 1
 fi
 

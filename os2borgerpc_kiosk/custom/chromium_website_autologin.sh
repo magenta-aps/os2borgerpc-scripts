@@ -7,7 +7,7 @@
 # SPDX-FileContributor: Marcus Funch
 
 if ! get_os2borgerpc_config os2_product | grep --quiet kiosk; then
-  echo "This script is not designed to be run on a a regular OS2borgerPC machine."
+  echo "This script has not been designed to run on a regular OS2borgerPC machine. Exiting."
   exit 1
 fi
 

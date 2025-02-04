@@ -14,7 +14,7 @@
 #   2: Where the app launcher should be located in the menu. Valid options are: true (top), false (bottom - which is default)
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
-  echo "This script is not designed to be run on a Kiosk machine."
+  echo "This script has not been designed to run on a Kiosk-machine. Exiting."
   exit 1
 fi
 

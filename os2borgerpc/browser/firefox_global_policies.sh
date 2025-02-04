@@ -24,7 +24,7 @@ COMMENT
 set -x
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
-  echo "This script is not designed to be used on a kiosk machine."
+  echo "This script has not been designed to run on a Kiosk-machine. Exiting."
   exit 1
 fi
 
