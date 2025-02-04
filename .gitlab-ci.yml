@@ -1,24 +1,6 @@
 # Chronologically specify the pipeline stages to run
 stages:
-  - permissions
   - lint
-
-# Relevant for scripts that are cloned here to be run e.g. when building an image
-Ensure execute permissions:
-  stage: permissions
-  image: alpine
-  before_script:
-    - apk add fd
-    - printf 'Ensuring executable permissions on all files:'
-  script:
-    - |+
-      for fperm in $(fd . ${CI_PROJECT_DIR} --type f --exec stat -c %a); do
-        if [ "$fperm" != "755" ] && [ "$fperm" != "777" ]; then
-          printf "%s\n" "At least one file does not have execute permissions. Specifically it had the permission: $fperm" \
-                        "All files in this repo should have 755/777 permissions, because they're being cloned and executed."
-          exit 1
-        fi
-      done
 
 # Common settings for linters to avoid code repetition
 # Needs can be used to specify dependencies
@@ -39,8 +21,7 @@ Lint shell scripts:
     - printf '%s\n' 'https://github.com/koalaman/shellcheck/wiki/Checks'
     - fd --extension sh --exec shellcheck
 
-#  Keep the python version in sync with what's in production
-#  Consider using black instead?
+# Keep the python version in sync with what's in production
 Lint python scripts:
   <<: *lint-default
   image: python:3.10-alpine
@@ -48,4 +29,30 @@ Lint python scripts:
     - apk add --no-cache --virtual .deps gcc musl-dev
     - pip install black
   script:
-    - black --check --diff .
+    - black --check --diff --exclude=migrations .
+
+# Relevant for scripts that are cloned here to be run e.g. when building an image
+Ensure execute permissions:
+  stage: lint
+  image: alpine
+  before_script:
+    - apk add fd
+    - printf 'Ensuring executable permissions on all files:'
+  script:
+    - |+
+      for fperm in $(fd . ${CI_PROJECT_DIR} --type f --exec stat -c %a); do
+        if [ "$fperm" != "755" ] && [ "$fperm" != "777" ]; then
+          printf "%s\n" "At least one file does not have execute permissions. Specifically it had the permission: $fperm" \
+                        "All files in this repo should have 755/777 permissions, because they're being cloned and executed."
+                        "You can run \"just fix-permissions\" to fix it."
+          exit 1
+        fi
+      done
+
+Lint REUSE compliance:
+  <<: *lint-default
+  image:
+    name: fsfe/reuse:latest
+    entrypoint: [""]
+  script:
+    - reuse lint

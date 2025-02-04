@@ -1,4 +1,10 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Sebastian Heiberg, Marcus Funch
 #
 # SYNOPSIS
 #    dconf_simple_scanner.sh page_size picture_dpi text_dpi
@@ -6,11 +12,7 @@
 # DESCRIPTION
 #    This script sets up the simple scanner settings
 #
-# IMPLEMENTATION
-#    copyright       Copyright 2024, Magenta ApS
-#    license         GNU General Public License
-
-# NOTE: This script does not set a dconf lock as people are free to temporarily change the settings from the defaults.
+# NOTE: This script intentionally does not set dconf locks so users are able to temporarily change the settings.
 
 set -x
 

@@ -1,4 +1,10 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
 
 SET_KERNEL_VERSION_TO_X="$1"
 HOLD_KERNEL_VERSION="$2"

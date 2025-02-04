@@ -1,8 +1,14 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch, Heini Leander Ovason, Andreas Poulsen
+#
 # We need to run this program only AFTER login, so not graphical.target or whatever, if that
 # includes the login manager which also runs in X.
-
+#
 # This program needs to run as root or superuser so a user can't kill it,
 # but at the same time the timer program must run as the regular user to be able to write things to
 # screen.
@@ -75,7 +81,7 @@ else
   CHECK_FILE=$LIGHTDM_GREETER_PAM
 fi
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
 	# TODO: Do we need to install bc or is come preinstalled?
 	apt-get install --assume-yes jq
 
@@ -84,7 +90,7 @@ if [ "$ACTIVATE" = 'True' ]; then
 	wget $EXTENSION_GIT_URL
 	unzip $BRANCH.zip
 	$REPO_NAME-$BRANCH/install.sh whatever $EXTENSION_NAME true true true
-	rm -r $BRANCH.zip $REPO_NAME-$BRANCH
+	rm --recursive $BRANCH.zip $REPO_NAME-$BRANCH
 
 	# Now overwrite the testing config with what the user inputted/defaults in this script
 	cat <<- EOF > $LOGOUT_TIMER_CONF
@@ -98,7 +104,7 @@ if [ "$ACTIVATE" = 'True' ]; then
 
 	# A backup timer used to logout if the user-run gnome extension is disabled/killed, running as root
 	cat <<- EOF > $LOGOUT_TIMER_ACTUAL
-		#! /usr/bin/env bash
+		#!/usr/bin/env bash
 
 		TIME_MINUTES=\$(jq < $LOGOUT_TIMER_CONF '.timeMinutes')
 
@@ -120,7 +126,7 @@ if [ "$ACTIVATE" = 'True' ]; then
 	# so the PAM stack continues instead of it waiting for the timer to run out
 	# Using bash as disown is undefined in sh
 	cat <<- EOF > $LOGOUT_TIMER_ACTUAL_LAUNCHER
-		#! /usr/bin/env bash
+		#!/usr/bin/env bash
 
 		$LOGOUT_TIMER_ACTUAL &
 		disown
@@ -138,7 +144,7 @@ if [ "$ACTIVATE" = 'True' ]; then
 	# the next login
 		# Create a new script to handle cleanup after the logout timer
 	cat <<- EOF > $LOGOUT_TIMER_SESSION_CLEANUP_FILE
-		#! /usr/bin/env sh
+		#!/usr/bin/env sh
 
 		pkill -f "$(basename $LOGOUT_TIMER_ACTUAL)"
 		runuser --login $OUR_USER --command "XDG_RUNTIME_DIR=/run/user/$(id -u $OUR_USER) gnome-extensions disable $EXTENSION_NAME"
@@ -156,7 +162,7 @@ else # Stop the timers and delete everything related to them
 	gnome-extensions disable $EXTENSION_NAME  # Note: Don't do this if we make "disable" run "gnome-session-quit --logout" as well!
 
 	sed --in-place "\@$LOGOUT_TIMER_SESSION_CLEANUP_FILE@d" $SESSION_CLEANUP_FILE
-	rm -r $LOGOUT_TIMER_ACTUAL $LOGOUT_TIMER_ACTUAL_LAUNCHER $EXTENSION_ACTIVATION_DESKTOP_FILE "$(dirname $LOGOUT_TIMER_CONF)" $LOGOUT_TIMER_SESSION_CLEANUP_FILE
+	rm --recursive $LOGOUT_TIMER_ACTUAL $LOGOUT_TIMER_ACTUAL_LAUNCHER $EXTENSION_ACTIVATION_DESKTOP_FILE "$(dirname $LOGOUT_TIMER_CONF)" $LOGOUT_TIMER_SESSION_CLEANUP_FILE
 
 	#	Alternate solution: Kill all processes started by user in user-cleanup.sh? Maybe that's a better idea anyway,
 	#	which we should do for everyone in the future?

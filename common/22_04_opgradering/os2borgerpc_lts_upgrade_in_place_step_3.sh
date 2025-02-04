@@ -1,29 +1,17 @@
 #!/usr/bin/env bash
-#================================================================
-# HEADER
-#================================================================
-#% SYNOPSIS
-#+    os2borgerpc_lts_upgrade_in_place_step_3.sh
-#%
-#% DESCRIPTION
-#%    Step three of the upgrade from 20.04 to 22.04.
-#%    Designed for regular OS2borgerPC machines
-#%
-#================================================================
-#- IMPLEMENTATION
-#-    version         os2borgerpc_lts_upgrade_in_place_step_3.sh 0.0.1
-#-    author          Andreas Poulsen
-#-    copyright       Copyright 2022, Magenta Aps
-#-    license         BSD/MIT
-#-    email           info@magenta.dk
-#-
-#================================================================
-#  HISTORY
-#     2022/09/15 : ap : Script creation
+
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
-#================================================================
-# END_OF_HEADER
-#================================================================
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Andreas Poulsen
+#
+# SYNOPSIS
+#    os2borgerpc_lts_upgrade_in_place_step_3.sh
+#
+# DESCRIPTION
+#    Step three of the upgrade from 20.04 to 22.04.
+#    Designed for regular OS2borgerPC machines
 
 set -ex
 
@@ -55,7 +43,7 @@ fi
 FIREFOX_POLICY_FILE=/usr/lib/firefox/distribution/policies.json
 NEW_FIREFOX_POLICY_FILE=/etc/firefox/policies/policies.json
 if [ ! -d "/etc/firefox/policies" ]; then
-  mkdir -p /etc/firefox/policies
+  mkdir --parents /etc/firefox/policies
 fi
 if [ -f "$FIREFOX_POLICY_FILE" ] && [ ! -f "$NEW_FIREFOX_POLICY_FILE" ]; then
   mv $FIREFOX_POLICY_FILE /etc/firefox/policies/
@@ -143,11 +131,11 @@ if [ -f "/home/.skjult/Skrivebord/firefox.desktop" ]; then
 fi
 
 # Remove the old version of firefox
-rm -f /usr/share/applications/firefox.desktop
+rm --force /usr/share/applications/firefox.desktop
 # Rename possible firefox favorite to the name of the snap
 FAVORITES_FILE="/etc/dconf/db/os2borgerpc.d/02-launcher-favorites"
-sed -i "s/'firefox.desktop'/'firefox_firefox.desktop'/" "$FAVORITES_FILE"
-# sed -i "s/NoDisplay=true/NoDisplay=false/" /usr/share/applications/firefox.desktop
+sed --in-place "s/'firefox.desktop'/'firefox_firefox.desktop'/" "$FAVORITES_FILE"
+# sed --in-place "s/NoDisplay=true/NoDisplay=false/" /usr/share/applications/firefox.desktop
 
 rm --force $PREVIOUS_STEP_DONE
 

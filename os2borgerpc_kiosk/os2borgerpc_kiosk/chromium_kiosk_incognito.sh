@@ -1,14 +1,18 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch, Andreas Poulsen
 #
 # Toggles kiosk and/or incognito mode for OS2borgerPC Kiosk Chromium
 # Why incognito?: If kiosk is disabled the browser will begin to remember
 # cookies after restart. If you don't want that you can enable incognito.
 #
 # Arguments:
-# 1: KIOSK: 'True' enables maximizing by default, 'False' disables it.
-# 2: INCOG: 'True' enables incognito by default. 'False' disables it.
-#
-# Author: mfm@magenta.dk
+#   1. KIOSK: 'True' enables maximizing by default, 'False' disables it.
+#   2. INCOG: 'True' enables incognito by default. 'False' disables it.
 
 set -ex
 
@@ -32,7 +36,7 @@ if grep --quiet "KIOSK=" $LAUNCH_FILE; then
   echo 'BPC_KIOSK="--kiosk"' >> $ENVIRONMENT_FILE
 fi
 
-if [ "$KIOSK" = 'True' ]; then
+if [ "$KIOSK" = "True" ]; then
   sed --in-place 's/BPC_KIOSK=.*/BPC_KIOSK="--kiosk"/' $ENVIRONMENT_FILE
 else
   sed --in-place 's/BPC_KIOSK=.*/BPC_KIOSK=""/' $ENVIRONMENT_FILE
@@ -41,7 +45,7 @@ fi
 # Backwards compatibility
 sed --in-place "/IncognitoModeAvailability/d" $POLICY_FILE_DEFAULT
 
-if [ "$INCOG" = 'True' ]; then
+if [ "$INCOG" = "True" ]; then
   cat << EOF > $POLICY_FILE_INCOG
 {
   "IncognitoModeAvailability": 2

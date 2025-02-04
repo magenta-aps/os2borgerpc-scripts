@@ -1,12 +1,17 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
-# Author: mfm@magenta.dk
-# Credits: Vordingborg Kommune
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Original author unknown, modifications by Marcus Funch
+#
+# With credits to Vordingborg municipality
 #
 # Arguments:
-# 1: Use a boolean to decide whether to add or remove the button
-# 2: The name the button should have on the desktop.
-#    If you choose deletion, the contents of the name argument does not matter.
+#   1. Use a boolean to decide whether to add or remove the button
+#   2. The name the button should have on the desktop.
+#      If you choose deletion, the contents of the name argument does not matter.
 
 ACTIVATE=$1
 NAME="$2"
@@ -16,7 +21,7 @@ DESKTOP_FILE=/home/.skjult/Skrivebord/logout.desktop
 
 rm --force "$OLD_DESKTOP_FILE"
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
 	mkdir --parents "$(dirname $DESKTOP_FILE)"
 
 	cat <<- EOF > $DESKTOP_FILE
@@ -28,7 +33,6 @@ if [ "$ACTIVATE" = 'True' ]; then
 		Icon=application-exit
 		Exec=gnome-session-quit --logout --no-prompt
 	EOF
-
 else
 	rm "$DESKTOP_FILE"
 fi

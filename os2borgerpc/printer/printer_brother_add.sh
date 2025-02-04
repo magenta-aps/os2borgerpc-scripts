@@ -1,7 +1,13 @@
 #!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # Installs Linux (deb) Driver + CUPS wrapper for arbitrary Brother printers
-
+#
 # Example URLs to download drivers for Brother printers:
 # https://www.brother.dk/support/hl-l5100dn/downloads
 # https://www.brother.dk/support/HL-L8260CDW/downloads

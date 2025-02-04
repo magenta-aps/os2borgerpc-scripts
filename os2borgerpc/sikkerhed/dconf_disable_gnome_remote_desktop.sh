@@ -1,6 +1,10 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
-set -x
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch, Andreas Poulsen
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   echo "Dette script er ikke designet til at blive anvendt på en kiosk-maskine."
@@ -11,9 +15,11 @@ fi
 POLICY_FILE="/etc/dconf/db/os2borgerpc.d/00-remote-desktop"
 POLICY_LOCK_FILE="/etc/dconf/db/os2borgerpc.d/locks/00-remote-desktop"
 
+set -x
+
 ACTIVATE=$1
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
 	# Disable GNOME Remote Desktop VNC + RDP (and also lock to "View Only" which should be superfluous when they can't be
 	# enabled, but...)
 	cat > "$POLICY_FILE" <<-END

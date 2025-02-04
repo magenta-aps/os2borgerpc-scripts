@@ -1,16 +1,22 @@
 #!/usr/bin/env bash
 
-set -ex
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Carsten Agger, Marcus Funch, Andreas Poulsen
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   echo "Dette script er ikke designet til at blive anvendt på en kiosk-maskine."
   exit 1
 fi
 
+set -ex
+
 ACTIVATE=$1
 
 # Restore access to settings
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
 
   # Making sure we're not removing the actual
   # gnome-control-center if run with the wrong argument or multiple times

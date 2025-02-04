@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Andreas Poulsen, Marcus Funch
+
 set -x
 
 CHECKIN_SCRIPT="/usr/share/os2borgerpc/bin/check-in.sh"

@@ -1,5 +1,11 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2020 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Carsten Agger, Marcus Funch, Andreas Poulsen
+#
 # Minimal install of X and Chromium and connectivity.
 
 # Not set -x because otherwise it prints out the contents of LOG_OUT as well, and so the output XML is invalid again...
@@ -31,7 +37,7 @@ if lsb_release -d | grep --quiet 22; then
   DNS_FIX_SERVICE="/etc/systemd/system/os2borgerpc-DNS_fix.service"
   mkdir --parents "$(dirname $DNS_FIX_SCRIPT)"
   cat << EOF > $DNS_FIX_SCRIPT
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 
 import os
 import subprocess

@@ -1,5 +1,11 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # Stop switches and lid switches from hibernating or suspending
 #
 # Designed for OS2borgerPC, but it *should* work on OS2borgerPC Kiosk as well.

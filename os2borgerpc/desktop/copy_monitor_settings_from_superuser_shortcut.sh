@@ -1,7 +1,10 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
-# Author: Marcus Funch (mfm@magenta.dk)
-# License: GPL
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
 
 ACTIVATE="$1"
 
@@ -22,7 +25,7 @@ mkdir --parents "$(dirname $MONITOR_SETTINGS_FILE_SKELETON)"
 
 if [ "$ACTIVATE" = "True" ]; then
 cat << EOF > $MONITOR_SCRIPT
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
 # Support three different languages
 MSG_SUCCESS_EN="Monitor settings updated to reflect superuser's. Logout and in again, and the changes should take effect."

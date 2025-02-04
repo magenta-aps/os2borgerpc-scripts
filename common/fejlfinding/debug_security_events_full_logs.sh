@@ -1,5 +1,11 @@
 #!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # Consider merging this with "debug_security_events". The advantage of this script is that it can handle larger logs,
 # and logs that may contain special characters.
 # It could potentially be adjusted slightly to also allow it to optionally send .1 files, and the already gzipped .n files

@@ -1,14 +1,20 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2017 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Danni Als
+#
 # This script and "inactivity_suspend_after_time.sh" are mutually exclusive, and each of them
 # are written to overwrite each other, so whichever was the last of them run takes effect.
-
-# PARAMETERS
-# 1. Checkbox. Enables/disables the script.
-# 2. Integer. How many minutes to wait before showing the warning dialog
-# 3. Integer. How many minutes to wait before logging out
-# 4. String. (optional) The text to be shown in the warning dialog. If no input is given, a default is used
-# 5. String. (optional) The text to be shown on the dialog button. If no input is given, a default is used
+#
+# Arguments
+#   1. Checkbox. Enables/disables the script.
+#   2. Integer. How many minutes to wait before showing the warning dialog
+#   3. Integer. How many minutes to wait before logging out
+#   4. String. (optional) The text to be shown in the warning dialog. If no input is given, a default is used
+#   5. String. (optional) The text to be shown on the dialog button. If no input is given, a default is used
 
 set -x
 
@@ -83,7 +89,7 @@ fi
 
 # New auto_logout file, running as root
 cat <<- EOF > $INACTIVITY_SCRIPT
-	#! /usr/bin/env sh
+	#!/usr/bin/env sh
 
 	# If the user is inactive for too long, a dialog will appear, warning the user that the session will end.
 	# If the user do not touch the mouse or press any keyboard key the session will end.
@@ -104,16 +110,16 @@ cat <<- EOF > $INACTIVITY_SCRIPT
 	echo $LOGOUT_TIME_MS \$(xprintidle) >> \$LOG
 
 	if [ \$(xprintidle) -ge $LOGOUT_TIME_MS ]; then
-		echo 'Logging user out' >> \$LOG
-		pkill -KILL -u user
-		exit 0
+	  echo 'Logging user out' >> \$LOG
+	  pkill -KILL -u user
+	  exit 0
 	fi
 	# if idle time is past the dialog time: show the dialog
 	if [ \$(xprintidle) -ge $DIALOG_TIME_MS ]; then
 	  # Do spare the poor lives of potential other zenity windows.
 	  PID_ZENITY="\$(pgrep --full 'Inaktivitet')"
 	  if [ -n \$PID_ZENITY ]; then
-	  	kill \$PID_ZENITY
+	    kill \$PID_ZENITY
 	  fi
 	  # echo 'Running zenity...' >> \$LOG
 	  # We use the --title to match against above

@@ -1,13 +1,17 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
 #
 # Changes monitor power saving.
 # A special use case for this is as a fix for touchscreens that refuse to
 # wake up on touch.
 #
 # Arguments:
-# 1: ACTIVATE: 'True' turns monitor power saving on. False turns it 'off'.
-#
-# Author: mfm@magenta.dk
+#   1. ACTIVATE: 'True' turns monitor power saving on. False turns it 'off'.
 
 set -ex
 
@@ -20,7 +24,7 @@ if ! get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   exit 1
 fi
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
     printf '%s\n' 'Slår automatisk skærmslukning ved inaktivitet TIL'
     sed -i "/xset -dpms/d" "$FILE"
 else

@@ -1,6 +1,10 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
-set -x
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
 
 HOST="$1"
 

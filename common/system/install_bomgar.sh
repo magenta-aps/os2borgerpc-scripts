@@ -1,5 +1,11 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # This presupposes, as its first parameter, the Bomgar desktop file.
 # Example file name, anonymized in case the last part contains a secret:
 # bomgar-scc-zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz.desktop

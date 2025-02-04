@@ -1,21 +1,25 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # DESCRIPTION:
-# Add a button to show/hide the onscreen keyboard
-# ...or more precisely it toggles fullscreen on the browser
-# Intended for OS2borgerPC Kiosk.
+#   Add a button to show/hide the onscreen keyboard
+#   ...or more precisely it toggles fullscreen on the browser
+#   Intended for OS2borgerPC Kiosk.
 #
 # ARGUMENTS:
-# 1: Whether to install / uninstall the button
-# 2: The name of the process (e.g. a browser) that should be full screened
-# 3: The background image to use for the GTK window (keyboard toggle button)
+#   1. Whether to install / uninstall the button
+#   2. The name of the process (e.g. a browser) that should be full screened
+#   3. The background image to use for the GTK window (keyboard toggle button)
 #
 # PREREQUISITES:
-# 1. os2borgerpc_kiosk/os2borgerpc_kiosk/chromium_install.sh
-# 2. os2borgerpc_kiosk/os2borgerpc_kiosk/chromium_setup.sh
-# 3. os2borgerpc_kiosk/os2borgerpc_kiosk/wm_keyboard_install.sh
-#
-# AUTHOR: mfm@magenta.dk
+#   1. os2borgerpc_kiosk/os2borgerpc_kiosk/chromium_install.sh
+#   2. os2borgerpc_kiosk/os2borgerpc_kiosk/chromium_setup.sh
+#   3. os2borgerpc_kiosk/os2borgerpc_kiosk/wm_keyboard_install.sh
 
 set -ex
 
@@ -61,7 +65,7 @@ BUTTON_STYLING_CSS_FILE="btn.css"
 
 export DEBIAN_FRONTEND=noninteractive
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
 
   ### SCRIPT PROPER ###
 
@@ -104,7 +108,7 @@ if [ "$ACTIVATE" = 'True' ]; then
   cp "$BUTTON_ICON_PATH" $SCRIPTS_BASE_PATH/bg.png
 
 	cat <<- EOF > "$BUTTON_SCRIPT"
-		#! /usr/bin/env python3
+		#!/usr/bin/env python3
 
 		# "Rules for positioning and sizing floating windows":
 		# https://github.com/baskerville/bspwm/issues/263
@@ -172,7 +176,7 @@ if [ "$ACTIVATE" = 'True' ]; then
   ### BUTTON MOVE SCRIPT ###
 
 	cat <<- EOF > "$BUTTON_MOVE_SCRIPT"
-		#! /usr/bin/env sh
+		#!/usr/bin/env sh
 
 		WINDOW_TO_MOVE="$BUTTON_WINDOW_TITLE"
 
@@ -205,7 +209,7 @@ if [ "$ACTIVATE" = 'True' ]; then
   ### FULLSCREEN TOGGLE SCRIPT ###
 
 	cat <<- EOF > "$FULLSCREEN_TOGGLE_SCRIPT"
-		#! /usr/bin/env sh
+		#!/usr/bin/env sh
 
 		# This script is run by the button.
 

@@ -1,5 +1,11 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Carsten Agger, Marcus Funch, Sebastian Heiberg
+#
 # This script sets printer options in various different ways based on what seems to work.
 # lpadmin makes changes in the PPD of the specified printer
 # lpoptions creates a config file in /etc/cups/lpoptions. It's global for all printers.

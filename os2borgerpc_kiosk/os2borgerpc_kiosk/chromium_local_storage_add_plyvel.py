@@ -1,4 +1,10 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch with credits to Danni Als
 
 import os
 from urllib.parse import urlparse
@@ -7,7 +13,9 @@ from time import sleep
 import sys
 
 if b"kiosk" not in check_output(["get_os2borgerpc_config", "os2_product"]):
-    print("This script is not designed to be run on a a regular OS2borgerPC machine.")
+    print(
+        "This script has not been designed to run on a regular OS2borgerPC machine. Exiting."
+    )
     sys.exit(1)
 
 EXPECTED_ARG_COUNT = 4

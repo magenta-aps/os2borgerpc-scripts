@@ -1,36 +1,23 @@
 #!/bin/bash
 
-#================================================================
-# HEADER
-#================================================================
-#% SYNOPSIS
-#+    apt_periodic_control.sh [false|security|all]
-#+    apt_periodic_control.sh [falsk|sikkerhed|alt]
-#%
-#% DESCRIPTION
-#%    This script controls automatic upgrades and updates.
-#%
-#%    It takes one optional parameter. If this parameter is missing (or if it's
-#%    either "false" or "falsk"), automatic upgrades will be disabled; if it's
-#%    "security" or "sikkerhed", automatic security upgrades will be enabled;
-#%    and if it's anything else, automatic upgrades for all packages will be
-#%    enabled.
-#%
-#================================================================
-#- IMPLEMENTATION
-#-    version         apt_periodic_control.sh (magenta.dk) 1.0.0
-#-    author          Alexander Faithfull
-#-    copyright       Copyright 2019, Magenta ApS
-#-    license         GNU General Public License
-#-    email           af@magenta.dk
-#-
-#================================================================
-#  HISTORY
-#     2019/10/16 : af : Script created
+# SPDX-FileCopyrightText: 2019 Magenta ApS <info@magenta.dk>
 #
-#================================================================
-# END_OF_HEADER
-#================================================================
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Alexander Faithful, Marcus Funch
+#
+# SYNOPSIS
+#    apt_periodic_control.sh [false|security|all]
+#    apt_periodic_control.sh [falsk|sikkerhed|alt]
+#
+# DESCRIPTION
+#    This script controls automatic upgrades and updates.
+#
+#    It takes one optional parameter. If this parameter is missing (or if it's
+#    either "false" or "falsk"), automatic upgrades will be disabled; if it's
+#    "security" or "sikkerhed", automatic security upgrades will be enabled;
+#    and if it's anything else, automatic upgrades for all packages will be
+#    enabled.
 
 set -ex
 
@@ -43,7 +30,7 @@ if [ "$1" != "" ] && [ "$1" != "false" ] && [ "$1" != "falsk" ]; then
 		# Check (quietly) that the unattended-upgrades package is installed, and
 		# install it if it isn't
 		if ! dpkg -s unattended-upgrades > /dev/null 2>&1; then
-			apt-get -y install unattended-upgrades
+			apt-get --assume-yes install unattended-upgrades
 		fi
 
 		# Start building the configuration file with two settings, one for

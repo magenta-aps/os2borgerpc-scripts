@@ -1,7 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2020 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Carsten Agger, Marcus Funch, Søren Howe Gersager, Andreas Poulsen, Louis Nordsø
+#
 # Make Chromium autostart, fx. in preparation for OS2Display.
-
+#
 # Policies:
 # AutofillAddressEnabled: Disable Autofill of addresses
 # AutofillCreditCardEnabled: Disable Autofill of payment methods
@@ -76,7 +82,7 @@ EOF
 mkdir --parents "$(dirname $AUTOLOGIN_SCRIPT)"
 
 cat << EOF > $AUTOLOGIN_SCRIPT
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 COUNTER=\$(cat $AUTOLOGIN_COUNTER)
 COUNTER=\$((COUNTER+1))
 echo \$COUNTER > $AUTOLOGIN_COUNTER

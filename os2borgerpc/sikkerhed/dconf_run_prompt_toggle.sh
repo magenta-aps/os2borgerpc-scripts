@@ -1,11 +1,17 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
-set -x
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   echo "Dette script er ikke designet til at blive anvendt på en kiosk-maskine."
   exit 1
 fi
+
+set -x
 
 ACTIVATE=$1
 
@@ -20,7 +26,7 @@ POLICY_VALUE_NO_BIND="@as []"
 POLICY_FILE="/etc/dconf/db/os2borgerpc.d/05-run-prompt"
 POLICY_LOCK_FILE="/etc/dconf/db/os2borgerpc.d/locks/05-run-prompt"
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
 	cat > "$POLICY_FILE" <<-END
 		[$POLICY_PATH]
 		$POLICY=$POLICY_VALUE_NO_BIND

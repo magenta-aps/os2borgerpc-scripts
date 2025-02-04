@@ -1,4 +1,10 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -24,7 +30,7 @@ Exec=$DUPLICATE_MONITORS_SCRIPT
 EOF
 
   cat << EOF > $DUPLICATE_MONITORS_SCRIPT
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
 # A bit of delay to give the desktop a bit of time to load before trying to do the keybind combination
 # Without it seemed to work less consistently

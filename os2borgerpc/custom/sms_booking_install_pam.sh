@@ -1,8 +1,13 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Andreas Poulsen
+#
 # Arguments:
 #   1: Whether to enable or disable SMS login. 'yes' enables, 'no' disables.
-#
 #
 # You may need to restart for it to take effect.
 
@@ -50,7 +55,7 @@ if grep -q "sms-booking-pam-module" "$LIGHTDM_PAM"; then
   /etc/systemd/system/sms_logout.service /etc/lightdm/greeter-setup-scripts/sms_logout.py
 fi
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
   apt-get update --assume-yes
   if ! apt-get install --assume-yes libpam-python; then
     echo "Error installing dependencies."
@@ -73,7 +78,7 @@ if [ "$ACTIVATE" = 'True' ]; then
 
 # Separated out because the pam module cannot run if you import the admin_client or re
 cat << EOF > $SMS_LOGIN_INTERFACE_PYTHON3
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 
 import sys
 from subprocess import check_output
@@ -153,7 +158,7 @@ EOF
 
 # Separated out because the pam module cannot run if you import the admin_client
 cat << EOF > $LOGIN_FINALIZE_INTERFACE_PYTHON3
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 
 import sys
 from subprocess import check_output
@@ -212,7 +217,7 @@ EOF
 chmod 700 $GREETER_SETUP_SCRIPT
 
 cat << EOF > $LOGOUT_SCRIPT
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 
 from subprocess import check_output
 import os2borgerpc.client.admin_client as admin_client
@@ -267,7 +272,7 @@ EOF
 systemctl enable "$(basename $LOGOUT_SERVICE)"
 
 cat << EOF > $PAM_PYTHON_MODULE
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from subprocess import check_output

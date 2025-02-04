@@ -1,9 +1,15 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Søren Howe Gersager, Marcus Funch, Andreas Poulsen
+#
 # One-off synchronize time with htpdate.
 # Used on instances where NTP ports or NTP synchronization in general are blocked.
 # If possible, we recommend opening up in the firewall for NTP instead.
-
+#
 # This script may cause jobmanager to time out due to changes in the time settings
 
 set -x

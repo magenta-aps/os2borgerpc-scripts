@@ -1,54 +1,36 @@
 #!/usr/bin/env bash
 
-#================================================================
-# HEADER
-#================================================================
-#% SYNOPSIS
-#+    polkit_policy_shutdown.sh [ENFORCE]
-#%
-#% DESCRIPTION
-#%    This script installs a mandatory PolicyKit policy that either prevents
-#%    the "user" or "lightdm" users from suspending the system or
-#%    prevents the "user" or "lightdm" users from suspending, restarting or shutting down
-#%    the system.
-#%
-#%    It takes two optional parameters: whether to prevent suspending the system
-#%    and whether to also prevent restart/shutdown.
-#%    1. Use a boolean to decide whether or not to prevent the "user" from
-#%       suspending the system. A checked box prevents suspend and an
-#%       unchecked box allows it
-#%    2. Use a boolean to decide whether or not to also prevent the "user" from
-#%       restarting/shutting down the system. A checked box prevents
-#%       restart/shutdown and an unchecked box allows it.
-#%       Has no effect if input 1 is unchecked
-#%
-#================================================================
-#- IMPLEMENTATION
-#-    version         polkit_policy_shutdown.sh (magenta.dk) 1.0.0
-#-    author          Alexander Faithfull
-#-    modified by     Andreas Poulsen
-#-    copyright       Copyright 2019, 2020 Magenta ApS
-#-    license         GNU General Public License
-#-    email           af@magenta.dk
-#-
-#================================================================
-#  HISTORY
-#     2019/09/25 : af : dconf_policy_shutdown.sh created
-#     2020/01/27 : af : This script created based on dconf_policy_shutdown.sh
-#     2022/11/01 : ap : This script modified to always disable hibernating/sleeping
-#     2022/12/12 : ap : This script modified to allow separately
-#                       disabling restart/shutdown or hibernating/sleeping
+# SPDX-FileCopyrightText: 2019 Magenta ApS <info@magenta.dk>
 #
-#================================================================
-# END_OF_HEADER
-#================================================================
-
-set -x
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Alexander Faithful, Marcus Funch, Andreas Poulsen
+#
+# SYNOPSIS
+#    polkit_policy_shutdown.sh [ENFORCE]
+#
+# DESCRIPTION
+#    This script installs a mandatory PolicyKit policy that either prevents
+#    the "user" or "lightdm" users from suspending the system or
+#    prevents the "user" or "lightdm" users from suspending, restarting or shutting down
+#    the system.
+#
+#    It takes two optional parameters: whether to prevent suspending the system
+#    and whether to also prevent restart/shutdown.
+#    1. Use a boolean to decide whether or not to prevent the "user" from
+#       suspending the system. A checked box prevents suspend and an
+#       unchecked box allows it
+#    2. Use a boolean to decide whether or not to also prevent the "user" from
+#       restarting/shutting down the system. A checked box prevents
+#       restart/shutdown and an unchecked box allows it.
+#       Has no effect if input 1 is unchecked
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   echo "Dette script er ikke designet til at blive anvendt på en kiosk-maskine."
   exit 1
 fi
+
+set -x
 
 DISABLE_SUSPEND=$1
 DISABLE_POWEROFF_RESTART=$2

@@ -1,37 +1,22 @@
 #!/usr/bin/env python3
 
-"""
-================================================================
- HEADER
-================================================================
-% SYNOPSIS
-+    grub_set_password.py PASSWORD
-%
-% DESCRIPTION
-%    This script locks all GRUB functionality, apart from booting with the
-%    default options of an installed Linux-based operating system, behind the
-%    given password.
-%
-%    It takes one mandatory parameter: the password to use. (The GRUB username
-%    associated with this password will always be "superuser".)
-%
-================================================================
-- IMPLEMENTATION
--    version         grub_set_password.py (magenta.dk) 1.0.0
--    author          Alexander Faithfull
--    copyright       Copyright 2019, Magenta ApS
--                    Portions copyright 2015 Ryan Sawhill Aroha
--    license         GNU General Public License v3+
--    email           af@magenta.dk
--
-================================================================
-  HISTORY
-     2019/10/28 : af : Script created
+# SPDX-FileCopyrightText: 2019 Magenta ApS <info@magenta.dk>, portions copyright 2015 Ryan Sawhill Aroha <rsaw@redhat.com>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Alexander Faithful
+#
+# SYNOPSIS
+#    grub_set_password.py PASSWORD
+#
+# DESCRIPTION
+#    This script locks all GRUB functionality, apart from booting with the
+#    default options of an installed Linux-based operating system, behind the
+#    given password.
+#
+#    It takes one mandatory parameter: the password to use. (The GRUB username
+#    associated with this password will always be "superuser".)
 
-================================================================
- END_OF_HEADER
-================================================================
-"""
 
 from os import chmod, rename, urandom
 from sys import argv, exit
@@ -161,7 +146,7 @@ def main():
                     new.write(line)
         new.write('set superusers="superuser" # OS2borgerPC lockdown\n')
         new.write(
-            "password_pbkdf2 superuser" " {0} # OS2borgerPC lockdown\n".format(encoded)
+            "password_pbkdf2 superuser {0} # OS2borgerPC lockdown\n".format(encoded)
         )
     chmod("/etc/grub.d/40_custom.tmp", 0o700)
     rename("/etc/grub.d/40_custom.tmp", "/etc/grub.d/40_custom")

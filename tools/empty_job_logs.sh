@@ -1,5 +1,11 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # This is useful if a given job has a job log with invalid contents, which it repeatedly tries to send to the server,
 # and thus all jobs end up in an "Afsendt" state.
 # Fx. you get errors like:

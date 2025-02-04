@@ -1,5 +1,11 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch, Andreas Poulsen, Sebastian Heiberg
+#
 # Sets the default browser on a OS2borgerPC for the regular user
 #
 # Arguments:

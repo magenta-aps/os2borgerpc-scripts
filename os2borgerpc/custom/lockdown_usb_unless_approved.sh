@@ -1,5 +1,11 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Andreas Poulsen
+#
 # SYNOPSIS
 #    lockdown_usb_unless_approved.sh [ENFORCE] [APPEND] [UNLOCK]
 #
@@ -32,11 +38,6 @@
 #
 #    Before running this script for the first time, please run lockdown_usb.sh with the
 #    input False, i.e. an unchecked checkbox
-#
-# IMPLEMENTATION
-#    version         lockdown_usb_unless_approved.sh (magenta.dk) 1.0.0
-#    copyright       Copyright 2022 Magenta ApS
-#    license         GNU General Public License
 #
 # TECHNICAL DESCRIPTION
 #    This script registers the currently connected USB devices as pre-approved devices then

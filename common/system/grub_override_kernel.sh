@@ -1,4 +1,10 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch, Andreas Poulsen
 
 OVERRIDE_KERNEL_VERSION="$1"
 REQUESTED_KERNEL_VERSION="$2"  # E.g.: 5.15.0-84-generic

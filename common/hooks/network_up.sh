@@ -1,34 +1,21 @@
 #!/bin/sh
 
-#================================================================
-# HEADER
-#================================================================
-#% SYNOPSIS
-#+    network_up.sh
-#%
-#% DESCRIPTION
-#%    This script installs or removes a pre-checkin hook that instructs
-#%    NetworkManager to bring up all network connections known to the target
-#%    machine.
-#%
-#%    Use a boolean to decide whether to enforce this policy or remove it.
-#%    A checked box enables it, an unchecked box removes the policy.
-#%
-#================================================================
-#- IMPLEMENTATION
-#-    version         network_up.sh (magenta.dk) 1.0.0
-#-    author          Alexander Faithfull
-#-    copyright       Copyright 2021, Magenta ApS
-#-    license         GNU General Public License
-#-    email           af@magenta.dk
-#-
-#================================================================
-#  HISTORY
-#     2021/03/12 : af : Script created
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
 #
-#================================================================
-# END_OF_HEADER
-#================================================================
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Alexander Faithful
+#
+# SYNOPSIS
+#    network_up.sh
+#
+# DESCRIPTION
+#    This script installs or removes a pre-checkin hook that instructs
+#    NetworkManager to bring up all network connections known to the target
+#    machine.
+#
+#    Use a boolean to decide whether to enforce this policy or remove it.
+#    A checked box enables it, an unchecked box removes the policy.
 
 set -x
 
@@ -36,7 +23,7 @@ if [ ! -f "/usr/local/bin/jobmanager.real" ]; then
     echo "This machine does not have jobmanager hook support"
     exit 1
 fi
-mkdir -p /etc/os2borgerpc/pre-checkin.d /etc/os2borgerpc/post-checkin.d
+mkdir --parents /etc/os2borgerpc/pre-checkin.d /etc/os2borgerpc/post-checkin.d
 
 HOOKS="/etc/os2borgerpc/pre-checkin.d/network_up.sh"
 
@@ -67,5 +54,5 @@ esac
 END
     chmod +x $HOOKS
 else
-    rm -f $HOOKS
+    rm --force $HOOKS
 fi

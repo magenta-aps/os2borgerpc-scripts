@@ -1,12 +1,18 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # Create a persistent directory in the user's home directory
 # Logout or restart to take effect
 #
 # Arguments
-#   1: Whether to add or remove the shared dir
+#   1. Whether to add or remove the shared dir
 #      'True' adds, 'False' removes
-#   2: The name of the shared dir to add or remove
+#   2. The name of the shared dir to add or remove
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   echo "Dette script er ikke designet til at blive anvendt på en kiosk-maskine."

@@ -1,5 +1,11 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Søren Howe Gersager Marcus Funch, Andreas Poulsen
+#
 # SYNOPSIS
 #    lockdown_usb.sh [ENFORCE]
 #
@@ -16,11 +22,6 @@
 #
 #    For use with the "unexpire_user.sh" and
 #    "detect_user_expired_event.py" script
-#
-# IMPLEMENTATION
-#    version         lockdown_usb.sh (magenta.dk) 1.0.0
-#    copyright       Copyright 2022 Magenta ApS
-#    license         GNU General Public License
 #
 # TECHNICAL NOTES
 #    This scripts creates and starts "os2borgerpc-monitor.service" which runs the script "usb-monitor" as a daemon.

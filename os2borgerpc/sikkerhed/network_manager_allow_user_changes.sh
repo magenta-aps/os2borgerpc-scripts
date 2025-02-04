@@ -1,12 +1,16 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch, Andreas Poulsen
+#
 # Allows any user to manage network manager
 #
 # Arguments
 #   1: Whether to enable or disable user access to modifying Network Manager settings
 #      'True' enables, 'False' disables
-#
-# Author: mfm@magenta.dk
 
 ACTIVATE="$1"
 
@@ -38,7 +42,7 @@ else # 20.04 and 22.04 support
   sed --in-place '/unix-group:user/{ n; n; n; n; s/ResultActive=yes/ResultActive=no/ }' $NM_POLKIT_LEGACY
 fi
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
   if [ -f $NM_POLKIT ]; then # 24.04 support
     sed --in-place 's/var users =.*/var users = ["gdm", "lightdm"]/' $NM_POLKIT
   else

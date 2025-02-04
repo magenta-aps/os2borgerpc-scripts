@@ -1,5 +1,11 @@
 #!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Emil Nordahn Andersen, Marcus Funch, Andreas Poulsen
+#
 # DESCRIPTION
 # This script either copies a given installed .desktop file to the autostart directory
 # or removes a given file from the autostart directory.

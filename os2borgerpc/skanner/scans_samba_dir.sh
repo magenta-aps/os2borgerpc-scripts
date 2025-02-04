@@ -1,5 +1,11 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # Test it like this, preferably from another machine:
 # smbclient '\\<IP_ADDRESS_HERE>\<SHARE_NAME>' -U <USER>
 # ...so more specifically:
@@ -24,11 +30,11 @@ OUR_USER="user"
 SAMBA_USER="samba"
 
 if [ "$ACTIVATE" != "True" ]; then
-	apt-get purge --assume-yes samba samba-common-bin
-	rm --recursive "$SCAN_DIRECTORY_SOURCE"
-	userdel $SAMBA_USER
-	groupdel $SAMBA_USER
-	exit 0
+  apt-get purge --assume-yes samba samba-common-bin
+  rm --recursive "$SCAN_DIRECTORY_SOURCE"
+  userdel $SAMBA_USER
+  groupdel $SAMBA_USER
+  exit 0
 fi
 
 # A provided password is required when activating this script

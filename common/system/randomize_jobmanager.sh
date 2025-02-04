@@ -1,31 +1,19 @@
 #!/usr/bin/env bash
-#================================================================
-# HEADER
-#================================================================
-#% SYNOPSIS
-#+    randomize_jobmanager args $(interval in minutes)
-#%
-#% DESCRIPTION
-#%    This script sets the cron.d/os2borgerpc_jobmanager job to execute
-#%    at a random startup time with a certain interval.
-#%    So if the interval is 5 minutes, the jobmanager could run at
-#%    1, 6, 11...56 every hour, instead of 0, 5, 10 ...55.
-#%
-#================================================================
-#- IMPLEMENTATION
-#-    version         randomize_jobmanager (magenta.dk) 0.0.1
-#-    author          Danni Als
-#-    copyright       Copyright 2018, Magenta Aps"
-#-    license         GNU General Public License
-#-    email           danni@magenta-aps.dk
-#-
-#================================================================
-#  HISTORY
-#     2018/15/02 : danni : Script creation
+
+# SPDX-FileCopyrightText: 2018 Magenta ApS <info@magenta.dk>
 #
-#================================================================
-# END_OF_HEADER
-#================================================================
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Danni Als, Carsten Agger, Marcus Funch, Andreas Poulsen
+#
+# SYNOPSIS
+#    randomize_jobmanager args $(interval in minutes)
+#
+# DESCRIPTION
+#    This script sets the cron.d/os2borgerpc_jobmanager job to execute
+#    at a random startup time with a certain interval.
+#    So if the interval is 5 minutes, the jobmanager could run at
+#    1, 6, 11...56 every hour, instead of 0, 5, 10 ...55.
 
 INTERVAL=$1
 

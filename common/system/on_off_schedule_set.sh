@@ -1,5 +1,11 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Andreas Poulsen
+#
 # SYNOPSIS
 #    on_off_schedule_set.sh PLAN MODE
 #
@@ -15,11 +21,6 @@
 #    The desired rtcwake mode should be represented by a string.
 #
 #    For use with the "on_off_schedule_remove.sh" script
-#
-# IMPLEMENTATION
-#    version         on_off_schedule_set.sh (magenta.dk) 1.0.0
-#    copyright       Copyright 2022 Magenta ApS
-#    license         GNU General Public License
 #
 # TECHNICAL DESCRIPTION
 #    This script creates and starts "os2borgerpc-set_on-off_schedule.service"

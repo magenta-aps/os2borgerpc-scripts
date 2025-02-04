@@ -1,21 +1,25 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # DESCRIPTION:
-# This script installs, sets up and enables a wm (bspwm)
-# and an on-screen keyboard (onboard).
-# Intended for OS2borgerPC Kiosk.
+#   This script installs, sets up and enables a wm (bspwm)
+#   and an on-screen keyboard (onboard).
+#   Intended for OS2borgerPC Kiosk.
 #
 # ARGUMENTS:
-# 1: Whether to install / uninstall the wm + onscreen keyboard
+#   1. Whether to install / uninstall the wm + onscreen keyboard
 #
 # PREREQUISITES:
-# 1. OS2borgerPC Kiosk - Installer Chromium
-# 2. OS2borgerPC Kiosk - Autostart Chromium
+#   1. OS2borgerPC Kiosk - Installer Chromium
+#   2. OS2borgerPC Kiosk - Autostart Chromium
 #
 # Would like to skip installing sxhkd but it's not trivial to do as it's
 # classified as a "required dependency" for bspwm
-#
-# AUTHOR: mfm@magenta.dk
 
 set -ex
 
@@ -36,7 +40,7 @@ ONBOARD_OPTIONS="--theme=/usr/share/onboard/themes/HighContrast.theme --layout /
 # For apt installations/removals
 export DEBIAN_FRONTEND=noninteractive
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
 
   # Keyboard options: onboard (~100 mb incl. dependencies?), xvkbd (almost no
   # dependencies), florence (~500 mb incl. dependencies?!),
@@ -59,7 +63,7 @@ if [ "$ACTIVATE" = 'True' ]; then
 
   # Configure bspwm
 cat << EOF > .config/bspwm/bspwmrc
-#! /bin/sh
+#!/bin/sh
 
 bspc monitor -d I
 

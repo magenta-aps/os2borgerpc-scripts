@@ -1,7 +1,12 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch, Emil Nordahn Andersen, Andreas Poulsen
 
 # Adds/Removes programs from the desktop in Ubuntu 20.04
-# Author: mfm@magenta.dk
 #
 # This script has been updated to automatically detect the name of
 # the 'Desktop' directory in the chosen locale.
@@ -34,13 +39,9 @@ SHADOW_DESKTOP="/home/.skjult/$DESKTOP"
 SNAP_DESKTOP_FILE_PATH="/var/lib/snapd/desktop/applications"
 APT_DESKTOP_FILE_PATH="/usr/share/applications"
 
-# TODO?: Make it replace all desktop icons which are copies with symlinks?
-
 mkdir --parents "$SHADOW_DESKTOP"
 
-# They can type in chrome, but the desktop file is called google-chrome
-# They can type in edge, but the desktop file is called microsoft-edge
-# They can also type in okular, but the desktop file is called okularApplication_kimgio
+# Mapping more human friendly inputted program name to desktop file name
 if [ "$PROGRAM" = "chrome" ]; then
   PROGRAM="google-chrome"
 elif [ "$PROGRAM" = "edge" ]; then
@@ -49,7 +50,7 @@ elif [ "$PROGRAM" = "okular" ]; then
   PROGRAM="okularApplication_kimgio"
 fi
 
-if [ "$ADD" = 'True' ]; then
+if [ "$ADD" = "True" ]; then
   if [ -f "$SNAP_DESKTOP_FILE_PATH/${PROGRAM}_$PROGRAM.desktop" ]; then
     ORIGINAL_FILE=$SNAP_DESKTOP_FILE_PATH/${PROGRAM}_$PROGRAM.desktop
   else

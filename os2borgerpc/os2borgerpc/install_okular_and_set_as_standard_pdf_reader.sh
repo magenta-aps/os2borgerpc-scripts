@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Carsten Agger, Heini Leander Ovason, Marcus Funch
+
 ENABLE=$1
 
 set -x

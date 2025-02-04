@@ -1,5 +1,11 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # SYNOPSIS
 #    dconf_keyboard_layout.sh [ENFORCE]
 #
@@ -9,10 +15,6 @@
 #
 #    Use a boolean to decide whether to enforce or not. An unchecked box will
 #    remove the policy and a checked one will enforce it.
-#
-# IMPLEMENTATION
-#    copyright       Copyright 2022, Magenta ApS
-#    license         GNU General Public License
 
 set -x
 
@@ -37,7 +39,7 @@ POLICY_VALUE="[('xkb','$DEFAULT_LANGUAGE'),('xkb','$LANGUAGE_TO_ADD')]"
 POLICY_FILE="/etc/dconf/db/os2borgerpc.d/00-keyboard-layout"
 POLICY_LOCK_FILE="/etc/dconf/db/os2borgerpc.d/locks/00-keyboard-layout"
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
 
 	cat > "$POLICY_FILE" <<-END
 		[$POLICY_PATH]

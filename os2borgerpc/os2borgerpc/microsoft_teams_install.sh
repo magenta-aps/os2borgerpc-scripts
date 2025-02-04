@@ -1,4 +1,10 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2022 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Heini Leander Ovason
 
 ACTIVATE=$1
 FILE=$2
@@ -8,7 +14,7 @@ if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   exit 1
 fi
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
   echo "##### Attempting to install Microsoft Teams #####"
   apt-get update --assume-yes
   apt-get install --fix-broken "$FILE" --assume-yes

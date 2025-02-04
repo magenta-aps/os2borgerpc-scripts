@@ -1,4 +1,10 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2021 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch, Emil Nordahn Andersen
 #
 # SYNOPSIS
 #    dconf_policy_print_notifications.sh [ENFORCE]
@@ -10,10 +16,6 @@
 #    It takes one optional parameter: whether or not to enforce this policy.
 #    Use a boolean to decide whether or not to enforce this policy, a checked box
 #    will enable the script, an unchecked box will remove it.
-#
-# IMPLEMENTATION
-#    copyright       Copyright 2022, Magenta ApS
-#    license         GNU General Public License
 
 set -x
 
@@ -26,7 +28,7 @@ POLICY_LOCK_FILE="/etc/dconf/db/os2borgerpc.d/locks/00-$POLICY"
 
 ACTIVATE=$1
 
-if [ "$ACTIVATE" = 'True' ]; then
+if [ "$ACTIVATE" = "True" ]; then
 	# Alternately disable notifications for print completely:
 	# enable=false
 	cat > "$POLICY_FILE" <<- END

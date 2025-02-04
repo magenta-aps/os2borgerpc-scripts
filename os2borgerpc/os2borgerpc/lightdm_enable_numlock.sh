@@ -1,13 +1,19 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
-# DESCRIPTION
-# Requires "lightdm_greeter_setup_scripts" to be run and enabled to take effect.
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
-# This script will install numlockx and enable it when the pc reaches the login screen.
-# Any changes made requires a reboot to take effect.
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
-# PARAMETERS
-# 1. Checkbox. Enables or disables numlock
+# SPDX-FileContributor: Emil Nordahn Andersen, Marcus Funch, Andreas Poulsen
+#
+# Description
+#   Requires "lightdm_greeter_setup_scripts" to be run and enabled to take effect.
+#
+#   This script will install numlockx and enable it when the pc reaches the login screen.
+#   Any changes made requires a reboot to take effect.
+#
+# Arguments:
+#   1. Checkbox. Enables or disables numlock
 
 set -ex
 

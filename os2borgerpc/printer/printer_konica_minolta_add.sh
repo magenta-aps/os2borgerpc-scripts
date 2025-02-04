@@ -1,5 +1,11 @@
 #!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # A script intended to be able to install arbitrary Konica Minolta printers from the KMbeuUX files that can be downloaded from their website, under a given printer model
 
 # lpadmin doesn't like spaces

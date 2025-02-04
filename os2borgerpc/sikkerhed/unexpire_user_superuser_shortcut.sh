@@ -1,4 +1,10 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
+
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
 
 SUPERUSER="superuser"
 CITIZEN="user"
@@ -20,6 +26,6 @@ EOF
 chown $SUPERUSER:$SUPERUSER "$SHORTCUT_PATH"
 
 runuser -u $SUPERUSER dbus-launch gio set "$SHORTCUT_PATH" metadata::trusted true
-# Updating the timestamp of the file so gio realizes its changed. We've tried touch for this, but sometimes, strangely,
-# that hasn't been enough
+# Updating the timestamp of the file so gio realizes its changed.
+# We've tried touch for this, but sometimes, strangely, that hasn't been enough
 chmod u+x,go-rwx "$SHORTCUT_PATH"

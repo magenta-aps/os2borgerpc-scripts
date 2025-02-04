@@ -1,8 +1,14 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # This script is written based off the following guide:
 # https://learn.microsoft.com/en-us/mem/intune/user-help/microsoft-intune-app-linux
-
+#
 # Because it adds a repo it's currently hardcoded to specific Ubuntu versions!: 22.04 and 24.04
 
 export DEBIAN_FRONTEND=noninteractive

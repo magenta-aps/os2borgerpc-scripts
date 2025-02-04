@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2017 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Danni Als, Carsten Agger, Marcus Funch, Søren Howe Gersager, Andreas Poulsen
+
 """An example of how to write a security script, useful for testing that the security system works."""
 
 from datetime import datetime

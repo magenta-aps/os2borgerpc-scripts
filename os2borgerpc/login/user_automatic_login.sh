@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2013 Magenta ApS <info@magenta.dk>
 #
-#   Takes two boolean parameters.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Carsten Agger, Marcus Funch
+#
+#   Arguments - both booleans:
 #     1. True will enable automatic login while an unchecked one will disable it.
 #     2. If the first argument is True, this determines if OUR_USER is required to type in their password or not.
 

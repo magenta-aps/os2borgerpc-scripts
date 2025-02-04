@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2019 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Alexander Faithfull, Marcus Funch, Andreas Poulsen
+#
 # SYNOPSIS
 #    chrome_policy_homepage.sh [URL]
 #
@@ -15,13 +21,6 @@
 #    It takes one optional parameter: the URL to set as the homepage. If
 #    this parameter is missing or empty, the existing policy will be
 #    deleted, if there is one.
-#
-# IMPLEMENTATION
-#    version         chrome_policy_homepage.sh (magenta.dk) 1.0.0
-#    author          Alexander Faithfull
-#    copyright       Copyright 2019, Magenta ApS
-#    license         GNU General Public License
-#    email           af@magenta.dk
 #
 # DEVELOPER NOTES
 #    The policies we set and why:

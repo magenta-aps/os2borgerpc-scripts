@@ -1,7 +1,13 @@
 #!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2019 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Alexander Faithful, Marcus Funch
+
 # SYNOPSIS
-#    dconf_policy_desktop.sh [FILE] [PICTURE_OPTION]
+#    dconf_policy_desktop_background.sh [FILE] [PICTURE_OPTION]
 #
 # DESCRIPTION
 #    This script changes and locks the desktop background for all users on the
@@ -11,10 +17,6 @@
 #    1. The path to the desktop background.
 #    2. Picture options. The default in GNOME is "zoom".
 #       Other picture options are: zoom, centered, stretched, spanned, wallpaper, scaled, none
-#
-# IMPLEMENTATION
-#    copyright       Magenta ApS
-#    license         GNU General Public License
 
 set -x
 

@@ -1,12 +1,16 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2017 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Danni Als, Carsten Agger, Marcus Funch, Heini Leander Ovason, Andreas Poulsen
+#
 # This script:
 # 1. Installs google-chrome
 # 2. Adds assorted policies listed below
 # 3. Adds a launch option that prevents it
 #    from checking for updates and showing it's out of date to whoever
-
-# Authors: Carsten Agger, Heini Leander Ovason, Marcus Funch Mogensen
 
 set -ex
 

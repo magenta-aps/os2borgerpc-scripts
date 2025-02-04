@@ -1,8 +1,14 @@
 #!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Marcus Funch
+#
 # This installs inkscape and it adds a custom preferences file.
 # The script was essentially created because the default preferences results in a three step welcome screen which would reset after each login, which might be a bit annoying on public computers
-
+#
 # A note on this config in case the format changes and it needs to be recreated in here:
 # The config below has been created by starting inkscape, ticking a checkbox that the welcome screen shouldn't be shown again, and then taking the contents of its preferences file and sticking it in here.
 # In other words it's just the default preferences except that single change

@@ -1,29 +1,17 @@
 #!/usr/bin/env bash
-#================================================================
-# HEADER
-#================================================================
-#% SYNOPSIS
-#+    kiosk_lts_upgrade_in_place_step_4.sh
-#%
-#% DESCRIPTION
-#%    Step four of the upgrade from 20.04 to 22.04.
-#%    Designed for Kiosk machines
-#%
-#================================================================
-#- IMPLEMENTATION
-#-    version         kiosk_lts_upgrade_in_place_step_4.sh 0.0.1
-#-    author          Andreas Poulsen
-#-    copyright       Copyright 2023, Magenta Aps
-#-    license         BSD/MIT
-#-    email           info@magenta.dk
-#-
-#================================================================
-#  HISTORY
-#     2023/02/01 : ap : Script creation
+
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
-#================================================================
-# END_OF_HEADER
-#================================================================
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Andreas Poulsen
+#
+# SYNOPSIS
+#    kiosk_lts_upgrade_in_place_step_4.sh
+#
+# DESCRIPTION
+#    Step four of the upgrade from 20.04 to 22.04.
+#    Designed for Kiosk machines
 
 set -ex
 
@@ -57,13 +45,13 @@ apt-get --assume-yes autoremove
 # Set danish timezone and language
 timedatectl set-timezone Europe/Copenhagen
 dpkg-reconfigure -f noninteractive tzdata
-sed -i 's/# \(da_DK.UTF-8 UTF-8\)/\1/'  /etc/locale.gen
+sed --in-place 's/# \(da_DK.UTF-8 UTF-8\)/\1/'  /etc/locale.gen
 dpkg-reconfigure --frontend=noninteractive locales
 update-locale LANG=da_DK.UTF-8
 
 # Update the time accordingly
 export DEBIAN_FRONTEND=noninteractive
-apt-get install -y ntpdate
+apt-get install --assume-yes ntpdate
 ntpdate pool.ntp.org
 
 # Setup Chromium user

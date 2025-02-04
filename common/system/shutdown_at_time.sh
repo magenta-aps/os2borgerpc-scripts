@@ -1,5 +1,11 @@
 #!/usr/bin/env sh
 
+# SPDX-FileCopyrightText: 2018 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Danni Als, Marcus Funch, Andreas Poulsen
+#
 # SYNOPSIS
 #    shutdown_at_time.sh <activate> <hours> <minutes>
 #
@@ -10,11 +16,6 @@
 #    as specified by the <hours> and <minutes> parameters. Thus, any line in
 #    crontab already specifying a shutdown will be deleted before a new one is
 #    inserted.
-#
-# IMPLEMENTATION
-#    author          Danni Als
-#    copyright       Copyright 2018, Magenta Aps"
-#    license         GNU General Public License
 
 set -x
 
