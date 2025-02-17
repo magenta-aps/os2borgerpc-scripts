@@ -30,7 +30,6 @@ Below `os2borgerpc` we have the following categories
 | ------------- | ---------------------------------------------------------------------------|
 | bluetooth     | Related to bluetooth                                                       |
 | browser       | Related to assorted web browsers                                           |
-| custom        | Local scripts for customers                                                |
 | desktop       | Desktop related scripts                                                    |
 | libreoffice   | Related to LibreOffice                                                     |
 | login         | Related to login                                                           |
@@ -43,7 +42,6 @@ Below `os2borgerpc_kiosk` we have the following categories
 
 | Category          | Description                                                                |
 | ------------------| ---------------------------------------------------------------------------|
-| custom            | Local scripts for customers                                                |
 | os2borgerpc_kiosk | Uncategorized scripts that are only designed to work on OS2borgerPC Kiosk  |
 
 ## Final remarks
