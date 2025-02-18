@@ -19,6 +19,7 @@ Below `common` we have the following categories
 | ------------------| ------------------------------------------------------------------------------------------|
 | hooks             | Scripts that add hooks to jobmanager                                                      |
 | lyd               | Related to sound                                                                          |
+| printer           | Scripts for printing (OS2borgerPC and OS2borgerPC Kiosk)                                  |
 | security          | Security scripts                                                                          |
 | sikkerhed         | Scripts that enhance or weaken security (OS2borgerPC and OS2borgerPC Kiosk)               |
 | system            | Uncategorized scripts that work on Ubuntu generally (OS2borgerPC and OS2borgerPC Kiosk)   |
@@ -34,7 +35,7 @@ Below `os2borgerpc` we have the following categories
 | libreoffice   | Related to LibreOffice                                                     |
 | login         | Related to login                                                           |
 | os2borgerpc   | Uncategorized scripts that are only designed to work on OS2BorgerPC        |
-| printer       | Related to printing                                                        |
+| printer       | Scripts for printing that are only designed for BorgerPC                   |
 | skanner       | Related to scanning                                                        |
 | sikkerhed     | Scripts that enhance or weaken security (OS2borgerPC only)                 |
 
