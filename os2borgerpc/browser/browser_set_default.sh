@@ -46,11 +46,10 @@ if [ ! -f "$FILE" ]; then
 EOF
 fi
 # Cleanup the file to prevent duplicate lines
-sed -i "\@text/html\|application/xhtml+xml\|x-scheme-handler/http\|x-scheme-handler/https@d" $FILE
+sed --in-place "\@text/html\|application/xhtml+xml\|x-scheme-handler/http\|x-scheme-handler/https@d" $FILE
 # Now set the new default:
-cat << EOF >> $FILE
-application/xhtml+xml=$DESKTOP_FILE
-text/html=$DESKTOP_FILE
-x-scheme-handler/http=$DESKTOP_FILE
-x-scheme-handler/https=$DESKTOP_FILE
-EOF
+sed --in-place "/Default Applications/a \
+application/xhtml+xml=$DESKTOP_FILE\n\
+text/html=$DESKTOP_FILE\n\
+x-scheme-handler/http=$DESKTOP_FILE\n\
+x-scheme-handler/https=$DESKTOP_FILE" $FILE

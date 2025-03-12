@@ -35,6 +35,13 @@ POLICY_DIR="/etc/firefox/policies"
 POLICY_FILE="$POLICY_DIR/policies.json"
 GLOBAL_MIME_FILE="/etc/xdg/mimeapps.list"
 
+PDF_TYPE_1=application/pdf
+PDF_TYPE_2=application/x-bzpdf
+PDF_TYPE_3=application/x-gzpdf
+PDF_TYPE_4=application/x-lzpdf
+PDF_TYPE_5=application/x-xzpdf
+PROGRAMS_TO_REMOVE="libreoffice-draw.desktop;google-chrome.desktop;microsoft-edge.desktop;chromium_chromium.desktop;firefox_firefox.desktop"
+
 if [ -z "$STARTPAGE" ]; then
   echo "WARNING: Missing <URL> argument. Unable to set Firefox startpage."
   exit 1
@@ -121,18 +128,19 @@ cat << EOF > "$POLICY_FILE"
 }
 EOF
 
+# Make sure the mime file exists
+if [ ! -f $GLOBAL_MIME_FILE ]; then
+	cat <<- EOF > $GLOBAL_MIME_FILE
+[Default Applications]
+EOF
+fi
+
 # Force Okular OR Evince to be the only PDF applications listed for the PDF filetypes,
 # to prevent programs like firefox from making gnome-desktop-portal prompt for which application to open the PDF with, when Firefox is set to use the external PDF reader
 # The contents of this section is shared by the firefox and okular scripts
-# Ideally crudini could create these sections and be idempotent about it, but it seems it doesn't have that feature
 if ! grep "Removed Associations" $GLOBAL_MIME_FILE; then
 	cat <<- EOF >> "$GLOBAL_MIME_FILE"
 		[Removed Associations]
-	EOF
-fi
-if ! grep "$PDF_TYPE_1=$PROGRAMS_TO_REMOVE" $GLOBAL_MIME_FILE; then
-  PROGRAMS_TO_REMOVE="libreoffice-draw.desktop;google-chrome.desktop;microsoft-edge.desktop;chromium_chromium.desktop;firefox_firefox.desktop"
-	cat <<- EOF >> "$GLOBAL_MIME_FILE"
 		$PDF_TYPE_1=$PROGRAMS_TO_REMOVE
 		$PDF_TYPE_2=$PROGRAMS_TO_REMOVE
 		$PDF_TYPE_3=$PROGRAMS_TO_REMOVE
