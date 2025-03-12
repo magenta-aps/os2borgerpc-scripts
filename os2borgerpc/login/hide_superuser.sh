@@ -12,6 +12,7 @@
 # Hence we change it in the AccountService config instead.
 #
 # Reboot or run "systemctl restart lightdm" (which logs you out immediately) for it to take effect.
+# In the case of GDM, the change takes effect after the next logout
 
 HIDE_SUPERUSER=$1
 SHOW_CUSTOM_LOGIN_FIELD=$2
@@ -24,6 +25,7 @@ fi
 CHOSEN_USER="superuser"
 ACCOUNT_SERVICE_SUPERUSER="/var/lib/AccountsService/users/$CHOSEN_USER"
 LIGHTDM_CONFIG="/etc/lightdm/lightdm.conf"
+DEFAULT_DM_FILE="/etc/X11/default-display-manager"
 
 if [ "$HIDE_SUPERUSER" = "True" ]; then
   FROM="false"
@@ -34,6 +36,15 @@ else
 fi
 
 sed --in-place "s/SystemAccount=$FROM/SystemAccount=$TO/" $ACCOUNT_SERVICE_SUPERUSER
+
+# GDM does not support an optional custom login field in the same way as lightdm
+# Instead, GDM will always show the line "Not listed?" below the users, which can
+# be clicked to open a custom login field. It does not seem to be possible to
+# disable this, so if the computer is using GDM, we simply exit here to prevent
+# errors related to missing lightdm files.
+if grep --quiet gdm3 $DEFAULT_DM_FILE; then
+  exit 0
+fi
 
 if [ "$SHOW_CUSTOM_LOGIN_FIELD" = "True" ]; then
 
