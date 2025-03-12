@@ -47,8 +47,16 @@ if [ "$ACTIVATE" = "True" ]; then
   # gnome onscreen keyboard, carabou
   # TODO: language-pack-da is now in install_dependencies.sh but older installs
   # ran a previous version of that, so keeping it here too
+  # dbus-x11 is needed to set a setting required to make the onboard keyboard
+  # work on 24.04, and is not installed by default on 24.04
   apt-get update
-  apt-get install -y language-pack-da bspwm onboard lemonbar- dmenu-
+  apt-get install -y language-pack-da bspwm onboard lemonbar- dmenu- dbus-x11
+ 
+
+  # We experienced a bug when running the script on 24.04, where the keyboard would appear 
+  # but crash when trying to interact with it. We have at the moment not found any other solution, 
+  # than switching to GTK. Setting input source to GTK does not cause problems on 22.04.
+  runuser -u $USER dbus-launch gsettings set org.onboard.keyboard input-event-source 'GTK'
 
   cd /home/$USER || exit 1
   # Make the directory for the config
