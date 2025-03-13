@@ -23,11 +23,11 @@ POLICY_FILE="/etc/dconf/db/os2borgerpc.d/00-$POLICY"
 PAPER_SIZE_NAME=$1
 
 # DPI for photos. Default is 300
-# Value must be 75, 150, 200, 300, 600, 1200 or 2400.
+# Value must be: 75, 150, 200, 300, 600, 1200 or 2400
 PHOTO_DPI=${2:-300}
 
 # DPI for text. Default is 150
-# Value must be 75, 150, 200, 300, 600, 1200 or 2400.
+# Value must be: 75, 150, 200, 300, 600, 1200 or 2400
 TEXT_DPI=${3:-150}
 
 # Brightness level for scanning. Default is 0
@@ -37,6 +37,10 @@ BRIGHTNESS=${4:-0}
 # Contrast level for scanning. Default is 0
 # Value must be between -100 and 100
 CONTRAST=${5:-0}
+
+# The document type. Default is photo
+# Value must be: text, photo
+DOCUMENT_TYPE=${6:-photo}
 
 # A page is defined as height and width instead of A4 or A3 ect.
 # Convert paper size names to width and height
@@ -78,6 +82,7 @@ cat > "$POLICY_FILE" <<- END
 	text-dpi=$TEXT_DPI
 	brightness=$BRIGHTNESS
 	contrast=$CONTRAST
+	document-type='$DOCUMENT_TYPE'
 END
 
 # Incorporate all of the text files we've just created into the system's dconf databases
