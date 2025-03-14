@@ -15,12 +15,15 @@ ALLOW_PASSWORD_MANAGER="$1"
 
 POLICY_FILE="/etc/opt/chrome/policies/managed/os2borgerpc-defaults.json"
 POLICY="PasswordManagerEnabled"
+POLICY2="ForceEphemeralProfiles"
 
 set -x
 
 if [ "$ALLOW_PASSWORD_MANAGER" = "True" ]; then
   sed --in-place "/$POLICY/d" $POLICY_FILE
+  sed --in-place "s/\"$POLICY2\": true,/\"$POLICY2\": false,/" $POLICY_FILE
 else
+  sed --in-place "s/\"$POLICY2\": false,/\"$POLICY2\": true,/" $POLICY_FILE
   # Idempotency check
   if ! grep "$POLICY" $POLICY_FILE; then
     sed --in-place "/MetricsReportingEnabled/a\ \ \ \ \"$POLICY\": false," $POLICY_FILE
