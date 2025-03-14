@@ -38,7 +38,8 @@ DRIVER_DESTINATION_PATH="$CUPS_DRIVER_DIR/$SELECTED_DRIVER"
 
 cd "$(dirname "$DRIVER_PACKAGE_PATH")"
 DRIVER_PACKAGE_FILE=$(basename "$DRIVER_PACKAGE_PATH")
-tar xzvf "$DRIVER_PACKAGE_FILE"
+# We've experienced that apparently tar.gz may get uncompressed during the transfer to the PC - hence we handle both here
+tar xzvf "$DRIVER_PACKAGE_FILE" || tar xvf "$DRIVER_PACKAGE_FILE"
 DRIVER_SOURCE_DIR="$(find . -mindepth 1 -type d)"
 
 # Copy the the driver/PPD to a dir that CUPS reads
