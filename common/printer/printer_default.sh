@@ -12,4 +12,13 @@ if [ $# -ne 1 ]; then
     exit 1
 fi
 
-lpadmin -d "$1" && lpstat -d
+if ! lpadmin -d "$1"; then
+    echo "It appears there was an error setting the default printer via lpadmin"
+fi
+
+if ! lpoptions -d "$1"; then
+    echo "It appears there was an error setting the default printer via lpoptions"
+fi
+
+# Show the current default printer:
+lpstat -d

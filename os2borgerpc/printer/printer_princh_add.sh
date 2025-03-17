@@ -33,7 +33,12 @@ if which princh-setup > /dev/null; then
    princh-setup add --name "$NAME" --device-id "$PRINCH_ID" --driver iso --description "$DESCRIPTION" $DEFAULT_MAYBE
    # Finally additionally set the location on the newly added printer
    lpadmin -p "$NAME" -L "$DESCRIPTION"
+   # Also set it as default via lpoptions as otherwise the default isn't respected for all printers
+   lpoptions -d "$NAME"
 else
    echo "Princh is not installed. Please run the script that installs Princh before this one."
    exit 1
 fi
+
+echo "Show the current default printer - for verification:"
+lpstat -d
