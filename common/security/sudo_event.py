@@ -23,13 +23,21 @@ def log_read(last_security_check, log_name):
 
     with open(log_name) as f:
         for line in f.readlines():
-            line = str(line.replace("\0", ""))
-            log_event_timestamp = line[:15]
-            log_event = line.strip("\n")
-            # convert from log event timestamp to security event log timestamp.
-            log_event_datetime = datetime.strptime(
-                str(now.year) + " " + log_event_timestamp, "%Y %b  %d %H:%M:%S"
-            )
+            line = line.replace("\0", "").strip("\n")
+            try:
+                log_event_timestamp = line[:15]
+                log_event = line
+                # convert from log event timestamp to security event log timestamp.
+                log_event_datetime = datetime.strptime(
+                    str(now.year) + " " + log_event_timestamp, "%Y %b  %d %H:%M:%S"
+                )
+            except ValueError:
+                log_event_timestamp = line[:19]
+                log_event = line
+                # convert from log event timestamp to security event log timestamp.
+                log_event_datetime = datetime.strptime(
+                    log_event_timestamp, "%Y-%m-%dT%H:%M:%S"
+                )
             security_event_log_timestamp = datetime.strftime(
                 log_event_datetime, "%Y%m%d%H%M%S"
             )
