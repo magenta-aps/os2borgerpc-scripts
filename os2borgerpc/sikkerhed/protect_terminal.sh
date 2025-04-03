@@ -16,9 +16,8 @@ set -ex
 ACTIVATE=$1
 
 PROGRAM_PATH="/usr/bin/gnome-terminal"
-SKEL=".skjult"
 SHORTCUT_NAME="org.gnome.Terminal.desktop"
-SHORTCUT_GLOBAL_PATH="/usr/share/applications/$SHORTCUT_NAME"
+SKEL=".skjult"
 SHORTCUT_LOCAL_PATH="/home/$SKEL/.local/share/applications/$SHORTCUT_NAME"
 
 # Also remove the gnome extension that can start gnome terminal, don't stop execution if it fails
@@ -34,6 +33,9 @@ if grep --quiet "zenity" "$PROGRAM_PATH"; then
   dpkg-divert --remove --rename "$PROGRAM_PATH"
 fi
 
+# Cleanup after previous script versions: Turns out this is unnecessary to hide the program from users program list
+rm --force $SHORTCUT_LOCAL_PATH
+
 if [ "$ACTIVATE" = "True" ]; then # Restore access
   # Remove the permissions override and manually reset permissions to defaults
   # Suppress error to prevent set -e exiting in case the override no longer exists
@@ -41,13 +43,8 @@ if [ "$ACTIVATE" = "True" ]; then # Restore access
   # statoverride remove can't change permissions and ownership back by itself currently, unfortunately
   chown root:root "$PROGRAM_PATH"
   chmod 755 "$PROGRAM_PATH"
-
-  rm --force $SHORTCUT_LOCAL_PATH
 else # Deny access
   dpkg-statoverride --update --add superuser root 770 "$PROGRAM_PATH" || true
-  # Additionally remove the program from Borgers program list for UX/cosmetic reasons (rather than security)
-  mkdir --parents "$(dirname $SHORTCUT_LOCAL_PATH)"
-  install --mode o-r $SHORTCUT_GLOBAL_PATH $SHORTCUT_LOCAL_PATH
 fi
 
 # For manual verification that there are no related diversions, but possibly a statoverride:
