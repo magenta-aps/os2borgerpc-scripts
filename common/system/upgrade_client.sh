@@ -4,8 +4,12 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# SPDX-FileContributor: Danni Als
+# SPDX-FileContributor: Danni Als, Andreas Poulsen
 
 set -ex
 
-pip3 install --upgrade os2borgerpc-client
+if [ -d "/root/.local/share/pipx/venvs/os2borgerpc-client" ]; then
+  pipx upgrade os2borgerpc-client
+else
+  pip3 install --upgrade os2borgerpc-client
+fi

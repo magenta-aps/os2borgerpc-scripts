@@ -8,4 +8,8 @@
 
 set -ex
 
-pip3 install --upgrade --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ os2borgerpc-client
+if [ -d "/root/.local/share/pipx/venvs/os2borgerpc-client" ]; then
+  pipx upgrade --index-url https://test.pypi.org/simple/ os2borgerpc-client
+else
+  pip3 install --upgrade --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ os2borgerpc-client
+fi
