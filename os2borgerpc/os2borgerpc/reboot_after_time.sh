@@ -16,6 +16,8 @@ fi
 
 TIME=$1
 
+OUR_USER="user"
+
 dpkg -l at > /dev/null 2>&1
 HAS_AT=$?
 
@@ -27,7 +29,11 @@ fi
 
 if [ "$TIME" -ge 5 ]; then
   TM5=$(( TIME - 5))
-  echo 'DISPLAY=:0.0 XAUTHORITY=/home/user/.Xauthority /usr/bin/zenity --warning --text="Computeren lukkes ned om fem minutter"' > /tmp/notify
+  cat << EOF > /tmp/notify
+export DISPLAY=\$(who | grep -w '$OUR_USER' | sed -rn 's/.*\((:[0-9]*)\).*/\1/p')
+
+/usr/sbin/runuser -u $OUR_USER -- /usr/bin/zenity --warning --text="Computeren lukkes ned om fem minutter"
+EOF
   at -f /tmp/notify now + $TM5 min
 fi
 
