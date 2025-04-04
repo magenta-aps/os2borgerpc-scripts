@@ -75,15 +75,9 @@ fi
 LOGOUT_TIME_MS=$(( LOGOUT_TIME_MINS * 60 * 1000 ))
 DIALOG_TIME_MS=$(( DIALOG_TIME_MINS * 60 * 1000 ))
 
-RELEASE=$(lsb_release --short --release)
-if [ "$RELEASE" = "20.04" ] || [ "$RELEASE" = "22.04" ]; then
-  # This setting is required on 22.04 and earlier, but invalid in 24.04
-  ZENITY_DISPLAY="--display=\$USER_DISPLAY"
-fi
-
 
 # Install xprintidle
-apt-get update --assume-yes
+apt-get update
 
 # Only try installing if it isn't already as otherwise it will exit with nonzero and stop the script
 if ! dpkg --get-selections | grep -v deinstall | grep --quiet xprintidle; then
@@ -111,11 +105,10 @@ cat <<- EOF > $INACTIVITY_SCRIPT
 	# just put e.g. a browser in front, to ensure they or someone else gets a
 	# new warning when/if inactivity is reached again
 
-	USER_DISPLAY=\$(who | grep -w '$OUR_USER' | sed -rn 's/.*\((:[0-9]*)\).*/\1/p')
+	export DISPLAY=\$(who | grep -w '$OUR_USER' | sed -rn 's/.*\((:[0-9]*)\).*/\1/p')
 
-	# These are used by xprintidle
-	export DISPLAY=\$USER_DISPLAY
-	su - $OUR_USER -c "DISPLAY=\$USER_DISPLAY xhost si:localuser:root"
+	# Used by xprintidle
+	su $OUR_USER -c "xhost si:localuser:root"
 
 	if [ \$(xprintidle) -ge $LOGOUT_TIME_MS ]; then
 		pkill -KILL -u $OUR_USER
@@ -129,7 +122,7 @@ cat <<- EOF > $INACTIVITY_SCRIPT
 	    kill \$PID_ZENITY
 	  fi
 	  # We use the --title to match against above
-	  runuser -u $OUR_USER -- zenity --warning --text="$DIALOG_TEXT" --ok-label="$BUTTON_TEXT" --no-wrap $ZENITY_DISPLAY --title "Inaktivitet"
+	  runuser -u $OUR_USER -- zenity --warning --text="$DIALOG_TEXT" --ok-label="$BUTTON_TEXT" --no-wrap --title "Inaktivitet"
 	fi
 EOF
 
