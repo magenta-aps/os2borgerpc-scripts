@@ -95,12 +95,6 @@ fi
 LOGOUT_TIME_MS=$(( LOGOUT_TIME_MINS * 60 * 1000 ))
 DIALOG_TIME_MS=$(( DIALOG_TIME_MINS * 60 * 1000 ))
 
-RELEASE=$(lsb_release --short --release)
-if [ "$RELEASE" = "20.04" ] || [ "$RELEASE" = "22.04" ]; then
-  # This setting is required on 22.04 and earlier, but invalid in 24.04
-  ZENITY_DISPLAY="--display=\$USER_DISPLAY"
-fi
-
 mkdir --parents "$(dirname $GREETER_SUSPEND_SCRIPT)"
 
 TIMEOUT_SECS=$((LOGOUT_TIME_MINS * 60))
@@ -177,7 +171,7 @@ EOF
 fi
 
 # Install xprintidle
-apt-get update --assume-yes
+apt-get update
 
 # Only try installing if it isn't already as otherwise it will exit with nonzero
 # and stop the script
@@ -206,11 +200,10 @@ cat <<- EOF > $SUSPEND_SCRIPT
 	# just put e.g. a browser in front, to ensure they or someone else gets a
 	# new warning when/if inactivity is reached again
 
-	USER_DISPLAY=\$(who | grep -w '$OUR_USER' | sed -rn 's/.*\((:[0-9]*)\).*/\1/p')
+	export DISPLAY=\$(who | grep -w '$OUR_USER' | sed -rn 's/.*\((:[0-9]*)\).*/\1/p')
 
-	# These are used by xprintidle
-	export DISPLAY=\$USER_DISPLAY
-	su - $OUR_USER -c "DISPLAY=\$USER_DISPLAY xhost si:localuser:root"
+	# Used by xprintidle
+	su $OUR_USER -c "xhost si:localuser:root"
 
 	# If the pc has a time plan, don't use systemctl suspend, but instead rtcwake -m mem,
 	# which is functionally the same and allows the machine to wake up in time to be shut down
@@ -250,7 +243,7 @@ cat <<- EOF > $SUSPEND_SCRIPT
 	    kill \$PID_ZENITY
 	  fi
 	  # We use the --title to match against above
-	  runuser -u $OUR_USER -- zenity --warning --text="$DIALOG_TEXT" --ok-label="$BUTTON_TEXT" --no-wrap $ZENITY_DISPLAY --title "Inaktivitet"
+	  runuser -u $OUR_USER -- zenity --warning --text="$DIALOG_TEXT" --ok-label="$BUTTON_TEXT" --no-wrap --title "Inaktivitet"
 	fi
 EOF
 
