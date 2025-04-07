@@ -29,10 +29,12 @@ LOGOUT_TIME_MINS=$3
 DIALOG_TEXT=$4
 BUTTON_TEXT=$5
 
-# Note: Currently this log is never rotated, so it'll grow and grow
+OUR_USER="user"
 INACTIVITY_SCRIPT="/usr/share/os2borgerpc/bin/inactive_logout.sh"
 INACTIVITY_SCRIPT_LOG="/usr/share/os2borgerpc/bin/inactive_logout.log"
 LIGHTDM_SCRIPT="/etc/lightdm/greeter-setup-scripts/suspend_after_time.sh"
+GDM_SCRIPT="/etc/os2borgerpc/post-session-scripts/suspend_after_time.sh"
+GDM_SUSPEND_SERVICE="/etc/systemd/system/suspend_after_time.service"
 
 # Stop Debconf from interrupting when interacting with the package system
 export DEBIAN_FRONTEND=noninteractive
@@ -42,13 +44,17 @@ error() {
   exit 1
 }
 
+# Remove old unnecessary log
+rm --force $INACTIVITY_SCRIPT_LOG
+
 # If this is run after inactivity_suspend_after_time, ensure the suspend script
 # hasn't left files behind
-rm --force $LIGHTDM_SCRIPT
+systemctl disable --now "$(basename $GDM_SUSPEND_SERVICE)"
+rm --force $GDM_SCRIPT $GDM_SUSPEND_SERVICE $LIGHTDM_SCRIPT
 
 # Handle deactivating inactivity logout
 if [ "$ENABLE" = "False" ]; then
-  rm --force $INACTIVITY_SCRIPT $INACTIVITY_SCRIPT_LOG
+  rm --force $INACTIVITY_SCRIPT
   OLDCRON="/tmp/oldcron"
   crontab -l > $OLDCRON
   if [ -f "$OLDCRON" ]; then
@@ -69,8 +75,9 @@ fi
 LOGOUT_TIME_MS=$(( LOGOUT_TIME_MINS * 60 * 1000 ))
 DIALOG_TIME_MS=$(( DIALOG_TIME_MINS * 60 * 1000 ))
 
+
 # Install xprintidle
-apt-get update --assume-yes
+apt-get update
 
 # Only try installing if it isn't already as otherwise it will exit with nonzero and stop the script
 if ! dpkg --get-selections | grep -v deinstall | grep --quiet xprintidle; then
@@ -98,32 +105,24 @@ cat <<- EOF > $INACTIVITY_SCRIPT
 	# just put e.g. a browser in front, to ensure they or someone else gets a
 	# new warning when/if inactivity is reached again
 
-	USER_DISPLAY=\$(who | grep -w 'user' | sed -rn 's/.*(:[0-9]*).*/\1/p')
+	export DISPLAY=\$(who | grep -w '$OUR_USER' | sed -rn 's/.*\((:[0-9]*)\).*/\1/p')
 
-	# These are used by xprintidle
-	export XAUTHORITY=/home/user/.Xauthority
-	export DISPLAY=\$USER_DISPLAY
-	su - user -c "DISPLAY=\$USER_DISPLAY xhost +localhost"
-
-	LOG=$INACTIVITY_SCRIPT_LOG
-
-	echo $LOGOUT_TIME_MS \$(xprintidle) >> \$LOG
+	# Used by xprintidle
+	su $OUR_USER -c "xhost si:localuser:root"
 
 	if [ \$(xprintidle) -ge $LOGOUT_TIME_MS ]; then
-	  echo 'Logging user out' >> \$LOG
-	  pkill -KILL -u user
-	  exit 0
+		pkill -KILL -u $OUR_USER
+		exit 0
 	fi
 	# if idle time is past the dialog time: show the dialog
 	if [ \$(xprintidle) -ge $DIALOG_TIME_MS ]; then
 	  # Do spare the poor lives of potential other zenity windows.
 	  PID_ZENITY="\$(pgrep --full 'Inaktivitet')"
-	  if [ -n \$PID_ZENITY ]; then
+	  if [ -n "\$PID_ZENITY" ]; then
 	    kill \$PID_ZENITY
 	  fi
-	  # echo 'Running zenity...' >> \$LOG
 	  # We use the --title to match against above
-	  zenity --warning --text="$DIALOG_TEXT" --ok-label="$BUTTON_TEXT" --no-wrap --display=\$USER_DISPLAY --title "Inaktivitet"
+	  runuser -u $OUR_USER -- zenity --warning --text="$DIALOG_TEXT" --ok-label="$BUTTON_TEXT" --no-wrap --title "Inaktivitet"
 	fi
 EOF
 
