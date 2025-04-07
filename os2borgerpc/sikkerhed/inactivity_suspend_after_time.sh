@@ -36,9 +36,12 @@ LOGOUT_TIME_MINS=$3
 DIALOG_TEXT=$4
 BUTTON_TEXT=$5
 
-# Note: Currently these logs are never rotated, so they'll grow and grow
+OUR_USER="user"
 SUSPEND_SCRIPT="/usr/share/os2borgerpc/bin/inactive_logout.sh"
 SUSPEND_SCRIPT_LOG="/usr/share/os2borgerpc/bin/inactive_logout.log"
+GDM_SUSPEND_SCRIPT="/etc/os2borgerpc/post-session-scripts/suspend_after_time.sh"
+GDM_SUSPEND_SERVICE="/etc/systemd/system/suspend_after_time.service"
+DEFAULT_DM_FILE="/etc/X11/default-display-manager"
 LIGHTDM_SUSPEND_SCRIPT="/etc/lightdm/greeter-setup-scripts/suspend_after_time.sh"
 LIGHTDM_SUSPEND_SCRIPT_LOG="/etc/lightdm/scriptlogs/suspend_after_time.log"
 LIGHTDM_GREETER_SETUP_SCRIPT="/etc/lightdm/greeter_setup_script.sh"
@@ -56,9 +59,22 @@ if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   error "Dette script er ikke designet til at blive anvendt på en kiosk-maskine."
 fi
 
+# Remove old unnecessary logs
+rm --force $SUSPEND_SCRIPT_LOG $LIGHTDM_SUSPEND_SCRIPT_LOG
+
+if grep --quiet gdm3 $DEFAULT_DM_FILE; then
+  GREETER_SUSPEND_SCRIPT=$GDM_SUSPEND_SCRIPT
+else
+  GREETER_SUSPEND_SCRIPT=$LIGHTDM_SUSPEND_SCRIPT
+fi
+
 # Handle deactivating inactivity suspend
 if [ "$ENABLE" = "False" ]; then
-  rm --force $SUSPEND_SCRIPT $LIGHTDM_SUSPEND_SCRIPT $SUSPEND_SCRIPT_LOG $LIGHTDM_SUSPEND_SCRIPT_LOG
+  if [ -f "$GDM_SUSPEND_SERVICE" ]; then
+    systemctl disable --now "$(basename $GDM_SUSPEND_SERVICE)"
+    rm $GDM_SUSPEND_SERVICE
+  fi
+  rm --force $SUSPEND_SCRIPT $GREETER_SUSPEND_SCRIPT
   OLDCRON="/tmp/oldcron"
   crontab -l > $OLDCRON
   if [ -f "$OLDCRON" ]; then
@@ -79,37 +95,17 @@ fi
 LOGOUT_TIME_MS=$(( LOGOUT_TIME_MINS * 60 * 1000 ))
 DIALOG_TIME_MS=$(( DIALOG_TIME_MINS * 60 * 1000 ))
 
-# Older versions of this script used sh, but our lightdm suspend script uses
-# bash specifics. Change it to run the script directly with whatever interpreter it has.
-# This requires ensuring that lightdm has execute permissions on all those scripts.
-chmod --recursive 700 $LIGHTDM_GREETER_SCRIPTS_DIR
-cat << EOF > $LIGHTDM_GREETER_SETUP_SCRIPT
-#!/bin/sh
-greeter_setup_scripts=\$(find $LIGHTDM_GREETER_SCRIPTS_DIR -mindepth 1)
-for file in \$greeter_setup_scripts
-do
-    ./"\$file" &
-done
-EOF
-
-chmod 700 $LIGHTDM_GREETER_SETUP_SCRIPT
-
-mkdir --parents "$(dirname $LIGHTDM_SUSPEND_SCRIPT)" "$(dirname $SUSPEND_SCRIPT_LOG)"
+mkdir --parents "$(dirname $GREETER_SUSPEND_SCRIPT)"
 
 TIMEOUT_SECS=$((LOGOUT_TIME_MINS * 60))
 
-cat << EOF > "$LIGHTDM_SUSPEND_SCRIPT"
+cat << EOF > "$GREETER_SUSPEND_SCRIPT"
 #!/usr/bin/env bash
-
-LOG=$LIGHTDM_SUSPEND_SCRIPT_LOG
 
 while :
 do
-  echo "Starting sleep for $TIMEOUT_SECS seconds" >> \$LOG
   sleep $TIMEOUT_SECS
-  echo "Sleep over" >> \$LOG
   if [ -z \$(users) ]; then
-    echo "no active users, suspending" >> \$LOG
     # If the pc has a time plan, don't use systemctl suspend, but instead rtcwake -m mem,
     # which is functionally the same and allows the machine to wake up in time to be shut down
     # by the time plan
@@ -131,20 +127,51 @@ do
     else
       systemctl suspend
     fi
-  else
-    echo "should be logged in as \$(users) breaking loop" >> \$LOG
+  else # A user is logged in
     break
   fi
 done
 
-echo "exited loop" >> \$LOG
 exit 0
 EOF
 
-chmod 700 $LIGHTDM_SUSPEND_SCRIPT
+chmod 700 $GREETER_SUSPEND_SCRIPT
+
+if grep --quiet lightdm $DEFAULT_DM_FILE; then
+# Older versions of this script used sh, but our lightdm suspend script uses
+# bash specifics. Change it to run the script directly with whatever interpreter it has.
+# This requires ensuring that lightdm has execute permissions on all those scripts.
+  chmod --recursive 700 $LIGHTDM_GREETER_SCRIPTS_DIR
+  cat << EOF > $LIGHTDM_GREETER_SETUP_SCRIPT
+#!/bin/sh
+greeter_setup_scripts=\$(find $LIGHTDM_GREETER_SCRIPTS_DIR -mindepth 1)
+for file in \$greeter_setup_scripts
+do
+    ./"\$file" &
+done
+EOF
+
+  chmod 700 $LIGHTDM_GREETER_SETUP_SCRIPT
+
+else
+  # This service is only needed to run the script just after boot
+  cat << EOF > $GDM_SUSPEND_SERVICE
+[Unit]
+Description=OS2borgerPC suspend_after_time service
+
+[Service]
+Type=simple
+ExecStart=$GDM_SUSPEND_SCRIPT
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  systemctl enable "$(basename $GDM_SUSPEND_SERVICE)"
+fi
 
 # Install xprintidle
-apt-get update --assume-yes
+apt-get update
 
 # Only try installing if it isn't already as otherwise it will exit with nonzero
 # and stop the script
@@ -173,25 +200,17 @@ cat <<- EOF > $SUSPEND_SCRIPT
 	# just put e.g. a browser in front, to ensure they or someone else gets a
 	# new warning when/if inactivity is reached again
 
-	USER_DISPLAY=\$(who | grep -w 'user' | sed -rn 's/.*(:[0-9]*).*/\1/p')
+	export DISPLAY=\$(who | grep -w '$OUR_USER' | sed -rn 's/.*\((:[0-9]*)\).*/\1/p')
 
-	# These are used by xprintidle
-	export XAUTHORITY=/home/user/.Xauthority
-	export DISPLAY=\$USER_DISPLAY
-	su - user -c "DISPLAY=\$USER_DISPLAY xhost +localhost"
-
-	LOG=$SUSPEND_SCRIPT_LOG
-
-	echo $LOGOUT_TIME_MS \$(xprintidle) >> \$LOG
+	# Used by xprintidle
+	su $OUR_USER -c "xhost si:localuser:root"
 
 	# If the pc has a time plan, don't use systemctl suspend, but instead rtcwake -m mem,
 	# which is functionally the same and allows the machine to wake up in time to be shut down
 	# by the time plan
 
 	if [ \$(xprintidle) -ge $LOGOUT_TIME_MS ]; then
-	  echo 'Logging user out' >> \$LOG
-	  pkill -KILL -u user
-	  echo 'suspending pc' >> \$LOG
+	  pkill -KILL -u $OUR_USER
 	  # If the pc has a time plan, don't use systemctl suspend, but instead rtcwake -m mem,
 	  # which is functionally the same and allows the machine to wake up in time to be shut down
 	  # by the time plan
@@ -220,12 +239,11 @@ cat <<- EOF > $SUSPEND_SCRIPT
 	if [ \$(xprintidle) -ge $DIALOG_TIME_MS ]; then
 	  # Do spare the poor lives of potential other zenity windows.
 	  PID_ZENITY="\$(pgrep --full 'Inaktivitet')"
-	  if [ -n \$PID_ZENITY ]; then
+	  if [ -n "\$PID_ZENITY" ]; then
 	    kill \$PID_ZENITY
 	  fi
-	  # echo 'Running zenity...' >> \$LOG
 	  # We use the --title to match against above
-	  zenity --warning --text="$DIALOG_TEXT" --ok-label="$BUTTON_TEXT" --no-wrap --display=\$USER_DISPLAY --title "Inaktivitet"
+	  runuser -u $OUR_USER -- zenity --warning --text="$DIALOG_TEXT" --ok-label="$BUTTON_TEXT" --no-wrap --title "Inaktivitet"
 	fi
 EOF
 
