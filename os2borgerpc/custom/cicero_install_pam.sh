@@ -28,8 +28,13 @@ DEFAULT_DM_FILE="/etc/X11/default-display-manager"
 # Put our module where PAM modules normally are
 PAM_PYTHON_MODULE=/usr/lib/x86_64-linux-gnu/security/os2borgerpc-cicero-pam-module.py
 # Keep this in sync with the extensions name as given in the os2borgerpc-gnome-extensions repo!
-# shellcheck disable=SC2034   # It exists in an included file
-EXTENSION_NAME='logout-timer@os2borgerpc.magenta.dk'
+if [ "$(lsb_release --release --short | cut --delimiter '.' --fields 1)" -lt 24 ]; then
+  # shellcheck disable=SC2034   # It exists in an included file
+  EXTENSION_NAME='logout-timer@os2borgerpc.magenta.dk'
+else
+  # shellcheck disable=SC2034   # It exists in an included file
+  EXTENSION_NAME='logout-timer-24-04@os2borgerpc.magenta.dk'
+fi
 # shellcheck disable=SC2034   # It exists in an included file
 LOGOUT_TIMER_CONF="/usr/share/gnome-shell/extensions/$EXTENSION_NAME/config.json"
 CICERO_INTERFACE_PYTHON3=/usr/share/os2borgerpc/bin/cicero_interface_python3.py
@@ -49,6 +54,12 @@ if grep --quiet gdm3 $DEFAULT_DM_FILE; then
 else
   PAM_FILE=$LIGHTDM_PAM
   CICERO_LOGOUT_SCRIPT=$CICERO_LOGOUT_LIGHTDM
+fi
+
+if [ -d "/root/.local/share/pipx/venvs/os2borgerpc-client" ]; then
+  PYTHON_SHEBANG="#!/root/.local/share/pipx/venvs/os2borgerpc-client/bin/python3"
+else
+  PYTHON_SHEBANG="#!/usr/bin/env python3"
 fi
 
 if [ "$ACTIVATE" = "True" ]; then
@@ -82,13 +93,12 @@ if [ "$ACTIVATE" = "True" ]; then
 
 # Separated out because the pam module cannot run if you import the admin_client
 cat << EOF > $CICERO_INTERFACE_PYTHON3
-#!/usr/bin/env python3
+$PYTHON_SHEBANG
 
 import sys
 from subprocess import check_output
 import os2borgerpc.client.admin_client as admin_client
 import socket
-
 
 def cicero_validate(cicero_user, cicero_pass):
     host_address = (
@@ -143,7 +153,7 @@ EOF
 chmod 700 $GREETER_SETUP_SCRIPT
 
 cat << EOF > $CICERO_LOGOUT_SCRIPT
-#!/usr/bin/env python3
+$PYTHON_SHEBANG
 
 from subprocess import check_output
 import os2borgerpc.client.admin_client as admin_client
@@ -225,7 +235,7 @@ def pam_sm_authenticate(pamh, flags, argv):
     # cicero_response is a binary string containing (time, 'citizen_hash')
     # This format determines the necessary commands to extract time and citizen_hash
     time = int(cicero_response.split(b", ")[0][1:])
-    citizen_hash = str(cicero_response.split(b", ")[1][:-1])[1:-1]
+    citizen_hash = str(cicero_response.split(b", ")[1][:-1])[1:-1].replace('"','').replace("'","")
 
     if citizen_hash == "logged_in":
         result_msg = pamh.Message(
@@ -294,7 +304,7 @@ else # Cleanup and remove the Cicero integration
   # Remove Cicero interegration from /etc/pam.d/ files
   sed -i '/pam_succeed_if.so user = user/d' $PAM_FILE
   sed -i '/# OS2borgerPC Cicero/d' $PAM_FILE
-  sed -i '/pam_succeed_if.so user != user/d' $PAM_FILE
+  sed -i '/auth \[success=1 default=ignore\] pam_succeed_if.so user != user/d' $PAM_FILE
   sed -i "\@auth required pam_python.so@d" $PAM_FILE
 
   systemctl disable "$(basename $CICERO_LOGOUT_SERVICE)"
