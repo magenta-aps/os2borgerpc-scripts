@@ -34,8 +34,8 @@ lower() {
     echo "$@" | tr '[:upper:]' '[:lower:]'
 }
 
-[ $# != 4 ] \
-  && printf "This script needs exactly four arguments which it wasn't given. Exiting." \
+[ $# != 5 ] \
+  && printf "This script needs exactly five arguments which it wasn't given. Exiting." \
   && exit 1
 
 ACTIVATE=$1
@@ -44,6 +44,7 @@ ACTIVATE=$1
 BROWSER="$(lower "$2")"
 BUTTON_ICON_PATH="$3"
 BUTTON_Y_OFFSET="$4"
+ONBOARD_START_MAXIMIZED="$5"
 
 # The input is just a number, but if it's positive we want a "+" prepended for the calculation
 [ "$BUTTON_Y_OFFSET" -ge 0 ] && BUTTON_Y_OFFSET="+ $BUTTON_Y_OFFSET"
@@ -62,8 +63,16 @@ BSPWM_ADD_BUTTON_SCRIPT="bspwm_add_button.sh"
 BUTTON_MOVE_SCRIPT="button_move.sh"
 FULLSCREEN_TOGGLE_SCRIPT="toggle_fullscreen.sh"
 BUTTON_STYLING_CSS_FILE="btn.css"
+XINITRC="/home/$CUSER/.xinitrc"
 
 export DEBIAN_FRONTEND=noninteractive
+
+# Ensure that the onboard keyboard has actually been added
+if ! grep --quiet "bspwm" $XINITRC; then
+  echo "The onboard keyboard has not been added."
+  echo "You must add the onboard keyboard before running this script. Exiting without doing anything."
+  exit 1
+fi
 
 if [ "$ACTIVATE" = "True" ]; then
 
@@ -253,7 +262,15 @@ if [ "$ACTIVATE" = "True" ]; then
   if ! grep --quiet  "$BSPWM_ADD_BUTTON_SCRIPT" $BSPWM_CONFIG; then
     echo "$SCRIPTS_BASE_PATH/$BSPWM_ADD_BUTTON_SCRIPT &" >> "$BSPWM_CONFIG"
   fi
+
+  ### Set the keyboard to start maximized (default) or minimized ###
+  if [ "$ONBOARD_START_MAXIMIZED" = "True" ]; then
+    sed --in-place "/$FULLSCREEN_TOGGLE_SCRIPT/d" "$BSPWM_CONFIG"
+  elif ! grep --quiet "$FULLSCREEN_TOGGLE_SCRIPT" "$BSPWM_CONFIG"; then
+    echo "sleep 5 && $SCRIPTS_BASE_PATH/$FULLSCREEN_TOGGLE_SCRIPT &" >> "$BSPWM_CONFIG"
+  fi
 else # CLEANUP
   # apt-get purge -y xdotool jq
-  sed -i "\,$BSPWM_ADD_BUTTON_SCRIPT,d" "$BSPWM_CONFIG"
+  sed --in-place --expression "\,$BSPWM_ADD_BUTTON_SCRIPT,d" \
+   --expression "/$FULLSCREEN_TOGGLE_SCRIPT/d" "$BSPWM_CONFIG"
 fi
