@@ -57,7 +57,8 @@ GRACE_PERIOD="30" # The root timer has this added to it, to be more certain that
 
 # EXTENSION ADDITIONAL SETTINGS:
 REPO_NAME="os2borgerpc-gnome-extensions"
-EXTENSION_GIT_URL=https://github.com/magenta-aps/$REPO_NAME/archive/refs/heads/main.zip
+BRANCH=main
+EXTENSION_GIT_URL=https://github.com/magenta-aps/$REPO_NAME/archive/refs/heads/${BRANCH}.zip
 
 # TODO: Consider not handling this here, and instead running install.sh with False to remove an extension. But then the repo
 # either needs to remain on disk or be downloaded anew just to delete an extension...?
@@ -86,7 +87,6 @@ if [ "$ACTIVATE" = "True" ]; then
 	apt-get install --assume-yes jq
 
 	# Fetch and install gnome extension
-	BRANCH=main
 	wget $EXTENSION_GIT_URL
 	unzip $BRANCH.zip
 	$REPO_NAME-$BRANCH/install.sh whatever $EXTENSION_NAME true true true
