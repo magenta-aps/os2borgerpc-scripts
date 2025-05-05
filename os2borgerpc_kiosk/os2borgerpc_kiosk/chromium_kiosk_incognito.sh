@@ -29,6 +29,16 @@ if ! get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   exit 1
 fi
 
+if [ ! -f "$POLICY_FILE_DEFAULT" ]; then
+  echo "Chromium Installér must be run before this script. Exiting without doing anything."
+  exit 1
+fi
+
+if [ ! -f "$LAUNCH_FILE" ]; then
+  echo "Chromium Autostart must be run before this script. Exiting without doing anything."
+  exit 1
+fi
+
 # Backwards compatibility
 if grep --quiet "KIOSK=" $LAUNCH_FILE; then
   sed --in-place "/KIOSK=/d" $LAUNCH_FILE

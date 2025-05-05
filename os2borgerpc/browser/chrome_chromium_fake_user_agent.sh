@@ -44,6 +44,11 @@ CHROMIUM_DESKTOP_FILE_2="/home/$SHADOW/$DESKTOP/chromium_chromium.desktop"
 CHROMIUM_DESKTOP_FILE_3="/home/$SHADOW/.config/autostart/chromium_chromium.desktop"
 CHROMIUM_FILES="$CHROMIUM_DESKTOP_FILE_1 $CHROMIUM_DESKTOP_FILE_2 $CHROMIUM_DESKTOP_FILE_3"
 
+if [ ! -f "$CHROME_ORIGINAL_FILE" ] && [ ! -f "$CHROMIUM_ORIGINAL_FILE" ]; then
+  echo "Neither Chrome nor Chromium are installed. Exiting without doing anything."
+  exit 1
+fi
+
 # Ensure that the local copy exists
 mkdir --parents "$(dirname "$CHROME_DESKTOP_FILE_1")"
 if [ ! -f "$CHROME_DESKTOP_FILE_1" ]; then
