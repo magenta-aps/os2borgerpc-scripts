@@ -20,7 +20,7 @@ ACTIVATE="$1"
 
 if [ "$ACTIVATE" = "True" ]; then
 
-    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+    wget --output-document - https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
     install -o root -g root -m 644 microsoft.gpg /usr/share/keyrings/
     if [ "$UBUNTU_VERSION" = "22.04" ]; then
         echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/ubuntu/22.04/prod jammy main" > /etc/apt/sources.list.d/microsoft-ubuntu-jammy-prod.list

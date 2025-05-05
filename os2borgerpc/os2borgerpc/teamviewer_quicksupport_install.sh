@@ -22,7 +22,7 @@ INSTALL_PATH="/home/.skjult/.local/opt"
 
 if [ "$ACTIVATE" = "True" ]; then
     # Download teamviewer quick support (distributed as an archive).
-    curl -L -O $URL
+    wget $URL
 
     tar -xf "$ARCHIVE" && rm "$ARCHIVE"
 

@@ -6,6 +6,6 @@
 #
 # SPDX-FileContributor: Carsten Agger
 
-curl --silent https://ipinfo.io/ip
+wget --output-document - --quiet https://ipinfo.io/ip
 printf "\n"
 exit 0
