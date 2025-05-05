@@ -35,8 +35,8 @@ HEADS_UP_MESSAGE="${5:-Tiden er udløbet om et minut. Husk at gemme dine ting}"
 # COMMON
 export DEBIAN_FRONTEND=noninteractive
 SHADOW=".skjult"
-EXTENSION_NAME='logout-timer@os2borgerpc.magenta.dk'
-LOGOUT_TIMER_CONF="/usr/share/gnome-shell/extensions/$EXTENSION_NAME/config.json"
+EXTENSION_NAME_OLD='logout-timer@os2borgerpc.magenta.dk'
+EXTENSION_NAME_NEW='logout-timer-24-04@os2borgerpc.magenta.dk'
 SESSION_CLEANUP_FILE="/usr/share/os2borgerpc/bin/user-cleanup.bash"
 LOGOUT_TIMER_SESSION_CLEANUP_FILE="/usr/share/os2borgerpc/bin/user-cleanup-logout-timer.bash"
 OUR_USER="user"
@@ -57,7 +57,8 @@ GRACE_PERIOD="30" # The root timer has this added to it, to be more certain that
 
 # EXTENSION ADDITIONAL SETTINGS:
 REPO_NAME="os2borgerpc-gnome-extensions"
-EXTENSION_GIT_URL=https://github.com/magenta-aps/$REPO_NAME/archive/refs/heads/main.zip
+BRANCH=main
+EXTENSION_GIT_URL=https://github.com/magenta-aps/$REPO_NAME/archive/refs/heads/${BRANCH}.zip
 
 # TODO: Consider not handling this here, and instead running install.sh with False to remove an extension. But then the repo
 # either needs to remain on disk or be downloaded anew just to delete an extension...?
@@ -81,19 +82,24 @@ else
   CHECK_FILE=$LIGHTDM_GREETER_PAM
 fi
 
+if [ "$(lsb_release --release --short | cut --delimiter '.' --fields 1)" -lt 24 ]; then
+  EXTENSION_NAME=$EXTENSION_NAME_OLD
+else
+  EXTENSION_NAME=$EXTENSION_NAME_NEW
+fi
+LOGOUT_TIMER_CONF="/usr/share/gnome-shell/extensions/$EXTENSION_NAME/config.json"
+
 if [ "$ACTIVATE" = "True" ]; then
-	# TODO: Do we need to install bc or is come preinstalled?
 	apt-get install --assume-yes jq
 
 	# Fetch and install gnome extension
-	BRANCH=main
 	wget $EXTENSION_GIT_URL
 	unzip $BRANCH.zip
 	$REPO_NAME-$BRANCH/install.sh whatever $EXTENSION_NAME true true true
 	rm --recursive $BRANCH.zip $REPO_NAME-$BRANCH
 
 	# Now overwrite the testing config with what the user inputted/defaults in this script
-	cat <<- EOF > $LOGOUT_TIMER_CONF
+	cat <<- EOF > "$LOGOUT_TIMER_CONF"
 	{
 	  "timeMinutes": $MINUTES_TO_LOGOUT,
 	  "preTimerText": "$PRE_TIMER_TEXT",
@@ -162,7 +168,7 @@ else # Stop the timers and delete everything related to them
 	gnome-extensions disable $EXTENSION_NAME  # Note: Don't do this if we make "disable" run "gnome-session-quit --logout" as well!
 
 	sed --in-place "\@$LOGOUT_TIMER_SESSION_CLEANUP_FILE@d" $SESSION_CLEANUP_FILE
-	rm --recursive $LOGOUT_TIMER_ACTUAL $LOGOUT_TIMER_ACTUAL_LAUNCHER $EXTENSION_ACTIVATION_DESKTOP_FILE "$(dirname $LOGOUT_TIMER_CONF)" $LOGOUT_TIMER_SESSION_CLEANUP_FILE
+	rm --recursive $LOGOUT_TIMER_ACTUAL $LOGOUT_TIMER_ACTUAL_LAUNCHER $EXTENSION_ACTIVATION_DESKTOP_FILE "$(dirname "$LOGOUT_TIMER_CONF")" $LOGOUT_TIMER_SESSION_CLEANUP_FILE
 
 	#	Alternate solution: Kill all processes started by user in user-cleanup.sh? Maybe that's a better idea anyway,
 	#	which we should do for everyone in the future?
