@@ -24,7 +24,7 @@ if [ "$ACTIVATE" = "True" ]; then
 
     # Fetching the heimdal keyring as their installer script currently doesn't do this, and then overwriting their apt sources list for heimdal to point to that keyring
     # This is taken from the "manual" section of their installation guide
-    curl https://linuxrepo.heimdalsecurity.com/pgp-key.public | gpg --yes --dearmor -o /usr/share/keyrings/heimdal-keyring.gpg
+    wget --output-document - https://linuxrepo.heimdalsecurity.com/pgp-key.public | gpg --yes --dearmor -o /usr/share/keyrings/heimdal-keyring.gpg
     echo "deb [arch=amd64 signed-by=/usr/share/keyrings/heimdal-keyring.gpg] https://linuxrepo.heimdalsecurity.com/apt-repo stable main" > /etc/apt/sources.list.d/heimdal.list
 
     echo "After installation: Checking if the Heimdal client is now running:"
