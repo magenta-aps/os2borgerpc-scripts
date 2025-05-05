@@ -15,37 +15,41 @@ fi
 
 WAYLAND_FORCE="$1"
 
+DEFAULT_DM_FILE="/etc/X11/default-display-manager"
 DISABLE_WAYLAND_FILE="/etc/lightdm/lightdm.conf.d/10-disable-wayland.conf"
 DISABLE_XORG_FILE="/etc/lightdm/lightdm.conf.d/10-disable-xorg.conf"
 LIGHTDM_CONF="/etc/lightdm/lightdm.conf"
+GDM_CONF="/etc/gdm3/custom.conf"
 
 if [ "$WAYLAND_FORCE" = "True" ]; then
-  rm $DISABLE_WAYLAND_FILE
+  if grep --quiet gdm3 $DEFAULT_DM_FILE; then
+    sed --in-place "s/WaylandEnable=false/WaylandEnable=true/" $GDM_CONF
+  else
+    rm --force $DISABLE_WAYLAND_FILE
 
   # Remove the option to launch Xorg from LightDM
-  cat << EOF > $DISABLE_XORG_FILE
+    cat << EOF > $DISABLE_XORG_FILE
 # No /usr/share/xsessions please
 [LightDM]
 sessions-directory=/usr/share/wayland-sessions:/usr/share/lightdm/sessions
 EOF
 
-  # Stop launching Xorg-specific display-setup-script
-  if [ -f "/usr/share/os2borgerpc/bin/xset.sh" ]; then
-    sed --in-place "\@/usr/share/os2borgerpc/bin/xset.sh@d" $LIGHTDM_CONF
+    # Stop launching Xorg-specific display-setup-script
+    if [ -f "/usr/share/os2borgerpc/bin/xset.sh" ]; then
+      sed --in-place "\@/usr/share/os2borgerpc/bin/xset.sh@d" $LIGHTDM_CONF
+    fi
   fi
-
 else
-  rm $DISABLE_XORG_FILE
+  if grep --quiet gdm3 $DEFAULT_DM_FILE; then
+    sed --in-place "s/WaylandEnable=true/WaylandEnable=false/" $GDM_CONF
+  else
+    rm --force $DISABLE_XORG_FILE
 
-  # Remove the option to launch Wayland from LightDM
-  cat << EOF > $DISABLE_WAYLAND_FILE
+    # Remove the option to launch Wayland from LightDM
+    cat << EOF > $DISABLE_WAYLAND_FILE
 # No /usr/share/wayland-sessions please
 [LightDM]
 sessions-directory=/usr/share/xsessions:/usr/share/lightdm/sessions
 EOF
-
-  # Start launching Xorg-specific display-setup-script, if it isn't already there
-  if [ -f "/usr/share/os2borgerpc/bin/xset.sh" ] && ! grep --quiet "/usr/share/os2borgerpc/bin/xset.sh" $LIGHTDM_CONF; then
-    echo "display-setup-script=/usr/share/os2borgerpc/bin/xset.sh" >> $LIGHTDM_CONF
   fi
 fi
