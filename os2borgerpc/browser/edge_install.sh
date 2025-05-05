@@ -114,7 +114,7 @@ PACKAGE="microsoft-edge-stable"
 if [ "$INSTALL" = "True" ]; then
 
   # Fetch the keyring, put it in the right place with the right permissions and make the source point to that key
-  curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/microsoft-edge.gpg # Should have root:root 644 permissions
+  wget --output-document - https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/microsoft-edge.gpg # Should have root:root 644 permissions
   echo 'deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main' > /etc/apt/sources.list.d/microsoft-edge.list
 
   apt-get update --assume-yes
