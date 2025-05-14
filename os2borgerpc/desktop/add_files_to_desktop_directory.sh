@@ -53,7 +53,7 @@ if [ "$ADD" = "True" ]; then
   cp $FILES_RENAMED "$DESTINATION_DIR/"
 
   if [ "$READ_ONLY_ACCESS" = "False" ]; then
-    chmod g+w "$DESTINATION_DIR"/*
+    chmod g+w --recursive "$DESTINATION_DIR"
   fi
 
   echo "Note: You need to logout before the script takes effect!"
