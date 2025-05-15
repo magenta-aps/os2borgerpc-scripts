@@ -42,5 +42,6 @@ elif [ ! -d "$EXTENSION_SETTINGS_PATH" ]; then
 else
   mkdir --parents "$CHROME_PROFILE_PATH"
   cp --recursive "$EXTENSION_SETTINGS_PATH" "$CHROME_PROFILE_PATH/"
+  chown --recursive root:root "$CHROME_PROFILE_PATH/"
   echo "The extension settings have been saved. It is now fine to log out."
 fi
