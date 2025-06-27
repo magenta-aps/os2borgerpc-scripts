@@ -33,7 +33,9 @@ WIDTH=$3
 HEIGHT=$4
 ORIENTATION=$5
 LOCK_DOWN_KEYBINDS=$(get_value_from_option "$6")  # 0: No binds removed, 1: Most binds removed, 2: All binds removed (specifically most + binds for printing, reloading and changing zoom)
+HIDE_CURSOR=$7
 
+UNCLUTTER_NAME="unclutter-xfixes"
 CUSER="chrome"
 XINITRC="/home/$CUSER/.xinitrc"
 BSPWM_CONFIG="/home/$CUSER/.config/bspwm/bspwmrc"
@@ -185,16 +187,16 @@ IURL="$URL"
 
 # Check if WIDTH is provided; if not, fall back to default from xrandr
 if [ "$WIDTH" = "auto" ]; then
-    IWIDTH="\$(echo \$DIMENSIONS | cut -d'x' -f1)"
+  IWIDTH="\$(echo \$DIMENSIONS | cut -d'x' -f1)"
 else
-    IWIDTH="$WIDTH"
+  IWIDTH="$WIDTH"
 fi
 
 # Check if HEIGHT is provided; if not, fall back to default from xrandr
 if [ "$HEIGHT" = "auto" ]; then
-    IHEIGHT="\$(echo \$DIMENSIONS | cut -d'x' -f2)"
+  IHEIGHT="\$(echo \$DIMENSIONS | cut -d'x' -f2)"
 else
-    IHEIGHT="$HEIGHT"
+  IHEIGHT="$HEIGHT"
 fi
 
 COMMON_SETTINGS="--password-store=basic --enable-offline-auto-reload"
@@ -327,10 +329,19 @@ $XBINDKEYS_MAYBE
 exec $CHROMIUM_SCRIPT nowm
 EOF
 
+# Stop the program
+if [ "$HIDE_CURSOR" = "False" ]; then
+  sed --in-place "/$UNCLUTTER_NAME/d" "$XINITRC"
+  pkill unclutter
+else
+  # 3 i means: Insert on line 3
+  sed --in-place "3 i $UNCLUTTER_NAME &" "$XINITRC"
+fi
+
 # If bspwm config (for the onscreen keyboard) is found, restore starting it up instead of starting chromium directly
 if [ -f $BSPWM_CONFIG ]; then
-# Don't auto-start chromium from xinitrc
-  sed -i "s,\(.*$CHROMIUM_SCRIPT.*\),#\1," $XINITRC
+	# Don't auto-start chromium from xinitrc
+	sed --in-place "s,\(.*$CHROMIUM_SCRIPT.*\),#\1," $XINITRC
 
   # Instead autostart bspwm
 	cat <<- EOF >> $XINITRC
@@ -341,11 +352,11 @@ fi
 # Start X upon login
 PROFILE="/home/$CUSER/.profile"
 if ! grep --quiet -- 'exit' $PROFILE; then # Ensure idempotency
-  # This first line cleans up after previous versions of the script
-  sed --in-place --expression "/startx/d" --expression "/for i in/d" --expression "/sleep/d" \
-      --expression "/done/d" --expression "/chromium_error_reboot/d" $PROFILE
-  cat << EOF >> $PROFILE
-startx
-exit
-EOF
+	# This first line cleans up after previous versions of the script
+	sed --in-place --expression "/startx/d" --expression "/for i in/d" --expression "/sleep/d" \
+		--expression "/done/d" --expression "/chromium_error_reboot/d" $PROFILE
+	cat <<- EOF >> $PROFILE
+		startx
+		exit
+	EOF
 fi
