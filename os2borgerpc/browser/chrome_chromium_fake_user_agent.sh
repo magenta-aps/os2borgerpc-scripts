@@ -51,25 +51,16 @@ add_to_desktop_files() {
     if [ -f "$FILE" ]; then
       # Don't add the parameter multiple times
       if ! grep --quiet -- "$PARAMETER" "$FILE"; then
-        sed --in-place "s,\(Exec=\S*\)\(.*\),\1 $PARAMETER\2," "$FILE"
+        # Snap handling
+        if ! grep --quiet 'Exec.*/snap/' "$FILE"; then
+          sed --in-place "s,\(Exec=\S*\)\(.*\),\1 $PARAMETER\2," "$FILE"
+        else
+          sed --in-place "s,\(Exec=.*/snap/bin/\S*\)\(.*\),\1 $PARAMETER\2," "$FILE"
+        fi
       fi
     fi
   done
 }
-add_to_snap_desktop_files() {
-  PARAMETER="$1"
-  shift # Now remove the parameter so we can loop over what remains: The files
-  for FILE in "$@"; do
-    # Only continue if the particular file exists
-    if [ -f "$FILE" ]; then
-      # Don't add the parameter multiple times
-      if ! grep --quiet -- "$PARAMETER" "$FILE"; then
-        sed --in-place "s,\(Exec=.*/snap/bin/\S*\)\(.*\),\1 $PARAMETER\2," "$FILE"
-      fi
-    fi
-  done
-}
-
 # Takes a parameter to remove and a list of .desktop files to remove it from
 remove_from_desktop_files() {
   PARAMETER="$1"
@@ -91,9 +82,7 @@ fi
 
 if [ "$ACTIVATE" = "True" ]; then
   # shellcheck disable=SC2086 # We want to split the files back into separate arguments
-  add_to_desktop_files "--user-agent='$USER_AGENT'" $CHROME_FILES
-  # shellcheck disable=SC2086 # We want to split the files back into separate arguments
-  add_to_snap_desktop_files "--user-agent='$USER_AGENT'" $CHROMIUM_FILES
+  add_to_desktop_files "--user-agent='$USER_AGENT'" $CHROME_FILES $CHROMIUM_FILES
 else
   # shellcheck disable=SC2086 # We want to split the files back into separate arguments
   remove_from_desktop_files "--user-agent='$USER_AGENT'" $CHROME_FILES $CHROMIUM_FILES
