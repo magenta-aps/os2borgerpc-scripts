@@ -20,6 +20,8 @@ LOCAL_COPY_DIR="/home/.skjult/.local/share/applications"
 LAUNCH_ARGS="-width 7680 -height 4320"
 
 # Takes a parameter to add to the Exec lines of the desktop files passed as the subsequent arguments
+# NOTE: The Firefox Snap desktop file is quite differently formatted compared to a its non-Snap Exec line. Example:
+# Exec=env BAMF_DESKTOP_FILE_HINT=/var/lib/snapd/desktop/applications/firefox_firefox.desktop /snap/bin/firefox %u
 add_to_desktop_files() {
   PARAMETER="$1"
   shift # Now remove the parameter so we can loop over what remains: The files
@@ -28,24 +30,12 @@ add_to_desktop_files() {
     if [ -f "$FILE" ]; then
       # Don't add the parameter multiple times
       if ! grep --quiet -- "$PARAMETER" "$FILE"; then
-        sed --in-place "s,\(Exec=\S*\)\(.*\),\1 $PARAMETER\2," "$FILE"
-      fi
-    fi
-  done
-}
-
-# The Firefox Snap desktop file is quite differently formatted compared to a its non-Snap Exec line. Example:
-# Exec=env BAMF_DESKTOP_FILE_HINT=/var/lib/snapd/desktop/applications/firefox_firefox.desktop /snap/bin/firefox %u
-# Considering whether it would be better to copy the desktop file to ~/.local/share/applications/ and modify it there.
-add_to_desktop_files_ff_snap() {
-  PARAMETER="$1"
-  shift # Now remove the parameter so we can loop over what remains: The files
-  for FILE in "$@"; do
-    # Only continue if the particular file exists
-    if [ -f "$FILE" ]; then
-      # Don't add the parameter multiple times
-      if ! grep --quiet -- "$PARAMETER" "$FILE"; then
-        sed --in-place "s,\(.*/snap/bin/firefox\)\(.*\),\1 $PARAMETER\2," "$FILE"
+        # Snap handling
+        if ! grep --quiet 'Exec.*/snap/' "$FILE"; then
+          sed --in-place "s,\(Exec=\S*\)\(.*\),\1 $PARAMETER\2," "$FILE"
+        else
+          sed --in-place "s,\(Exec=.*/snap/bin/\S*\)\(.*\),\1 $PARAMETER\2," "$FILE"
+        fi
       fi
     fi
   done
@@ -68,11 +58,7 @@ if [ ! -f "$FIREFOX_DESKTOP_LOCAL_COPY" ]; then
 fi
 
 if [ "$ACTIVATE" = "True" ]; then
-  if [ -d "/snap/firefox" ]; then
-    add_to_desktop_files_ff_snap "$LAUNCH_ARGS" $FIREFOX_DESKTOP_LOCAL_COPY
-  else
-    add_to_desktop_files "$LAUNCH_ARGS" $FIREFOX_DESKTOP_LOCAL_COPY
-  fi
+  add_to_desktop_files "$LAUNCH_ARGS" $FIREFOX_DESKTOP_LOCAL_COPY
 else
   sed --in-place "s/$LAUNCH_ARGS //" $FIREFOX_DESKTOP_LOCAL_COPY
 fi
