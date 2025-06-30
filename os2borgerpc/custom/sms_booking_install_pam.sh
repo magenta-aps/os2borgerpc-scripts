@@ -32,8 +32,13 @@ DEFAULT_DM_FILE="/etc/X11/default-display-manager"
 # Put our module where PAM modules normally are
 PAM_PYTHON_MODULE=/usr/lib/x86_64-linux-gnu/security/os2borgerpc-custom-login-pam-module.py
 # Keep this in sync with the extensions name as given in the os2borgerpc-gnome-extensions repo!
-# shellcheck disable=SC2034   # It exists in an included file
-EXTENSION_NAME='logout-timer@os2borgerpc.magenta.dk'
+if [ "$(lsb_release --release --short | cut --delimiter '.' --fields 1)" -lt 24 ]; then
+  # shellcheck disable=SC2034   # It exists in an included file
+  EXTENSION_NAME='logout-timer@os2borgerpc.magenta.dk'
+else
+  # shellcheck disable=SC2034   # It exists in an included file
+  EXTENSION_NAME='logout-timer-24-04@os2borgerpc.magenta.dk'
+fi
 # shellcheck disable=SC2034   # It exists in an included file
 LOGOUT_TIMER_CONF="/usr/share/gnome-shell/extensions/$EXTENSION_NAME/config.json"
 SMS_LOGIN_INTERFACE_PYTHON3=/usr/share/os2borgerpc/bin/sms_login_interface_python3.py
@@ -53,7 +58,7 @@ POST_SESSION_FILE="/etc/gdm3/PostSession/Default"
 if grep -q "sms-booking-pam-module" "$LIGHTDM_PAM"; then
   sed -i '/pam_succeed_if.so user = user/d' $LIGHTDM_PAM
   sed -i '/# OS2borgerPC SMS login/d' $LIGHTDM_PAM
-  sed -i '/pam_succeed_if.so user != user/d' $LIGHTDM_PAM
+  sed -i '/auth \[success=1 default=ignore\] pam_succeed_if.so user != user/d' $LIGHTDM_PAM
   sed -i "\@auth required pam_python.so@d" $LIGHTDM_PAM
   systemctl disable "sms_logout.service"
   rm --force /usr/lib/x86_64-linux-gnu/security/os2borgerpc-sms-booking-pam-module.py \
@@ -66,6 +71,12 @@ if grep --quiet gdm3 $DEFAULT_DM_FILE; then
 else
   PAM_FILE=$LIGHTDM_PAM
   LOGOUT_SCRIPT=$LOGOUT_SCRIPT_LIGHTDM
+fi
+
+if [ -d "/root/.local/share/pipx/venvs/os2borgerpc-client" ]; then
+  PYTHON_SHEBANG="#!/root/.local/share/pipx/venvs/os2borgerpc-client/bin/python3"
+else
+  PYTHON_SHEBANG="#!/usr/bin/env python3"
 fi
 
 if [ "$ACTIVATE" = "True" ]; then
@@ -93,7 +104,7 @@ if [ "$ACTIVATE" = "True" ]; then
 
 # Separated out because the pam module cannot run if you import the admin_client or re
 cat << EOF > $SMS_LOGIN_INTERFACE_PYTHON3
-#!/usr/bin/env python3
+$PYTHON_SHEBANG
 
 import sys
 from subprocess import check_output
@@ -171,9 +182,9 @@ EOF
 
   chmod u+x $SMS_LOGIN_INTERFACE_PYTHON3
 
-# Separated out because the pam module cannot run if you import the admin_client
+# Separated out because the pam module cannot run otherwise
 cat << EOF > $LOGIN_FINALIZE_INTERFACE_PYTHON3
-#!/usr/bin/env python3
+$PYTHON_SHEBANG
 
 import sys
 from subprocess import check_output
@@ -232,7 +243,7 @@ EOF
 chmod 700 $GREETER_SETUP_SCRIPT
 
 cat << EOF > $LOGOUT_SCRIPT
-#!/usr/bin/env python3
+$PYTHON_SHEBANG
 
 from subprocess import check_output
 import os2borgerpc.client.admin_client as admin_client
@@ -343,7 +354,7 @@ def pam_sm_authenticate(pamh, flags, argv):
     # sms_booking_response is a binary string containing (time, 'citizen_hash_note')
     # This format determines the necessary commands to extract time and citizen_hash_note
     time = int(sms_booking_response.split(b", ")[0][1:])
-    citizen_hash_note = str(sms_booking_response.split(b", ")[1][:-1])[1:-1]
+    citizen_hash_note = str(sms_booking_response.split(b", ")[1][:-1])[1:-1].replace('"','').replace("'","")
 
     if citizen_hash_note == "sms_failed":
         result_msg = pamh.Message(
@@ -430,6 +441,7 @@ def pam_sm_authenticate(pamh, flags, argv):
             log_id = check_output(
                 ["$LOGIN_FINALIZE_INTERFACE_PYTHON3", phone_number]
             ).strip()
+            log_id = log_id.decode("ascii")
             if log_id:
                 with open("$LOG_ID_FILE", "w") as f:
                     f.write(log_id)
@@ -498,13 +510,17 @@ def pam_sm_setcred(pamh, flags, argv):
 EOF
 
 # Make sure they have a sufficiently updated version of the client
-pip install --upgrade os2borgerpc-client
+if [ -d "/root/.local/share/pipx/venvs/os2borgerpc-client" ]; then
+  pipx upgrade os2borgerpc-client
+else
+  pip install --upgrade os2borgerpc-client
+fi
 
 else # Cleanup and remove the SMS/booking integration
   # Remove SMS/booking integration from /etc/pam.d/ files
   sed -i '/pam_succeed_if.so user = user/d' $PAM_FILE
   sed -i '/# OS2borgerPC custom login/d' $PAM_FILE
-  sed -i '/pam_succeed_if.so user != user/d' $PAM_FILE
+  sed -i '/auth \[success=1 default=ignore\] pam_succeed_if.so user != user/d' $PAM_FILE
   sed -i "\@auth required pam_python.so@d" $PAM_FILE
 
   systemctl disable "$(basename $LOGOUT_SERVICE)"
