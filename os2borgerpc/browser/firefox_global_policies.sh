@@ -40,7 +40,7 @@ PDF_TYPE_2=application/x-bzpdf
 PDF_TYPE_3=application/x-gzpdf
 PDF_TYPE_4=application/x-lzpdf
 PDF_TYPE_5=application/x-xzpdf
-PROGRAMS_TO_REMOVE="libreoffice-draw.desktop;google-chrome.desktop;microsoft-edge.desktop;chromium_chromium.desktop;firefox_firefox.desktop"
+PROGRAMS_TO_REMOVE="libreoffice-draw.desktop;com.google.Chrome.desktop;google-chrome.desktop;microsoft-edge.desktop;chromium_chromium.desktop;firefox_firefox.desktop"
 
 if [ -z "$STARTPAGE" ]; then
   echo "WARNING: Missing <URL> argument. Unable to set Firefox startpage."
@@ -141,13 +141,18 @@ fi
 if ! grep "Removed Associations" $GLOBAL_MIME_FILE; then
 	cat <<- EOF >> "$GLOBAL_MIME_FILE"
 		[Removed Associations]
-		$PDF_TYPE_1=$PROGRAMS_TO_REMOVE
-		$PDF_TYPE_2=$PROGRAMS_TO_REMOVE
-		$PDF_TYPE_3=$PROGRAMS_TO_REMOVE
-		$PDF_TYPE_4=$PROGRAMS_TO_REMOVE
-		$PDF_TYPE_5=$PROGRAMS_TO_REMOVE
 	EOF
 fi
+# Delete everything after "[Removed Associations] for idempotency
+sed --in-place "/Removed Associations/q" $GLOBAL_MIME_FILE
+
+cat <<- EOF >> "$GLOBAL_MIME_FILE"
+$PDF_TYPE_1=$PROGRAMS_TO_REMOVE
+$PDF_TYPE_2=$PROGRAMS_TO_REMOVE
+$PDF_TYPE_3=$PROGRAMS_TO_REMOVE
+$PDF_TYPE_4=$PROGRAMS_TO_REMOVE
+$PDF_TYPE_5=$PROGRAMS_TO_REMOVE
+EOF
 
 # Remove the policy from its former standard location if present.
 rm --force /usr/lib/firefox/distribution/policies.json

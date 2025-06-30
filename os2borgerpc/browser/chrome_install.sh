@@ -72,6 +72,13 @@ setup_policies() {
 
   mkdir --parents "$(dirname "$POLICY")"
 
+  # Ensure that the default pdf reader setting is correct to prevent the computer
+  # from using Chrome as a pdf reader
+  GLOBAL_MIME_FILE="/etc/xdg/mimeapps.list"
+  if [ -f "$GLOBAL_MIME_FILE" ]; then
+    sed --in-place "s@/usr/share/applications/@@" $GLOBAL_MIME_FILE
+  fi
+
   cat > "$POLICY" << END
 {
     "AutofillAddressEnabled": false,

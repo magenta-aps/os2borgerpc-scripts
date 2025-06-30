@@ -32,7 +32,7 @@ PDF_TYPE_2=application/x-bzpdf
 PDF_TYPE_3=application/x-gzpdf
 PDF_TYPE_4=application/x-lzpdf
 PDF_TYPE_5=application/x-xzpdf
-PROGRAMS_TO_REMOVE="libreoffice-draw.desktop;google-chrome.desktop;microsoft-edge.desktop;chromium_chromium.desktop;firefox_firefox.desktop"
+PROGRAMS_TO_REMOVE="libreoffice-draw.desktop;com.google.Chrome.desktop;google-chrome.desktop;microsoft-edge.desktop;chromium_chromium.desktop;firefox_firefox.desktop"
 
 # Removes PDF programs from the Default Applications section in the specified file
 cleanup_mime_file_default() {
@@ -47,7 +47,6 @@ set_default_pdf_reader() {
 
   [ "$PROGRAM" = "okular" ] && DESKTOP_FILE=okularApplication_kimgio.desktop
   [ "$PROGRAM" = "evince" ] && DESKTOP_FILE=org.gnome.Evince.desktop
-  DESKTOP_FILE_PATH="/usr/share/applications/$DESKTOP_FILE"
 
   # Idempotency and cleanup
   cleanup_mime_file_default $GLOBAL_MIME_FILE
@@ -58,11 +57,11 @@ set_default_pdf_reader() {
   [ -f $OLD_USER_MIME_FILE ] && cleanup_mime_file_default $OLD_USER_MIME_FILE
 
   sed --in-place "/Default Applications/a \
-$PDF_TYPE_1=$DESKTOP_FILE_PATH\n\
-$PDF_TYPE_2=$DESKTOP_FILE_PATH\n\
-$PDF_TYPE_3=$DESKTOP_FILE_PATH\n\
-$PDF_TYPE_4=$DESKTOP_FILE_PATH\n\
-$PDF_TYPE_5=$DESKTOP_FILE_PATH" "$GLOBAL_MIME_FILE"
+$PDF_TYPE_1=$DESKTOP_FILE\n\
+$PDF_TYPE_2=$DESKTOP_FILE\n\
+$PDF_TYPE_3=$DESKTOP_FILE\n\
+$PDF_TYPE_4=$DESKTOP_FILE\n\
+$PDF_TYPE_5=$DESKTOP_FILE" "$GLOBAL_MIME_FILE"
 }
 
 # SCRIPT PROPER
@@ -82,13 +81,18 @@ fi
 if ! grep "Removed Associations" $GLOBAL_MIME_FILE; then
 	cat <<- EOF >> "$GLOBAL_MIME_FILE"
 		[Removed Associations]
-		$PDF_TYPE_1=$PROGRAMS_TO_REMOVE
-		$PDF_TYPE_2=$PROGRAMS_TO_REMOVE
-		$PDF_TYPE_3=$PROGRAMS_TO_REMOVE
-		$PDF_TYPE_4=$PROGRAMS_TO_REMOVE
-		$PDF_TYPE_5=$PROGRAMS_TO_REMOVE
 	EOF
 fi
+# Delete everything after "[Removed Associations] for idempotency
+sed --in-place "/Removed Associations/q" $GLOBAL_MIME_FILE
+
+cat <<- EOF >> "$GLOBAL_MIME_FILE"
+$PDF_TYPE_1=$PROGRAMS_TO_REMOVE
+$PDF_TYPE_2=$PROGRAMS_TO_REMOVE
+$PDF_TYPE_3=$PROGRAMS_TO_REMOVE
+$PDF_TYPE_4=$PROGRAMS_TO_REMOVE
+$PDF_TYPE_5=$PROGRAMS_TO_REMOVE
+EOF
 
 if [ "$PDF_READER_TO_SWITCH_TO" = "okular" ]; then
 
