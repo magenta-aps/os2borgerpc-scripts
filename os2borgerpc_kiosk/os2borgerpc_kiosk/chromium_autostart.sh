@@ -332,7 +332,7 @@ EOF
 # Stop the program
 if [ "$HIDE_CURSOR" = "False" ]; then
   sed --in-place "/$UNCLUTTER_NAME/d" "$XINITRC"
-  pkill unclutter
+  pkill unclutter || true
 else
   # 3 i means: Insert on line 3
   sed --in-place "3 i $UNCLUTTER_NAME &" "$XINITRC"
