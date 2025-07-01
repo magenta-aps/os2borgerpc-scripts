@@ -22,9 +22,16 @@ export DEBIAN_FRONTEND=noninteractive
 
 apt-get update --assume-yes
 
+if ! get_os2borgerpc_config os2_product | grep --quiet rpi; then
+  # Note: -intel and -qxl are technically under "recommends" for -all so specifying them isn't strictly needed
+  VIDEO_DRIVERS="xserver-xorg-video-qxl xserver-xorg-video-intel xserver-xorg-video-all"
+else
+  VIDEO_DRIVERS=""
+fi
+
 apt-get install --assume-yes xinit xserver-xorg-core x11-xserver-utils --no-install-recommends --no-install-suggests
-# Unclutter automatically hides the cursor after inactivity. Chromium_autostart.sh determines whether it's active or not
-apt-get install --assume-yes xdg-utils xserver-xorg-video-qxl xserver-xorg-video-intel xserver-xorg-video-all xserver-xorg-input-all libleveldb-dev unclutter-xfixes xbindkeys
+# shellcheck disable=SC2086  # We want word-splitting
+apt-get install --assume-yes xdg-utils $VIDEO_DRIVERS xserver-xorg-input-all libleveldb-dev unclutter-xfixes xbindkeys
 
 # This section is a workaround to handle an error in Ubuntu server 22.04
 # that causes certain snap installs to trigger DNS problems on wifi.
