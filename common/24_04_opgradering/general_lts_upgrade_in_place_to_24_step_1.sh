@@ -20,10 +20,41 @@ if lsb_release -d | grep --quiet 20; then
   exit 1
 fi
 
+# Fail on machines that have already run this script or later upgrade scripts
+if [ -f "/etc/os2borgerpc/first_24_upgrade_step_done" ]; then
+  echo "This script has already been run on this computer."
+  echo "Please run 24.04 opgradering - Opgradering til Ubuntu 24.04 trin 2 to continue the upgrade."
+  exit 1
+elif [ -f "/etc/os2borgerpc/second_24_upgrade_step_done" ]; then
+  echo "This computer has already completed the first two steps in the upgrade."
+  if ! get_os2borgerpc_config os2_product | grep --quiet kiosk; then
+    echo "Please run 24.04 opgradering - Opgradering til Ubuntu 24.04 trin 3 to continue the upgrade."
+  else
+    echo "Please run 24.04 opgradering - Kiosk Opgradering til Ubuntu 24.04 trin 3 to continue the upgrade."
+  fi
+  exit 1
+elif [ -f "/etc/os2borgerpc/third_24_upgrade_step_done" ]; then
+  echo "This computer has already completed the first three steps in the upgrade."
+  if ! get_os2borgerpc_config os2_product | grep --quiet kiosk; then
+    echo "Please run 24.04 opgradering - Opgradering til Ubuntu 24.04 trin 4 to complete the upgrade."
+  else
+    echo "Please run 24.04 opgradering - Kiosk Opgradering til Ubuntu 24.04 trin 4 to complete the upgrade."
+  fi
+  exit 1
+fi
+
 # Fail on machines that have already been upgraded
 if ! lsb_release -d | grep --quiet 22; then
   echo "This computer is not using Ubuntu 22.04."
   echo "This script is only meant for upgrading from Ubuntu 22.04 to Ubuntu 24.04."
+  exit 1
+fi
+
+if ! grep --quiet "GRUB_DEFAULT=0" /etc/default/grub; then
+  echo "This computer has been locked to a previous kernel."
+  echo "To minimize the risk of problems, please deactivate 'System - GRUB: Skift kerneversion'"
+  echo "then reboot the computer before running this script again."
+  echo "If necessary, 'System - GRUB: Skift kerneversion' can be reactivated after completing the upgrade."
   exit 1
 fi
 

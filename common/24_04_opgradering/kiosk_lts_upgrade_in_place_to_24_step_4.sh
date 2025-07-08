@@ -52,7 +52,8 @@ update-locale LANG=da_DK.UTF-8
 # Update the time accordingly
 export DEBIAN_FRONTEND=noninteractive
 apt-get install --assume-yes ntpdate
-ntpdate pool.ntp.org
+# It's not a big deal if the time sync fails, which it sometimes does for no apparent reason
+ntpdate pool.ntp.org || true
 
 # Setup the new autologin approach if they are not already using it
 AUTOLOGIN_SCRIPT="/usr/share/os2borgerpc/bin/autologin.sh"
