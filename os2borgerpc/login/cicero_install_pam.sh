@@ -101,15 +101,6 @@ import os2borgerpc.client.admin_client as admin_client
 import socket
 
 def cicero_validate(cicero_user, cicero_pass):
-    host_address = (
-        check_output(["get_os2borgerpc_config", "admin_url"]).decode().strip()
-    )
-    # Example URL:
-    # host_address = "https://os2borgerpc-admin.magenta.dk/admin-xml/"
-
-    # For local testing with VirtualBox
-    # host_address = "http://10.0.2.2:9999/admin-xml/"
-
     # Obtain the pc_uid and convert from bytes to regular string
     # and remove the trailing newline
     pc_uid = check_output(["get_os2borgerpc_config", "uid"]).decode().strip()
@@ -122,7 +113,7 @@ def cicero_validate(cicero_user, cicero_pass):
     #   r < 0: User is quarantined and may login in -r minutes
     #   r = 0: Unable to authenticate.
     #   r > 0: The user is allowed r minutes of login time.
-    admin = admin_client.OS2borgerPCAdmin(host_address + "/admin-xml/")
+    admin = admin_client.get_default_admin()
     try:
         time, citizen_hash, _ = admin.general_citizen_login(pc_uid, "cicero", value_dict)
     except (socket.gaierror, TimeoutError, ConnectionError):
@@ -164,10 +155,7 @@ def cicero_logout():
     if exists("$CITIZEN_HASH_FILE"):
         with open("$CITIZEN_HASH_FILE", "r") as f:
             citizen_hash = f.read()
-        host_address = (
-            check_output(["get_os2borgerpc_config", "admin_url"]).decode().strip()
-        )
-        admin = admin_client.OS2borgerPCAdmin(host_address + "/admin-xml/")
+        admin = admin_client.get_default_admin()
         try:
             result = admin.general_citizen_logout(citizen_hash, "")
         except (socket.gaierror, TimeoutError, ConnectionError):

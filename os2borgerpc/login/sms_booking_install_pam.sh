@@ -138,15 +138,6 @@ def sms_validate(phone_number, password):
     # Make the message for the sms
     message = f"Engångslösenordet för den här MedborgarPC är {password}"
 
-    host_address = (
-        check_output(["get_os2borgerpc_config", "admin_url"]).decode().strip()
-    )
-    # Example URL:
-    # host_address = "https://os2borgerpc-admin.magenta.dk"
-
-    # For local testing with VirtualBox
-    # host_address = "http://10.0.2.2:9999"
-
     # Obtain the pc_uid and convert from bytes to regular string
     # and remove the trailing newline
     pc_uid = check_output(["get_os2borgerpc_config", "uid"]).decode().strip()
@@ -165,7 +156,7 @@ def sms_validate(phone_number, password):
     #             the next matching booking starts in -time minutes
     #   time = 0: Unable to authenticate.
     #   time > 0: The user is allowed r minutes of login time.
-    admin = admin_client.OS2borgerPCAdmin(host_address + "/admin-xml/")
+    admin = admin_client.get_default_admin()
     try:
         time, citizen_hash_note = admin.sms_login(phone_number, message, pc_uid, require_booking, pc_name,
                                              allow_idle_login, login_duration, quarantine_duration)
@@ -199,20 +190,11 @@ quarantine_duration = $QUARANTINE_DURATION
 
 def sms_login_finalize(phone_number):
 
-    host_address = (
-        check_output(["get_os2borgerpc_config", "admin_url"]).decode().strip()
-    )
-    # Example URL:
-    # host_address = "https://os2borgerpc-admin.magenta.dk"
-
-    # For local testing with VirtualBox
-    # host_address = "http://10.0.2.2:9999"
-
     # Obtain the pc_uid and convert from bytes to regular string
     # and remove the trailing newline
     pc_uid = check_output(["get_os2borgerpc_config", "uid"]).decode().strip()
 
-    admin = admin_client.OS2borgerPCAdmin(host_address + "/admin-xml/")
+    admin = admin_client.get_default_admin()
     try:
         log_id = admin.sms_login_finalize(phone_number, pc_uid, require_booking, save_log,
                                           allow_idle_login, login_duration, quarantine_duration)
@@ -263,10 +245,7 @@ def sms_logout():
             with open("$LOG_ID_FILE", "r") as f:
                 log_id = f.read()
             remove("$LOG_ID_FILE")
-        host_address = (
-            check_output(["get_os2borgerpc_config", "admin_url"]).decode().strip()
-        )
-        admin = admin_client.OS2borgerPCAdmin(host_address + "/admin-xml/")
+        admin = admin_client.get_default_admin()
         try:
             result = admin.general_citizen_logout(citizen_hash, log_id)
         except (socket.gaierror, TimeoutError, ConnectionError):
