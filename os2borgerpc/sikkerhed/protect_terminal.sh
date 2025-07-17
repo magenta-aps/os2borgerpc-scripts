@@ -33,6 +33,12 @@ if grep --quiet "zenity" "$PROGRAM_PATH"; then
   dpkg-divert --remove --rename "$PROGRAM_PATH"
 fi
 
+# Make sure the terminal is correctly installed
+if [ ! -f "$PROGRAM_PATH" ] || [ ! -f "$PROGRAM_PATH.real" ]; then
+  apt-get update
+  apt-get install --reinstall --assume-yes gnome-terminal
+fi
+
 # Cleanup after previous script versions: Turns out this is unnecessary to hide the program from users program list
 rm --force $SHORTCUT_LOCAL_PATH
 
@@ -43,8 +49,13 @@ if [ "$ACTIVATE" = "True" ]; then # Restore access
   # statoverride remove can't change permissions and ownership back by itself currently, unfortunately
   chown root:root "$PROGRAM_PATH"
   chmod 755 "$PROGRAM_PATH"
+  # Do the same for the .real-file
+  dpkg-statoverride --remove "$PROGRAM_PATH.real" || true
+  chown root:root "$PROGRAM_PATH.real"
+  chmod 755 "$PROGRAM_PATH.real"
 else # Deny access
   dpkg-statoverride --update --add superuser root 770 "$PROGRAM_PATH" || true
+  dpkg-statoverride --update --add root superuser 750 "$PROGRAM_PATH.real" || true
 fi
 
 # For manual verification that there are no related diversions, but possibly a statoverride:
