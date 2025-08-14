@@ -148,6 +148,7 @@ fi
 
 # Fix /etc/xdg/mimeapps.list
 GLOBAL_MIME_FILE="/etc/xdg/mimeapps.list"
+OLD_DEFAULTS_LIST="/usr/share/applications/defaults.list"
 PDF_TYPE_1=application/pdf
 PDF_TYPE_2=application/x-bzpdf
 PDF_TYPE_3=application/x-gzpdf
@@ -157,6 +158,28 @@ if apt list --installed | grep --quiet okular; then
   DESKTOP_FILE=okularApplication_kimgio.desktop
 else
   DESKTOP_FILE=org.gnome.Evince.desktop
+fi
+if [ -f "$OLD_DEFAULTS_LIST" ]; then
+  if ! grep --quiet "text/html" $OLD_DEFAULTS_LIST; then
+    DEFAULT_BROWSER="firefox_firefox.desktop"
+  else
+    DEFAULT_BROWSER=$(grep "text/html" $OLD_DEFAULTS_LIST | cut --delimiter "=" --fields 2 | cut --delimiter "." --fields 1)
+    DEFAULT_BROWSER="$DEFAULT_BROWSER.desktop"
+  fi
+else
+  DEFAULT_BROWSER="firefox_firefox.desktop"
+fi
+if [ ! -f "$GLOBAL_MIME_FILE" ]; then
+  cat << EOF > $GLOBAL_MIME_FILE
+[Default Applications]
+EOF
+fi
+if ! grep --quiet "text/html" $GLOBAL_MIME_FILE; then
+  sed --in-place "/Default Applications/a \
+application/xhtml+xml=$DEFAULT_BROWSER\n\
+text/html=$DEFAULT_BROWSER\n\
+x-scheme-handler/http=$DEFAULT_BROWSER\n\
+x-scheme-handler/https=$DEFAULT_BROWSER" $GLOBAL_MIME_FILE
 fi
 if ! grep --quiet "$DESKTOP_FILE" $GLOBAL_MIME_FILE; then
   sed --in-place "/Default Applications/a \

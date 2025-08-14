@@ -143,6 +143,11 @@ if [ -f "$LOCKDOWN_USB_FILE" ]; then
   systemctl disable --now os2borgerpc-usb-monitor.service
 fi
 
+# Make sure that we have a backup of jobmanager, just in case
+if [ ! -f "/etc/os2borgerpc/jobmanager" ]; then
+  cp "/usr/local/bin/jobmanager" "/etc/os2borgerpc/"
+fi
+
 # Perform the actual upgrade with some error handling
 if lsb_release -d | grep --quiet 22; then
   do-release-upgrade -f DistUpgradeViewNonInteractive > /var/log/os2borgerpc_upgrade_2.log || true
@@ -155,8 +160,6 @@ apt-get --assume-yes install --upgrade python3-pip || true
 
 # Install the client via pipx
 apt-get --assume-yes install pipx || true
-# Take a backup of jobmanager before overwriting it, just in case
-cp "/usr/local/bin/jobmanager" "/etc/os2borgerpc/"
 PIPX_ERRORS="False"
 PIPX_BIN_DIR="/usr/local/bin" PIPX_HOME="/root/.local/share/pipx" pipx install --force os2borgerpc-client || PIPX_ERRORS="True"
 
@@ -168,8 +171,6 @@ if [ "$PIPX_ERRORS" = "True" ]; then
   echo "A problem occurred during the switch to pipx. Try rebooting and running this script again."
   echo "If the problem persists, contact support."
   exit 1
-else
-  rm "/etc/os2borgerpc/jobmanager"
 fi
 
 # Modify update_client_and_register to use pipx
@@ -207,6 +208,9 @@ fi
 RELEASE=$(lsb_release --release --short)
 set_os2borgerpc_config _os_release "$RELEASE"
 os2borgerpc_push_config_keys _os_release
+
+# Delete the backup of jobmanager, which we no longer need
+rm --force "/etc/os2borgerpc/jobmanager"
 
 rm --force $PREVIOUS_STEP_DONE
 
