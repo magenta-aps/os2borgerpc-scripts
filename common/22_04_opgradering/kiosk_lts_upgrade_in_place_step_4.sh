@@ -52,7 +52,8 @@ update-locale LANG=da_DK.UTF-8
 # Update the time accordingly
 export DEBIAN_FRONTEND=noninteractive
 apt-get install --assume-yes ntpdate
-ntpdate pool.ntp.org
+# It's not a big deal if the time sync fails, which it sometimes does for no apparent reason
+ntpdate pool.ntp.org || true
 
 # Setup Chromium user
 USER="chrome"
@@ -343,11 +344,6 @@ fi
 set_os2borgerpc_config job_timeout 900
 
 os2borgerpc_push_config_keys job_timeout
-
-# Update distribution to show ubuntu22.04
-set_os2borgerpc_config distribution ubuntu22.04
-
-os2borgerpc_push_config_keys distribution
 
 # Fix dpkg settings
 cat << EOF > /etc/apt/apt.conf.d/local
