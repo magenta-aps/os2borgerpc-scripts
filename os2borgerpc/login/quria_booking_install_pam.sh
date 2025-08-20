@@ -116,15 +116,6 @@ def quria_validate(loaner_number, pincode):
     if not re.fullmatch(f"^\d+$", pincode):
         return 0, "invalid_pin", ""
 
-    host_address = (
-        check_output(["get_os2borgerpc_config", "admin_url"]).decode().strip()
-    )
-    # Example URL:
-    # host_address = "https://os2borgerpc-admin.magenta.dk"
-
-    # For local testing with VirtualBox
-    # host_address = "http://10.0.2.2:9999"
-
     # Obtain the pc_uid and convert from bytes to regular string
     # and remove the trailing newline
     pc_uid = check_output(["get_os2borgerpc_config", "uid"]).decode().strip()
@@ -157,7 +148,7 @@ def quria_validate(loaner_number, pincode):
     #             the next booking starts in -time minutes (theirs or anothers)
     #   time = 0: Unable to authenticate.
     #   time > 0: The user is allowed r minutes of login time.
-    admin = admin_client.OS2borgerPCAdmin(host_address + "/admin-xml/")
+    admin = admin_client.get_default_admin()
     try:
         time, citizen_hash_note, log_id = admin.general_citizen_login(pc_uid, "quria", value_dict)
     except (socket.gaierror, TimeoutError, ConnectionError):
@@ -208,10 +199,7 @@ def quria_logout():
             with open("$LOG_ID_FILE", "r") as f:
                 log_id = f.read()
             remove("$LOG_ID_FILE")
-        host_address = (
-            check_output(["get_os2borgerpc_config", "admin_url"]).decode().strip()
-        )
-        admin = admin_client.OS2borgerPCAdmin(host_address + "/admin-xml/")
+        admin = admin_client.get_default_admin()
         try:
             result = admin.general_citizen_logout(citizen_hash, log_id)
         except (socket.gaierror, TimeoutError, ConnectionError):
