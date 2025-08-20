@@ -22,16 +22,24 @@ runuser -u user xdg-user-dirs-update
 DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
 
 USER_AGENT="Mozilla\/5.0 (Windows NT 10.0\; Win64\; x64) AppleWebKit\/537.36 (KHTML\, like Gecko) Chrome\/119.0.0.0 Safari\/537.36"
-ORIGINAL_FILE="/usr/share/applications/google-chrome.desktop"
-DESKTOP_FILE_1="/home/$SHADOW/.local/share/applications/google-chrome.desktop"
-DESKTOP_FILE_2="/home/$SHADOW/$DESKTOP/google-chrome.desktop"
-DESKTOP_FILE_3="/home/$SHADOW/.config/autostart/google-chrome.desktop"
-FILES="$DESKTOP_FILE_1 $DESKTOP_FILE_2 $DESKTOP_FILE_3"
+CHROME_ORIGINAL_FILE="/usr/share/applications/google-chrome.desktop"
+CHROME_DESKTOP_FILE_1="/home/$SHADOW/.local/share/applications/google-chrome.desktop"
+CHROME_DESKTOP_FILE_2="/home/$SHADOW/$DESKTOP/google-chrome.desktop"
+CHROME_DESKTOP_FILE_3="/home/$SHADOW/.config/autostart/google-chrome.desktop"
+CHROME_FILES="$CHROME_DESKTOP_FILE_1 $CHROME_DESKTOP_FILE_2 $CHROME_DESKTOP_FILE_3"
+CHROMIUM_ORIGINAL_FILE="/var/lib/snapd/desktop/applications/chromium_chromium.desktop"
+CHROMIUM_DESKTOP_FILE_1="/home/$SHADOW/.local/share/applications/chromium_chromium.desktop"
+CHROMIUM_DESKTOP_FILE_2="/home/$SHADOW/$DESKTOP/chromium_chromium.desktop"
+CHROMIUM_DESKTOP_FILE_3="/home/$SHADOW/.config/autostart/chromium_chromium.desktop"
+CHROMIUM_FILES="$CHROMIUM_DESKTOP_FILE_1 $CHROMIUM_DESKTOP_FILE_2 $CHROMIUM_DESKTOP_FILE_3"
 
 # Ensure that the local copy exists
-mkdir --parents "$(dirname "$DESKTOP_FILE_1")"
-if [ ! -f "$DESKTOP_FILE_1" ]; then
-  cp "$ORIGINAL_FILE" "$DESKTOP_FILE_1"
+mkdir --parents "$(dirname "$CHROME_DESKTOP_FILE_1")"
+if [ ! -f "$CHROME_DESKTOP_FILE_1" ]; then
+  cp "$CHROME_ORIGINAL_FILE" "$CHROME_DESKTOP_FILE_1"
+fi
+if [ ! -f "$CHROMIUM_DESKTOP_FILE_1" ]; then
+  cp "$CHROMIUM_ORIGINAL_FILE" "$CHROMIUM_DESKTOP_FILE_1"
 fi
 
 # Takes a parameter to add to Chrome and a list of .desktop files to add it to
@@ -43,12 +51,16 @@ add_to_desktop_files() {
     if [ -f "$FILE" ]; then
       # Don't add the parameter multiple times
       if ! grep --quiet -- "$PARAMETER" "$FILE"; then
-        sed --in-place "s,\(Exec=\S*\)\(.*\),\1 $PARAMETER\2," "$FILE"
+        # Snap handling
+        if ! grep --quiet 'Exec.*/snap/' "$FILE"; then
+          sed --in-place "s,\(Exec=\S*\)\(.*\),\1 $PARAMETER\2," "$FILE"
+        else
+          sed --in-place "s,\(Exec=.*/snap/bin/\S*\)\(.*\),\1 $PARAMETER\2," "$FILE"
+        fi
       fi
     fi
   done
 }
-
 # Takes a parameter to remove and a list of .desktop files to remove it from
 remove_from_desktop_files() {
   PARAMETER="$1"
@@ -70,8 +82,8 @@ fi
 
 if [ "$ACTIVATE" = "True" ]; then
   # shellcheck disable=SC2086 # We want to split the files back into separate arguments
-  add_to_desktop_files "--user-agent='$USER_AGENT'" $FILES
+  add_to_desktop_files "--user-agent='$USER_AGENT'" $CHROME_FILES $CHROMIUM_FILES
 else
   # shellcheck disable=SC2086 # We want to split the files back into separate arguments
-  remove_from_desktop_files "--user-agent='$USER_AGENT'" $FILES
+  remove_from_desktop_files "--user-agent='$USER_AGENT'" $CHROME_FILES $CHROMIUM_FILES
 fi
