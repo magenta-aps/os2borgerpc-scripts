@@ -6,8 +6,6 @@
 #
 # SPDX-FileContributor: Marcus Funch
 
-UBUNTU_VERSION=$(lsb_release --release --short)
-
 pulseaudio_initial_setup() {
     # Hacky workaround to be able to run pactl as root
     # https://stackoverflow.com/a/64932897/1172409
@@ -40,74 +38,48 @@ pulseaudio_cleanup() {
 }
 
 header() {
-    MSG=$1
-    printf "\n\n\n%s\n\n\n" "### $MSG ###"
+  MSG=$1
+  printf "\n\n\n%s\n\n\n" "### $MSG ###"
 }
 
 text() {
-    MSG=$1
-    printf "\n%s\n" "### $MSG ###"
+  MSG=$1
+  printf "\n%s\n" "### $MSG ###"
 }
 
-if [ "$UBUNTU_VERSION" != "20.04" ] && [ "$UBUNTU_VERSION" != "22.04" ]; then # 24.04 and newer
-    # Determine the running user
-    RUNNING_USERS=$(who)
-    if echo "$RUNNING_USERS" | grep --quiet 'superuser'; then
-        U="superuser"
-    elif echo "$RUNNING_USERS" | grep --quiet 'user'; then
-        U="user"
-    elif echo "$RUNNING_USERS" | grep --quiet 'gdm'; then
-        U="gdm"
-    elif echo "$RUNNING_USERS" | grep --quiet 'lightdm'; then
-        U="lightdm"
-    else
-        echo "Failed to identify the current user. Exiting"
-        exit 1
-    fi
+pulseaudio_initial_setup  # To be run before any pulseaudio commands are executed
 
-    USER_ID=$(id -u $U)
+text "List of cards"
+run_pulseaudio_command "pactl list cards short" | tr "\t" " "  # Currently the client removes tabs from the log-output, so this is a workaround
 
-    text "List of sinks"
-    XDG_RUNTIME_DIR=/run/user/$USER_ID pw-cli info all 2>/dev/null | grep 'node.name =' | grep --invert-match 'Dummy\|Freewheel\|Midi' | cut --delimiter='=' --fields 2
+text "Overview of sinks and their volumes and mute status"
+run_pulseaudio_command "pactl list sinks" | grep -E "Sink|State|Name|Description|Mute|Volume"
 
-    text "Current default output (sink) and input (source) and their current volumes"
-    XDG_RUNTIME_DIR=/run/user/$USER_ID wpctl status --name | sed --quiet '/^Audio/,/^Video/p' | grep '*'
+text "Default sink"
+# This one works in newer versions of pactl, but not in the one in Ubuntu 20.04 necessarily
+# run_pulseaudio_command "pactl get-default-sink"
+# ...so this is another way:
+run_pulseaudio_command "pactl info" | tail --lines 6
 
-else # Legacy support: pulseaudio
-    pulseaudio_initial_setup  # To be run before any pulseaudio commands are executed
+header "INFO ON BORGERPC AUDIO CONFIG AND PULSEAUDIO CONFIG FILES"
 
-    text "List of cards"
-    run_pulseaudio_command "pactl list cards short" | tr "\t" " "  # Currently the client removes tabs from the log-output, so this is a workaround
+text "Print contents of current borgerpc pulseaudio config file"
+cat /etc/pulse/default.pa.d/os2borgerpc.pa
 
-    text "Overview of sinks and their volumes and mute status"
-    run_pulseaudio_command "pactl list sinks" | grep -E "Sink|State|Name|Description|Mute|Volume"
+text "Print contents of the previous borgerpc pulseaudio config file"
+cat /etc/pulse/profile.pa.d/os2borgerpc.pa
 
-    text "Default sink"
-    # This one works in newer versions of pactl, but not in the one in Ubuntu 20.04 necessarily
-    # run_pulseaudio_command "pactl get-default-sink"
-    # ...so this is another way:
-    run_pulseaudio_command "pactl info" | tail --lines 6
+text "Print the last lines of the main pulseaudio config file"
+# This file should include a line that makes it load all files from the dir /etc/pulse/profile.pa.d/
+tail --lines 3 /etc/pulse/default.pa
 
-    header "INFO ON BORGERPC AUDIO CONFIG AND PULSEAUDIO CONFIG FILES"
+header "DETAILED INFO"
 
-    text "Print contents of current borgerpc pulseaudio config file"
-    cat /etc/pulse/default.pa.d/os2borgerpc.pa
+text "Detailed info on cards and their profiles and ports"
+run_pulseaudio_command "pactl list cards"
 
-    text "Print contents of the previous borgerpc pulseaudio config file"
-    cat /etc/pulse/profile.pa.d/os2borgerpc.pa
+# Not sure if these are specifically the sinks for the current profile or not?
+text "Detailed info on sinks and their ports (incl. volume, mute status etc.)"
+run_pulseaudio_command "pactl list sinks"
 
-    text "Print the last lines of the main pulseaudio config file"
-    # This file should include a line that makes it load all files from the dir /etc/pulse/profile.pa.d/
-    tail --lines 3 /etc/pulse/default.pa
-
-    header "DETAILED INFO"
-
-    text "Detailed info on cards and their profiles and ports"
-    run_pulseaudio_command "pactl list cards"
-
-    # Not sure if these are specifically the sinks for the current profile or not?
-    text "Detailed info on sinks and their ports (incl. volume, mute status etc.)"
-    run_pulseaudio_command "pactl list sinks"
-
-    pulseaudio_cleanup  # To be run after any pulseaudio commands are executed (to cleanup changes by pulseaudio_initial_setup)
-fi
+pulseaudio_cleanup  # To be run after any pulseaudio commands are executed (to cleanup changes by pulseaudio_initial_setup)
