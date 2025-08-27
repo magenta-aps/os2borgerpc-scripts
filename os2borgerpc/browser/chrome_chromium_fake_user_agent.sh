@@ -4,16 +4,27 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# SPDX-FileContributor: MAndreas Poulsen
+# SPDX-FileContributor: Andreas Poulsen
 
 set -x
 
-if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
-  echo "Dette script er ikke designet til at blive anvendt på en kiosk-maskine."
-  exit 1
-fi
-
 ACTIVATE=$1
+
+USER_AGENT="Mozilla\/5.0 (Windows NT 10.0\; Win64\; x64) AppleWebKit\/537.36 (KHTML\, like Gecko) Chrome\/119.0.0.0 Safari\/537.36"
+
+if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
+  CHROMIUM_SCRIPT='/usr/share/os2borgerpc/bin/start_chromium.sh'
+  if [ ! -f "$CHROMIUM_SCRIPT" ]; then
+    echo 'You need to run "OS2borgerPC Kiosk - Chromium Autostart" before running this script.'
+    exit 1
+  fi
+  if [ "$ACTIVATE" = "True" ] && ! grep --quiet -- "--user-agent='$USER_AGENT'" $CHROMIUM_SCRIPT; then
+    sed --in-place "s@chromium-browser@chromium-browser --user-agent='$USER_AGENT'@" $CHROMIUM_SCRIPT
+  elif [ "$ACTIVATE" = "False" ]; then
+    sed --in-place "s@ --user-agent='$USER_AGENT'@@g" $CHROMIUM_SCRIPT
+  fi
+  exit 0
+fi
 
 SHADOW=".skjult"
 
@@ -21,7 +32,6 @@ export "$(grep LANG= /etc/default/locale | tr -d '"')"
 runuser -u user xdg-user-dirs-update
 DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
 
-USER_AGENT="Mozilla\/5.0 (Windows NT 10.0\; Win64\; x64) AppleWebKit\/537.36 (KHTML\, like Gecko) Chrome\/119.0.0.0 Safari\/537.36"
 CHROME_ORIGINAL_FILE="/usr/share/applications/google-chrome.desktop"
 CHROME_DESKTOP_FILE_1="/home/$SHADOW/.local/share/applications/google-chrome.desktop"
 CHROME_DESKTOP_FILE_2="/home/$SHADOW/$DESKTOP/google-chrome.desktop"
