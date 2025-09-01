@@ -241,8 +241,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
                         <key group='shifts'    id='RTSH'/>
                         <!--<key group='bottomrow' id='LCTL'/>
                         <key group='bottomrow' id='LALT'/>
-                        <key group='bottomrow' id='RALT'/>
                         <key group="bottomrow" id="LWIN"/>-->
+                        <key group='bottomrow' id='RALT'/>
 
                         <key group="bottomrow" id="SPCE"/>
                         <key group="bottomrow" id="DELE.next-to-backspace"/>
