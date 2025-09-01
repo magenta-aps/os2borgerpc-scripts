@@ -80,7 +80,7 @@ EOF
   cat << EOF > /etc/systemd/system/getty@tty1.service.d/override.conf
 [Service]
 ExecStart=
-ExecStart=-/sbin/agetty --noissue --login-program $AUTOLOGIN_SCRIPT --autologin $USER %I $TERM
+ExecStart=-/sbin/agetty --noissue --login-program $AUTOLOGIN_SCRIPT --autologin $CUSER %I $TERM
 Type=idle
 EOF
 
@@ -109,8 +109,10 @@ EOF
 
   # To maintain the functionality of the error reboot script
   if [ -f "$REBOOT_SCRIPT" ]; then
-    sed --in-place --expression "\@else@{ n; n; s@/bin/login@$REBOOT_SCRIPT@ }" \
-        --expression "s/Regular login prompt/Reboot the computer/" $AUTOLOGIN_SCRIPT
+    # If we combine these two sed-commands into one, the second one doesn't work
+    # for some reason
+    sed --in-place "\@else@{ n; n; s@/bin/login@$REBOOT_SCRIPT@ }" $AUTOLOGIN_SCRIPT
+    sed --in-place "s/Regular login prompt/Reboot the computer/" $AUTOLOGIN_SCRIPT
   fi
 
   chmod 700 $AUTOLOGIN_SCRIPT
