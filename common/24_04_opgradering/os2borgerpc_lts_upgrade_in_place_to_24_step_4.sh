@@ -207,8 +207,10 @@ LIGHTDM_SUSPEND_SCRIPT="/etc/lightdm/greeter-setup-scripts/suspend_after_time.sh
 if [ -f "$INACTIVITY_SCRIPT" ] && grep --quiet "XAUTHORITY" $INACTIVITY_SCRIPT; then
   OUR_USER="user"
   TIMES=$(grep -- "-ge" $INACTIVITY_SCRIPT)
-  LOGOUT_TIME_MS=$(echo "$TIMES" | cut --delimiter " " --fields 5)
-  DIALOG_TIME_MS=$(echo "$TIMES" | cut --delimiter " " --fields 12)
+  # shellcheck disable=SC2086 # We need word splitting for this to work correctly
+  LOGOUT_TIME_MS=$(echo $TIMES | cut --delimiter " " --fields 5)
+  # shellcheck disable=SC2086 # We need word splitting for this to work correctly
+  DIALOG_TIME_MS=$(echo $TIMES | cut --delimiter " " --fields 12)
   DIALOG_TEXT=$(grep "zenity --warning" $INACTIVITY_SCRIPT | cut --delimiter '"' --fields 2)
   BUTTON_TEXT=$(grep "zenity --warning" $INACTIVITY_SCRIPT | cut --delimiter '"' --fields 4)
   if grep --quiet "systemctl suspend" $INACTIVITY_SCRIPT; then
@@ -303,7 +305,7 @@ EOF
   chmod 700 $INACTIVITY_SCRIPT
 fi
 if [ -f "$LIGHTDM_SUSPEND_SCRIPT" ]; then
-  sed --in-place "/scriptlogs/d" $LIGHTDM_SUSPEND_SCRIPT
+  sed --in-place "/LOG/d" $LIGHTDM_SUSPEND_SCRIPT
 fi
 rm --force "/usr/share/os2borgerpc/bin/inactive_logout.log" "/etc/lightdm/scriptlogs/suspend_after_time.log"
 
@@ -425,8 +427,6 @@ cat << EOF > $GRD_POLICY_LOCK_FILE
 /org/gnome/desktop/remote-desktop/vnc/view-only
 EOF
 
-dconf update
-
 # Ensure that user-cleanup will work correctly if they swap to gdm
 USER_CLEANUP="/usr/share/os2borgerpc/bin/user-cleanup.bash"
 if ! grep --quiet "PATH=" $USER_CLEANUP; then
@@ -448,6 +448,30 @@ fi
 
 # Remove thunderbird, don't stop if it fails (it might not be installed)
 snap remove thunderbird || true
+
+# Install the snap version of pinta if they previously had the apt version.
+# The apt version is not available in 24.04.
+if [ -f "/etc/os2borgerpc/pinta_installed" ]; then
+  snap install pinta
+  # Fix potential pinta shortcuts
+  sed --in-place "s/pinta/pinta_pinta/" /etc/dconf/db/os2borgerpc.d/02-launcher-favorites
+  export "$(grep LANG= /etc/default/locale | tr -d '"')"
+  runuser -u user xdg-user-dirs-update
+  DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
+  SHADOW_DESKTOP="/home/.skjult/$DESKTOP"
+  OLD_DESKTOP_FILE="$SHADOW_DESKTOP/pinta.desktop"
+  if [ -f "$OLD_DESKTOP_FILE" ]; then
+    OLD_LOCAL_COPY="/home/.skjult/.local/share/applications/pinta.desktop"
+    NEW_LOCAL_COPY="/home/.skjult/.local/share/applications/pinta_pinta.desktop"
+    rm --force "$OLD_LOCAL_COPY" "$OLD_DESKTOP_FILE"
+    mkdir --parents "$(dirname $NEW_LOCAL_COPY)"
+    cp "/var/lib/snapd/desktop/applications/pinta_pinta.desktop" $NEW_LOCAL_COPY
+    ln --symbolic --force "$NEW_LOCAL_COPY" "$SHADOW_DESKTOP/pinta_pinta.desktop"
+  fi
+  rm /etc/os2borgerpc/pinta_installed
+fi
+
+dconf update
 
 # Fix dpkg settings
 cat << EOF > /etc/apt/apt.conf.d/local

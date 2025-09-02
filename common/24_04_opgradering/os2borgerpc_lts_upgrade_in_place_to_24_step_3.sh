@@ -92,6 +92,25 @@ fi
 # Ensure correct permissions on user-cleanup.bash
 chmod 700 "/usr/share/os2borgerpc/bin/user-cleanup.bash"
 
+# Check if the apt version of Pinta is installed so we can install
+# the snap version after the upgrade. The apt version of Pinta is
+# not available in 24.04 and will automatically be removed during
+# the upgrade
+if apt list --installed | grep --quiet pinta; then
+  touch /etc/os2borgerpc/pinta_installed
+fi
+
+# If the default printer is a princh printer, set it as default printer
+# again via the new method. This is done because some customers
+# reported that princh printers were not correctly set as the default printer
+# after the upgrade, most likely because they've only used the old version
+# of the script for adding princh printers.
+DEFAULT_PRINTER=$(lpstat -s | grep "system default destination:" | cut --delimiter ":" --fields 2 | xargs)
+if [ ! -z "$DEFAULT_PRINTER" ] && lpstat -s | grep "$DEFAULT_PRINTER" | grep --quiet princh; then
+  lpadmin -d "$DEFAULT_PRINTER" || true
+  lpoptions -d "$DEFAULT_PRINTER" || true
+fi
+
 # Switch to new method for hiding terminal if they are hiding terminal
 PROGRAM_PATH="/usr/bin/gnome-terminal"
 SKEL=".skjult"
@@ -152,6 +171,10 @@ fi
 if lsb_release -d | grep --quiet 22; then
   do-release-upgrade -f DistUpgradeViewNonInteractive > /var/log/os2borgerpc_upgrade_2.log || true
 fi
+
+# Change the release-upgrade prompt back to never.
+# This should prevent future popups regarding updates
+sed --in-place "s/Prompt=.*/Prompt=never/" $release_upgrades_file || true
 
 apt-get --assume-yes --fix-broken install || true
 apt-get --assume-yes install --upgrade python3-pip || true
