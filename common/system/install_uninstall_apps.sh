@@ -19,13 +19,25 @@ apt-get --assume-yes update
 # Attempt to fix broken or interrupted installations
 apt-get --assume-yes --fix-broken install
 
+# On 24.04, Pinta can only be installed as a snap
+if lsb_release -d | grep --quiet 24 && echo "$APPNAMES" | grep --quiet pinta; then
+  PINTA_SNAP="True"
+  APPNAMES="${APPNAMES//pinta/}"
+fi
+
 # Install or remove the chosen package
 if [ "$INSTALL" = "True" ]; then
   # shellcheck disable=SC2086  # We want word-splitting to handle multiple apps
   apt-get --assume-yes install $APPNAMES
+  if [ "$PINTA_SNAP" = "True" ]; then
+    snap install pinta
+  fi
 else
   # shellcheck disable=SC2086  # We want word-splitting to handle multiple apps
   apt-get --assume-yes remove $APPNAMES
+  if [ "$PINTA_SNAP" = "True" ]; then
+    snap remove pinta
+  fi
 fi
 
 # Remove packages only installed as dependencies, which are no longer dependencies
