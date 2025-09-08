@@ -34,8 +34,8 @@ lower() {
     echo "$@" | tr '[:upper:]' '[:lower:]'
 }
 
-[ $# != 5 ] \
-  && printf "This script needs exactly five arguments which it wasn't given. Exiting." \
+[ $# != 6 ] \
+  && printf "This script needs exactly six arguments which it wasn't given. Exiting." \
   && exit 1
 
 ACTIVATE=$1
@@ -43,8 +43,9 @@ ACTIVATE=$1
 # Tested values: chromium
 BROWSER="$(lower "$2")"
 BUTTON_ICON_PATH="$3"
-BUTTON_Y_OFFSET="$4"
-ONBOARD_START_MAXIMIZED="$5"
+BUTTON_X_OFFSET="$4"
+BUTTON_Y_OFFSET="$5"
+ONBOARD_START_MAXIMIZED="$6"
 
 # The input is just a number, but if it's positive we want a "+" prepended for the calculation
 [ "$BUTTON_Y_OFFSET" -ge 0 ] && BUTTON_Y_OFFSET="+ $BUTTON_Y_OFFSET"
@@ -190,7 +191,7 @@ if [ "$ACTIVATE" = "True" ]; then
 		WINDOW_TO_MOVE="$BUTTON_WINDOW_TITLE"
 
 		# Try to match the black border margin of the keyboard, ish
-		X_OFFSET=16
+		X_OFFSET=\$((16 + $BUTTON_X_OFFSET))
 
 		# 1. isolate line with the current resolution
 		# 2. isolate resolution
