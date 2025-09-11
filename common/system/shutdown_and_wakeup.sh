@@ -58,7 +58,7 @@ if id $OUR_USER > /dev/null 2>&1; then
   chmod 700 $USERCRON
 
   # Delete current crontab entries related to this script AND shutdown_at_time
-  sed --in-place "/notify-send/d" $USERCRON
+  sed --in-place --expression "/lukker ned/d" --expression "/stängs av/d" --expression "/shut down/d" $USERCRON
 fi
 
 # Delete current crontab entries related to this script AND shutdown_at_time
@@ -96,7 +96,9 @@ EOF
       HRS=$(( HOURS - HRCORR))
       HRS=$(( $(( HRS + 24)) % 24))
       # Now output to user's crontab as well
-      echo "$MINS $HRS * * * XDG_RUNTIME_DIR=/run/user/\$(id -u) /usr/bin/notify-send \"$MESSAGE\"" >> $USERCRON
+      cat << EOF >> $USERCRON
+$MINS $HRS * * * DISPLAY=\$(who | grep -w '$OUR_USER' | sed -rn 's/.*\((:[0-9]*)\).*/\1/p') /usr/bin/zenity --warning --text '<big>$MESSAGE</big>'
+EOF
     fi
   fi
 fi
