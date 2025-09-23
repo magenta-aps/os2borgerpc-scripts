@@ -10,7 +10,8 @@ set -x
 
 ACTIVATE=$1
 
-USER_AGENT="Mozilla\/5.0 (Windows NT 10.0\; Win64\; x64) AppleWebKit\/537.36 (KHTML\, like Gecko) Chrome\/119.0.0.0 Safari\/537.36"
+OLD_USER_AGENT="Mozilla\/5.0 (Windows NT 10.0\; Win64\; x64) AppleWebKit\/537.36 (KHTML\, like Gecko) Chrome\/119.0.0.0 Safari\/537.36"
+USER_AGENT="Mozilla\/5.0 (Windows NT 10.0\; Win64\; x64) AppleWebKit\/537.36 (KHTML\, like Gecko) Chrome\/140.0.0.0 Safari\/537.36"
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   CHROMIUM_SCRIPT='/usr/share/os2borgerpc/bin/start_chromium.sh'
@@ -89,6 +90,10 @@ if [ -f $OLD_DESKTOP_FILE ]; then
   echo "Genkør venligst Chrome - Autostart tilføj/fjern"
   exit 1
 fi
+
+# Remove the old fake user-agent if it's there
+# shellcheck disable=SC2086 # We want to split the files back into separate arguments
+remove_from_desktop_files "--user-agent='$OLD_USER_AGENT'" $CHROME_FILES $CHROMIUM_FILES
 
 if [ "$ACTIVATE" = "True" ]; then
   # shellcheck disable=SC2086 # We want to split the files back into separate arguments
