@@ -10,6 +10,8 @@ set -x
 
 ACTIVATE=$1
 TIMES=$2
+
+OUR_USER="user"
 ROOTCRON_TMP="/tmp/oldcron"
 USERCRON="/etc/os2borgerpc/usercron"
 USER_CLEANUP="/usr/share/os2borgerpc/bin/user-cleanup.bash"
@@ -47,7 +49,9 @@ if [ "$ACTIVATE" = "True" ]; then
       HRCORR=$(( 1 - $(( MINM5P60 / 60))))
       HRS=$(( HOURS - HRCORR))
       HRS=$(( $(( HRS + 24)) % 24))
-      echo "$MINS $HRS * * * XDG_RUNTIME_DIR=/run/user/\$(id -u) /usr/bin/notify-send \"$MESSAGE\"" >> $USERCRON
+      cat << EOF >> $USERCRON
+$MINS $HRS * * * DISPLAY=\$(who | grep -w '$OUR_USER' | sed -rn 's/.*\((:[0-9]*)\).*/\1/p') /usr/bin/zenity --warning --text '<big>$MESSAGE</big>'
+EOF
     fi
   done
 fi
