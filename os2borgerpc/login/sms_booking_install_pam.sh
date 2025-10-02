@@ -98,9 +98,9 @@ if [ "$ACTIVATE" = "True" ]; then
 
   # Disable automatic login
   deluser user nopasswdlogin
-  sed --in-place "/autologin-user/d" $LIGHTDM_CONFIG
-  sed --in-place "/AutomaticLogin/d" $GDM_CONFIG
-  sed --in-place "/gdm-automatic-login/d" $POST_SESSION_FILE
+  [ -f $LIGHTDM_CONFIG ] && sed --in-place "/autologin-user/d" $LIGHTDM_CONFIG
+  [ -f $GDM_CONFIG ] && sed --in-place "/AutomaticLogin/d" $GDM_CONFIG
+  [ -f $POST_SESSION_FILE ] && sed --in-place "/gdm-automatic-login/d" $POST_SESSION_FILE
 
 # Separated out because the pam module cannot run if you import the admin_client or re
 cat << EOF > $SMS_LOGIN_INTERFACE_PYTHON3
