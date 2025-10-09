@@ -20,12 +20,13 @@ POLICY2="ForceEphemeralProfiles"
 set -x
 
 if [ "$ALLOW_PASSWORD_MANAGER" = "True" ]; then
-  sed --in-place "/$POLICY/d" $POLICY_FILE
+  sed --in-place "s/\"$POLICY\": false,/\"$POLICY\": true,/" $POLICY_FILE
   sed --in-place "s/\"$POLICY2\": true,/\"$POLICY2\": false,/" $POLICY_FILE
 else
+  sed --in-place "s/\"$POLICY\": true,/\"$POLICY\": false,/" $POLICY_FILE
   sed --in-place "s/\"$POLICY2\": false,/\"$POLICY2\": true,/" $POLICY_FILE
   # Idempotency check
   if ! grep "$POLICY" $POLICY_FILE; then
-    sed --in-place "/OverridePostUpdatePage/a\ \ \ \ \"$POLICY\": false," $POLICY_FILE
+    sed --in-place "/MetricsReportingEnabled/a\ \ \ \ \"$POLICY\": false," $POLICY_FILE
   fi
 fi
