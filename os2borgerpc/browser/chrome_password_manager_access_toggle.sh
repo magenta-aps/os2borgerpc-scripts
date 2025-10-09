@@ -26,6 +26,6 @@ else
   sed --in-place "s/\"$POLICY2\": false,/\"$POLICY2\": true,/" $POLICY_FILE
   # Idempotency check
   if ! grep "$POLICY" $POLICY_FILE; then
-    sed --in-place "/MetricsReportingEnabled/a\ \ \ \ \"$POLICY\": false," $POLICY_FILE
+    sed --in-place "/OverridePostUpdatePage/a\ \ \ \ \"$POLICY\": false," $POLICY_FILE
   fi
 fi
