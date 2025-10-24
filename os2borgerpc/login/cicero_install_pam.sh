@@ -81,9 +81,9 @@ if [ "$ACTIVATE" = "True" ]; then
 
   # Disable automatic login
   deluser user nopasswdlogin
-  sed --in-place "/autologin-user/d" $LIGHTDM_CONFIG
-  sed --in-place "/AutomaticLogin/d" $GDM_CONFIG
-  sed --in-place "/gdm-automatic-login/d" $POST_SESSION_FILE
+  [ -f $LIGHTDM_CONFIG ] && sed --in-place "/autologin-user/d" $LIGHTDM_CONFIG
+  [ -f $GDM_CONFIG ] && sed --in-place "/AutomaticLogin/d" $GDM_CONFIG
+  [ -f $POST_SESSION_FILE ] && sed --in-place "/gdm-automatic-login/d" $POST_SESSION_FILE
 
   # Set up age limit
   set_os2borgerpc_config cicero_age_limit "$AGE_LIMIT"

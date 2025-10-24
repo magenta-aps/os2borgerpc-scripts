@@ -30,14 +30,14 @@ if [ "$ACTIVATE" = "True" ]; then
 
     mv teamviewerqs $INSTALL_TEMP_PATH/teamviewerqs
 
-    chown -R user:user $INSTALL_TEMP_PATH/teamviewerqs
+    chown --recursive user:user $INSTALL_TEMP_PATH/teamviewerqs
     runuser -l user -c $INSTALL_TEMP_PATH/teamviewerqs/teamviewer
 
-    cp -r $INSTALL_TEMP_PATH/teamviewerqs $INSTALL_PATH/
-    chown -R root:root $INSTALL_PATH/teamviewerqs
+    cp --recursive $INSTALL_TEMP_PATH/teamviewerqs $INSTALL_PATH/
+    chown --recursive root:root $INSTALL_PATH/teamviewerqs
 
     cp $INSTALL_PATH/teamviewerqs/teamviewer.desktop /usr/share/applications/
 else
-    rm -Rf $INSTALL_TEMP_PATH/teamviewerqs $INSTALL_PATH/teamviewerqs
+    rm --recursive --force $INSTALL_TEMP_PATH/teamviewerqs $INSTALL_PATH/teamviewerqs
     rm /usr/share/applications/teamviewer.desktop
 fi
