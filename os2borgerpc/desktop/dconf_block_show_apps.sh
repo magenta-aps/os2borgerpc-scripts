@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# SPDX-FileContributor: Marcus Funch
+# SPDX-FileContributor: Andreas Poulsen
 
 set -x
 
