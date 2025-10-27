@@ -123,8 +123,13 @@ if grep --quiet "zenity" "$PROGRAM_PATH"; then
   dpkg-divert --remove --rename "$PROGRAM_PATH"
   # Cleanup after older script versions: Turns out this is unnecessary to hide the program from users program list
   rm --force $SHORTCUT_LOCAL_PATH
+  # Make sure terminal is correctly installed
+  if [ ! -f "$PROGRAM_PATH" ] || [ ! -f "$PROGRAM_PATH.real" ]; then
+    apt-get install --reinstall --assume-yes gnome-terminal
+  fi
   # Deny access
-  dpkg-statoverride --update --add superuser root 770 "$PROGRAM_PATH" || true
+  dpkg-statoverride --update --add root superuser 750 "$PROGRAM_PATH" || true
+  dpkg-statoverride --update --add root superuser 750 "$PROGRAM_PATH.real" || true
 fi
 
 # Switch to new method for hiding settings if they are hiding settings
