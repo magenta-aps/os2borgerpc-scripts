@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# SPDX-FileContributor: Carsten Agger, Marcus Funch
+# SPDX-FileContributor: Carsten Agger, Marcus Funch, Andreas Poulsen
 #
 # This script can remove/restore access to gnome-terminal.
 # Background: /usr/bin/gnome-terminal is usually a shell script that points to /usr/bin/gnome-terminal.real.

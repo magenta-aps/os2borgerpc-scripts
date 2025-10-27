@@ -128,7 +128,7 @@ if grep --quiet "zenity" "$PROGRAM_PATH"; then
     apt-get install --reinstall --assume-yes gnome-terminal
   fi
   # Deny access
-  dpkg-statoverride --update --add superuser root 770 "$PROGRAM_PATH" || true
+  dpkg-statoverride --update --add root superuser 750 "$PROGRAM_PATH" || true
   dpkg-statoverride --update --add root superuser 750 "$PROGRAM_PATH.real" || true
 fi
 
