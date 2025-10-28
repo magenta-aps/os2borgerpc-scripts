@@ -27,6 +27,7 @@ ACTIVATE=$1
 # We refer to Chrome policies here because we're trying to share the policies between Chrome and Chromium
 CHROME_POLICIES_PATH="/etc/opt/chrome/policies"
 CHROMIUM_POLICIES_PATH="/var/snap/chromium/current/policies"
+USER_CLEANUP="/usr/share/os2borgerpc/bin/user-cleanup.bash"
 
 mkdir --parents "$(dirname $CHROMIUM_POLICIES_PATH)"
 
@@ -160,8 +161,26 @@ if [ "$ACTIVATE" = "True" ]; then
   ln --symbolic --force $CHROME_POLICIES_PATH $CHROMIUM_POLICIES_PATH
 
   setup_policies
+
+  # Alter user-cleanup.bash to prevent problems with chromium
+  # This involves altering user-cleanup to not delete everything
+  # under /tmp/, but only the user-owned files/directories
+  # This is only necessary on 22.04 (20.04 is no longer supported)
+  if lsb_release -d | grep --quiet 22; then
+    sed --in-place "s@/tmp/\* /tmp/\.??\* @@" $USER_CLEANUP
+    if ! grep --quiet "FILES_DIRS" $USER_CLEANUP; then
+    cat << EOF >> $USER_CLEANUP
+
+# Find all files/directories owned by user in the world-writable directories
+FILES_DIRS=\$(find /tmp/ /var/tmp/ /var/crash/ /var/metrics/ /var/lock/ -user user)
+rm --recursive --force /dev/shm/* /dev/shm/.??* \$FILES_DIRS
+EOF
+    else
+      sed --in-place "s@find /var@find /tmp/ /var@" $USER_CLEANUP
+    fi
+  fi
 else
   snap remove chromium
   # Remove chromium symlink
-  rm $CHROMIUM_POLICIES_PATH
+  rm --force $CHROMIUM_POLICIES_PATH
 fi
