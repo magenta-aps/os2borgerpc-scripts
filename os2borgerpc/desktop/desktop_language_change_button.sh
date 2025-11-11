@@ -117,6 +117,12 @@ if ! grep --quiet $LANGUAGE_CHANGE_SCRIPT $USER_CLEANUP; then
   sed --in-place --expression "\@$GIO_LAUNCHER@i $LANGUAGE_CHANGE_SCRIPT \"\$DESKTOP\"" \
    --expression "\@$GIO_LAUNCHER@a DESKTOP=\$(runuser -u \$USERNAME xdg-user-dir DESKTOP)" $USER_CLEANUP
 fi
+if ! grep --quiet "runuser -u \$USERNAME xdg-user-dirs-update" $USER_CLEANUP; then
+  sed --in-place "/USERNAME=\"$USERNAME\"/a \
+export \$(grep LANG= \/etc\/default\/locale | tr -d \'\"\')\n\
+runuser -u \$USERNAME xdg-user-dirs-update\n\
+DESKTOP=\$(runuser -u \$USERNAME xdg-user-dir DESKTOP)" $USER_CLEANUP
+fi
 
 # The desktop shortcut
 cat << EOF > "$LANGUAGE_SELECT_BUTTON"
