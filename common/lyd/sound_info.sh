@@ -7,6 +7,7 @@
 # SPDX-FileContributor: Marcus Funch
 
 UBUNTU_VERSION=$(lsb_release --release --short)
+DEFAULT_DM_FILE="/etc/X11/default-display-manager"
 
 pulseaudio_initial_setup() {
     # Hacky workaround to be able to run pactl as root
@@ -49,17 +50,22 @@ text() {
     printf "\n%s\n" "### $MSG ###"
 }
 
-if [ "$UBUNTU_VERSION" != "20.04" ] && [ "$UBUNTU_VERSION" != "22.04" ]; then # 24.04 and newer
+# TODO: Make this script work on the login screen. At least it's broken in GDM.
+if ! get_os2borgerpc_config os2_product | grep --quiet kiosk && [ "$UBUNTU_VERSION" != "20.04" ] && [ "$UBUNTU_VERSION" != "22.04" ]; then # 24.04 and newer
     # Determine the running user
     RUNNING_USERS=$(who)
     if echo "$RUNNING_USERS" | grep --quiet 'superuser'; then
         U="superuser"
     elif echo "$RUNNING_USERS" | grep --quiet 'user'; then
         U="user"
-    elif echo "$RUNNING_USERS" | grep --quiet 'gdm'; then
+    elif grep --quiet gdm3 $DEFAULT_DM_FILE; then
         U="gdm"
+        echo "This script currently does not work on the login screen. Ensure that either Borger (user) or superuser is logged in while it's running."
+        exit 1
     elif echo "$RUNNING_USERS" | grep --quiet 'lightdm'; then
         U="lightdm"
+        echo "This script currently does not work on the login screen. Ensure that either Borger (user) or superuser is logged in while it's running."
+        exit 1
     else
         echo "Failed to identify the current user. Exiting"
         exit 1
@@ -71,10 +77,10 @@ if [ "$UBUNTU_VERSION" != "20.04" ] && [ "$UBUNTU_VERSION" != "22.04" ]; then # 
     XDG_RUNTIME_DIR=/run/user/$USER_ID pw-cli info all 2>/dev/null | grep 'node.name =' | grep --invert-match 'Dummy\|Freewheel\|Midi' | cut --delimiter='=' --fields 2
 
     text "Current default output (sink) and input (source) and their current volumes"
-    # shellcheck disable=SC2063  # --parents is just there to ignore errors if it already exists
+    # shellcheck disable=SC2063  # It's no glob
     XDG_RUNTIME_DIR=/run/user/$USER_ID wpctl status --name | sed --quiet '/^Audio/,/^Video/p' | grep '*'
 
-else # Legacy support: pulseaudio
+else # Legacy support: pulseaudio without pipewire
     pulseaudio_initial_setup  # To be run before any pulseaudio commands are executed
 
     text "List of cards"
