@@ -36,7 +36,7 @@ if [ "$UBUNTU_VERSION" != "20.04" ] && [ "$UBUNTU_VERSION" != "22.04" ]; then # 
 				set-sink-mute $SINK_NAME 1 # analog-output-speaker
 EOF
     fi
-    # SHARED BLOCK FOR SOUND SCRIPTS IN 24.04 - CURRENTLY NOT KIOSK AS IT CURRENTLY DOES NOT USE PIPEWIRE
+    # SHARED BLOCK FOR SOUND SCRIPTS IN 24.04
     # Run all $OS2BORGERPC_PULSEAUDIO_CONFIG commands at user login with pactl
     mkdir --parents $STARTUP_DIR
     cat <<- EOF > $OS2BORGERPC_24_04_AUDIO_STARTUP_FILE
