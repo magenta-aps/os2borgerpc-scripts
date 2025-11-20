@@ -19,6 +19,7 @@ TIME=$1
 API_KEY=$2
 ORIENTATION=$3
 LOCK_DOWN_KEYBINDS=$(get_value_from_option "$4")  # 0: No binds removed, 1: Most binds removed, 2: All binds removed (specifically most + binds for printing, reloading and changing zoom)
+OPENSTREAM_SERVER=${5:-produktion}
 
 CUSER="chrome"
 XINITRC="/home/$CUSER/.xinitrc"
@@ -43,15 +44,30 @@ if [ "$(lsb_release --release --short | cut --delimiter "." --fields 1)" -lt 24 
   exit 1
 fi
 
+case "$OPENSTREAM_SERVER" in
+"test")
+  BASE_URL="https://test.openstream.dk"
+  ;;
+"staging")
+  BASE_URL="https://staging.openstream.dk"
+  ;;
+"produktion")
+  BASE_URL="https://openstream.dk"
+  ;;
+*)
+  BASE_URL="$OPENSTREAM_SERVER"
+  ;;
+esac
+
 # Log output in English, please. More useable as search terms when debugging.
 export LANG=en_US.UTF-8
 export DEBIAN_FRONTEND=noninteractive
 
 if uname -m | grep --quiet x86; then
-  DOWNLOAD_URL="https://os2borgerpc-media.magenta.dk/assorted/os2borgerPC-webview-1.0.0.AppImage"
+  DOWNLOAD_URL="https://os2borgerpc-media.magenta.dk/assorted/os2borgerPC-webview-1.1.0.AppImage"
   ARCHITECTURE_DEPS="libatk1.0-0t64 libatk-bridge2.0-0t64 libcups2t64 libgtk-3-0t64 libnss3-dev"
 else
-  DOWNLOAD_URL="https://os2borgerpc-media.magenta.dk/assorted/os2borgerPC-webview-1.0.0-arm64.AppImage"
+  DOWNLOAD_URL="https://os2borgerpc-media.magenta.dk/assorted/os2borgerPC-webview-1.1.0-arm64.AppImage"
   ARCHITECTURE_DEPS="zlib1g-dev"
 fi
 
@@ -62,6 +78,13 @@ apt-get install --assume-yes xinit xserver-xorg-core x11-xserver-utils --no-inst
 # We want word-splitting here
 # shellcheck disable=SC2086
 apt-get install --assume-yes xdg-utils xbindkeys libfuse2 libasound2t64 $ARCHITECTURE_DEPS
+
+# Get the computer UID, fail if we can't (though this should never happen)
+PC_UID=$(get_os2borgerpc_config uid)
+if [ -z "$PC_UID" ]; then
+  echo "Failed to get UID. Exiting."
+  exit 1
+fi
 
 # Download the AppImage
 # We can't overwrite the AppImage-file if it's currently running
@@ -152,6 +175,9 @@ cat << EOF > "$ELECTRON_SCRIPT"
 API_KEY="$API_KEY"
 COMMON_SETTINGS="--no-sandbox"
 
+# Get hostname
+PC_HOSTNAME=\$(hostname)
+
 DIMENSIONS=\$(xrandr | grep '*' | awk '{print \$1}')
 IWIDTH="\$(echo \$DIMENSIONS | cut -d'x' -f1)"
 IHEIGHT="\$(echo \$DIMENSIONS | cut -d'x' -f2)"
@@ -162,7 +188,9 @@ if [ "$ORIENTATION" = "left" ] || [ "$ORIENTATION" = "right" ] ; then
   IHEIGHT=\$TEMP
 fi
 
-$ELECTRON_APP \$COMMON_SETTINGS --api_key=\$API_KEY --height=\$IHEIGHT --width=\$IWIDTH
+CONNECT_URL="$BASE_URL/connect-screen?hostname=\$PC_HOSTNAME&uid=$PC_UID&apiKey=$API_KEY"
+
+$ELECTRON_APP \$COMMON_SETTINGS --height=\$IHEIGHT --width=\$IWIDTH --url=\$CONNECT_URL
 EOF
 
 chmod +x "$ELECTRON_SCRIPT"
