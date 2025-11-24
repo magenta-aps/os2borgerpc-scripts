@@ -45,8 +45,12 @@ cat <<EOF > $LOGIN_COUNT_SCRIPT
 #!/usr/bin/env bash
 
 LAST_ON_DATE_FULL=\$(cat $DATE_FILE)
-# Convert to the date format used in auth.log
-LAST_ON_DATE=\$(LANG=en_US.UTF-8 date -d "\$LAST_ON_DATE_FULL" "+%b %_d")
+# Convert to the date format used in auth.log. This varies between Ubuntu versions
+if [ "\$(lsb_release --release --short | cut --delimiter "." --fields 1)" -ge 24 ]; then
+  LAST_ON_DATE=\$LAST_ON_DATE_FULL
+else
+  LAST_ON_DATE=\$(LANG=en_US.UTF-8 date -d "\$LAST_ON_DATE_FULL" "+%b %_d")
+fi
 TODAY_DATE_FULL=\$(date -d "today" +%F)
 
 # Stop if the date to be checked is today
@@ -62,7 +66,7 @@ if ! grep --quiet "\$LAST_ON_DATE" \$LOG_FILE; then
   LOG_FILE="/var/log/auth.log.1"
 fi
 
-LOGIN_COUNT=\$(grep --text "\$LAST_ON_DATE" "\$LOG_FILE" | grep -c "New session c[^ ]* of user user")
+LOGIN_COUNT=\$(grep --text "\$LAST_ON_DATE" "\$LOG_FILE" | grep -c "New session c\?[^ ]* of user user")
 
 if [ -z "\$OLD_LOGIN_COUNTS" ]; then
   CONFIG_VALUE=\$(echo "\$LAST_ON_DATE_FULL: \$LOGIN_COUNT")
