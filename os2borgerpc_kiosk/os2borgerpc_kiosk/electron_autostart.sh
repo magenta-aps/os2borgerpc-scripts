@@ -23,6 +23,8 @@ OPENSTREAM_SERVER=${5:-produktion}
 
 CUSER="chrome"
 XINITRC="/home/$CUSER/.xinitrc"
+PC_NAME_FILE="/home/chrome/pc_name"
+PC_NAME_FILE_UPDATE_SERVICE="/etc/systemd/system/pc_name_file_update.service"
 ELECTRON_APP="/home/chrome/os2borgerPC-webview.AppImage"
 ELECTRON_SCRIPT='/usr/share/os2borgerpc/bin/start_chromium.sh'
 ROTATE_SCREEN_SCRIPT_PATH="/usr/share/os2borgerpc/bin/rotate_screen.sh"
@@ -175,8 +177,8 @@ cat << EOF > "$ELECTRON_SCRIPT"
 API_KEY="$API_KEY"
 COMMON_SETTINGS="--no-sandbox"
 
-# Get hostname
-PC_HOSTNAME=\$(hostname)
+# Get pc name
+PC_NAME=\$(cat $PC_NAME_FILE)
 
 DIMENSIONS=\$(xrandr | grep '*' | awk '{print \$1}')
 IWIDTH="\$(echo \$DIMENSIONS | cut -d'x' -f1)"
@@ -188,12 +190,29 @@ if [ "$ORIENTATION" = "left" ] || [ "$ORIENTATION" = "right" ] ; then
   IHEIGHT=\$TEMP
 fi
 
-CONNECT_URL="$BASE_URL/connect-screen?hostname=\$PC_HOSTNAME&uid=$PC_UID&apiKey=$API_KEY"
+CONNECT_URL="$BASE_URL/connect-screen?hostname=\$PC_NAME&uid=$PC_UID&apiKey=$API_KEY"
 
 $ELECTRON_APP \$COMMON_SETTINGS --height=\$IHEIGHT --width=\$IWIDTH --url=\$CONNECT_URL
 EOF
 
 chmod +x "$ELECTRON_SCRIPT"
+
+# Create service to update PC_NAME_FILE on boot
+# We need this file because the ELECTRON_SCRIPT can't use
+# get_os2borgerpc_config since it's run by the CUSER user
+cat << EOF > $PC_NAME_FILE_UPDATE_SERVICE
+[Unit]
+Description=Update the pc name file when the computer starts
+
+[Service]
+Type=oneshot
+ExecStart=sh -c 'echo \$(get_os2borgerpc_config name) > $PC_NAME_FILE'
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl enable --now "$(basename $PC_NAME_FILE_UPDATE_SERVICE)"
 
 if [ "$LOCK_DOWN_KEYBINDS" -lt "1" ]; then
   rm --force $XBINDKEYS_CONFIG
