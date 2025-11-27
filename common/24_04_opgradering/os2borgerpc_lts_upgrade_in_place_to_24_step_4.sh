@@ -396,6 +396,16 @@ if [ -f "$LOGOUT_TIMER_CONF_OLD" ]; then
 EOF
 fi
 
+# Ensure that get_daily_login_count continues working correctly, if they are using it
+LOGIN_COUNT_SCRIPT="/usr/local/lib/os2borgerpc/count_daily_logins.sh"
+if [ -f "$LOGIN_COUNT_SCRIPT" ] && ! grep --quiet "lsb_release" $LOGIN_COUNT_SCRIPT; then
+  sed --in-place "s/LAST_ON_DATE=.*/LAST_ON_DATE=\$LAST_ON_DATE_FULL/" $LOGIN_COUNT_SCRIPT
+  sed --in-place "s/New session c/New session c\\\?/" $LOGIN_COUNT_SCRIPT
+  LOGIN_COUNT_SERVICE="/etc/systemd/system/os2borgerpc-count_daily_logins.service"
+  systemctl disable "$(basename $LOGIN_COUNT_SERVICE)" || true
+  rm --force $LOGIN_COUNT_SERVICE
+fi
+
 # Hide some irrelevant shortcuts for user
 PTH="/home/.skjult/.local/share/applications"
 mkdir --parents $PTH

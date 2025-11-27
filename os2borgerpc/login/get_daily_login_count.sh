@@ -8,8 +8,12 @@
 
 set -x
 
+if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
+  echo "This script is not designed to be used on a Kiosk device."
+  exit 1
+fi
+
 LOGIN_COUNT_SCRIPT="/usr/local/lib/os2borgerpc/count_daily_logins.sh"
-LOGIN_COUNT_SERVICE="/etc/systemd/system/os2borgerpc-count_daily_logins.service"
 DATE_FILE="/etc/os2borgerpc/last_on_date.txt"
 CONFIG_NAME="login_counts"
 DATA_LIMIT=89 # This is one less than the number of days that are stored
@@ -23,15 +27,18 @@ crontab -l > $ROOTCRON_TMP
 
 sed --in-place "/count_daily_logins/d" $ROOTCRON_TMP
 
+# Cleanup after the previous version of the script
+LOGIN_COUNT_SERVICE="/etc/systemd/system/os2borgerpc-count_daily_logins.service"
+systemctl disable "$(basename $LOGIN_COUNT_SERVICE)"
+rm --force $LOGIN_COUNT_SERVICE
+
 if [ "$ACTIVATE" = "False" ]; then
-  systemctl disable "$(basename $LOGIN_COUNT_SERVICE)"
   crontab $ROOTCRON_TMP
-  rm --force $LOGIN_COUNT_SCRIPT $LOGIN_COUNT_SERVICE \
-              $DATE_FILE $ROOTCRON_TMP
+  rm --force $LOGIN_COUNT_SCRIPT $DATE_FILE $ROOTCRON_TMP
   exit 0
 fi
 
-echo "0 * * * * $LOGIN_COUNT_SCRIPT" >> $ROOTCRON_TMP
+echo "0,30 * * * * $LOGIN_COUNT_SCRIPT" >> $ROOTCRON_TMP
 
 crontab $ROOTCRON_TMP
 
@@ -45,8 +52,12 @@ cat <<EOF > $LOGIN_COUNT_SCRIPT
 #!/usr/bin/env bash
 
 LAST_ON_DATE_FULL=\$(cat $DATE_FILE)
-# Convert to the date format used in auth.log
-LAST_ON_DATE=\$(LANG=en_US.UTF-8 date -d "\$LAST_ON_DATE_FULL" "+%b %_d")
+# Convert to the date format used in auth.log. This varies between Ubuntu versions
+if [ "\$(lsb_release --release --short | cut --delimiter "." --fields 1)" -ge 24 ]; then
+  LAST_ON_DATE=\$LAST_ON_DATE_FULL
+else
+  LAST_ON_DATE=\$(LANG=en_US.UTF-8 date -d "\$LAST_ON_DATE_FULL" "+%b %_d")
+fi
 TODAY_DATE_FULL=\$(date -d "today" +%F)
 
 # Stop if the date to be checked is today
@@ -62,7 +73,7 @@ if ! grep --quiet "\$LAST_ON_DATE" \$LOG_FILE; then
   LOG_FILE="/var/log/auth.log.1"
 fi
 
-LOGIN_COUNT=\$(grep --text "\$LAST_ON_DATE" "\$LOG_FILE" | grep -c "New session c[^ ]* of user user")
+LOGIN_COUNT=\$(grep --text "\$LAST_ON_DATE" "\$LOG_FILE" | grep -c "New session c\?[^ ]* of user user")
 
 if [ -z "\$OLD_LOGIN_COUNTS" ]; then
   CONFIG_VALUE=\$(echo "\$LAST_ON_DATE_FULL: \$LOGIN_COUNT")
@@ -92,16 +103,5 @@ EOF
 
 chmod 700 $LOGIN_COUNT_SCRIPT
 
-cat <<EOF > $LOGIN_COUNT_SERVICE
-[Unit]
-Description=OS2borgerPC count daily logins service
-
-[Service]
-Type=simple
-ExecStart=$LOGIN_COUNT_SCRIPT
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl enable --now "$(basename $LOGIN_COUNT_SERVICE)"
+# Execute the login count script to get login counts for yesterday
+$LOGIN_COUNT_SCRIPT
