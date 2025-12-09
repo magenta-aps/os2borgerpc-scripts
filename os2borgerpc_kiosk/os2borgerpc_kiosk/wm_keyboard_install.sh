@@ -51,10 +51,9 @@ if [ "$ACTIVATE" = "True" ]; then
   # work on 24.04, and is not installed by default on 24.04
   apt-get update
   apt-get install -y language-pack-da bspwm onboard lemonbar- dmenu- dbus-x11
- 
 
-  # We experienced a bug when running the script on 24.04, where the keyboard would appear 
-  # but crash when trying to interact with it. We have at the moment not found any other solution, 
+  # We experienced a bug when running the script on 24.04, where the keyboard would appear
+  # but crash when trying to interact with it. We have at the moment not found any other solution,
   # than switching to GTK. Setting input source to GTK does not cause problems on 22.04.
   runuser -u $USER dbus-launch gsettings set org.onboard.keyboard input-event-source 'GTK'
 
@@ -79,6 +78,8 @@ bspc config border_width         0
 bspc config window_gap           0
 bspc config borderless_monocle   true
 bspc config gapless_monocle      true
+# To fix an issue in 24.04 with keys being "sticky"
+bspc config swallow_first_click true
 
 # leave 20% space for the keyboard
 bspc config split_ratio          0.80
@@ -372,6 +373,19 @@ EOF
 
   # Give it the same permission as the file it overwrites
   chmod 644 /usr/share/onboard/layouts/Compact.onboard
+
+  # Increase long press delay to effectively disable it because it causes issues
+  # + basic dconf setup for the purpose
+  mkdir --parents /etc/dconf/db/os2borgerpc.d/locks /etc/dconf/profile
+
+  cat <<- EOF > /etc/dconf/profile/chrome
+	user-db:user
+	system-db:os2borgerpc
+EOF
+
+  cat <<- EOF > /etc/dconf/db/os2borgerpc.d/onboard
+	org.onboard.keyboard long-press-delay 10.0
+EOF
 
 else # Go back to not using a wm or the onscreen keyboard
 
