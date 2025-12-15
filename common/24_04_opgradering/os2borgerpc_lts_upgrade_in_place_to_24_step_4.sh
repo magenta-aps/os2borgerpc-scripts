@@ -372,16 +372,16 @@ NEW_EXTENSION_NAME="logout-timer-24-04@os2borgerpc.magenta.dk"
 LOGOUT_TIMER_ACTUAL="/usr/share/os2borgerpc/bin/logout_timer_actual.sh"
 LOGOUT_TIMER_SESSION_CLEANUP_FILE="/usr/share/os2borgerpc/bin/user-cleanup-logout-timer.bash"
 EXTENSION_ACTIVATION_DESKTOP_FILE="/home/.skjult/.config/autostart/logout-timer-user.desktop"
+OLD_EXTENSION_ACTIVATION_DESKTOP_FILE="/home/.skjult/.config/autostart/logout-timer_user.desktop"
 EXTENSION_GIT_URL="https://github.com/magenta-aps/os2borgerpc-gnome-extensions/archive/refs/heads/main.zip"
 if [ -f "$LOGOUT_TIMER_CONF_OLD" ]; then
   HEADS_UP_MESSAGE=$(grep "headsUpMessage" $LOGOUT_TIMER_CONF_OLD | cut --delimiter '"' --fields 4)
   PRE_TIMER_TEXT=$(grep "preTimerText" $LOGOUT_TIMER_CONF_OLD | cut --delimiter '"' --fields 4)
   MINUTES_TO_LOGOUT=$(grep "timeMinutes" $LOGOUT_TIMER_CONF_OLD | cut --delimiter " " --fields 4 | cut --delimiter "," --fields 1)
   HEADS_UP_SECONDS_LEFT=$(grep "headsUpSecondsLeft" $LOGOUT_TIMER_CONF_OLD | cut --delimiter " " --fields 4 | cut --delimiter "," --fields 1)
-  rm --recursive "$(dirname $LOGOUT_TIMER_CONF_OLD)"
   sed --in-place "s/logout-timer@/logout-timer-24-04@/" $LOGOUT_TIMER_ACTUAL
   sed --in-place "s/logout-timer@/logout-timer-24-04@/" $LOGOUT_TIMER_SESSION_CLEANUP_FILE
-  sed --in-place "s/logout-timer@/logout-timer-24-04@/" $EXTENSION_ACTIVATION_DESKTOP_FILE
+  rm --force $EXTENSION_ACTIVATION_DESKTOP_FILE $OLD_EXTENSION_ACTIVATION_DESKTOP_FILE "/usr/share/os2borgerpc/logout_timer.conf" "/usr/share/os2borgerpc/bin/logout_timer_visual.sh"
   wget $EXTENSION_GIT_URL
   unzip main.zip
   os2borgerpc-gnome-extensions-main/install.sh whatever $NEW_EXTENSION_NAME true true true
@@ -394,11 +394,12 @@ if [ -f "$LOGOUT_TIMER_CONF_OLD" ]; then
   "headsUpMessage": "$HEADS_UP_MESSAGE"
 }
 EOF
+  rm --recursive "$(dirname $LOGOUT_TIMER_CONF_OLD)"
 fi
 
 # Ensure that get_daily_login_count continues working correctly, if they are using it
 LOGIN_COUNT_SCRIPT="/usr/local/lib/os2borgerpc/count_daily_logins.sh"
-if [ -f "$LOGIN_COUNT_SCRIPT" ] && ! grep --quiet "lsb_release" $LOGIN_COUNT_SCRIPT; then
+if [ -f "$LOGIN_COUNT_SCRIPT" ] && ! grep --quiet "LAST_ON_DATE=\$LAST_ON_DATE_FULL" $LOGIN_COUNT_SCRIPT; then
   sed --in-place "s/LAST_ON_DATE=.*/LAST_ON_DATE=\$LAST_ON_DATE_FULL/" $LOGIN_COUNT_SCRIPT
   sed --in-place "s/New session c/New session c\\\?/" $LOGIN_COUNT_SCRIPT
   LOGIN_COUNT_SERVICE="/etc/systemd/system/os2borgerpc-count_daily_logins.service"
