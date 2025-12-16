@@ -23,6 +23,7 @@ ACTIVATE=$1
 SHORTCUT_NAME="$2"
 PROMPT=$3
 ICON_UPLOAD="$4"
+GNOME_LOGOUT="$5"
 
 # Determine the name of the user desktop directory. This is done via xdg-user-dir,
 # which checks the /home/user/.config/user-dirs.dirs file. To ensure this file exists,
@@ -42,11 +43,19 @@ if [ "$ACTIVATE" = "True" ]; then
 
   mkdir --parents "$(dirname "$DESKTOP_FILE")"
 
-  TO_PROMPT_OR_NOT=--no-prompt
-
-  if [ "$PROMPT" = "True" ]; then
-    # If they DO want the prompt
-    unset TO_PROMPT_OR_NOT
+  if [ "$GNOME_LOGOUT" = "False" ]; then
+    if [ "$PROMPT" = "True" ]; then
+      # If they DO want the prompt
+      COMMAND='if zenity --question --title="Log Borger ud" --text="Vil du logge ud?"; then pkill -KILL -u user; fi'
+    else
+        COMMAND='pkill -KILL -u user'
+    fi
+  else
+    if [ "$PROMPT" = "True" ]; then
+      COMMAND="sleep 0.1 && gnome-session-quit --logout"
+    else
+      COMMAND="sleep 0.1 && gnome-session-quit --logout --no-prompt"
+    fi
   fi
 
   if [ -z "$ICON_UPLOAD" ]; then
@@ -78,7 +87,7 @@ cat <<- EOF > "$DESKTOP_FILE"
 	Name=$SHORTCUT_NAME
 	Comment=Logud
 	Icon=$ICON
-	Exec=sh -c "sleep 0.1 && gnome-session-quit --logout $TO_PROMPT_OR_NOT"
+	Exec=sh -c '$COMMAND'
 EOF
 
 else

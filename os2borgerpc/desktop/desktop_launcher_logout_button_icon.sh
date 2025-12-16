@@ -23,6 +23,7 @@ ADD="$1"
 SHORTCUT_NAME="$2"
 MENU_START="$3"
 ICON_UPLOAD="$4"
+GNOME_LOGOUT="$5"
 
 DESKTOP_FILE=/usr/share/applications/os2borgerpc-menu-logout.desktop
 DESKTOP_FILE_NAME=$(basename $DESKTOP_FILE)
@@ -38,6 +39,12 @@ remove_logout_buttons_from_menu()  {
 if [ "$ADD" = False ]; then
 	remove_logout_buttons_from_menu
 else
+
+  if [ "$GNOME_LOGOUT" = "False" ]; then
+    COMMAND='if zenity --question --title="Log Borger ud" --text="Vil du logge ud?"; then pkill -KILL -u user; fi'
+  else
+    COMMAND="gnome-session-quit --logout"
+  fi
 
 	if [ -z "$ICON_UPLOAD" ]; then
 		ICON="system-log-out"
@@ -67,7 +74,7 @@ else
 		Type=Application
 		Name=$SHORTCUT_NAME
 		Icon=$ICON
-		Exec=gnome-session-quit --logout
+		Exec=sh -c '$COMMAND'
 	EOF
 
 	# Idempotency: First remove the shortcut if it's already there (if not it has no effect), before adding adding it
