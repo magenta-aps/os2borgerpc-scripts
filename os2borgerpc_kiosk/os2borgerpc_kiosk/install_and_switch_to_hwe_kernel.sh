@@ -17,6 +17,8 @@ fi
 
 PKG="linux-generic-hwe-$(lsb_release --release --short)"
 
+apt-get update > /dev/null
+
 if [ "$ACTIVATE" = "True" ]; then
   apt-get install --assume-yes "$PKG"
 else
