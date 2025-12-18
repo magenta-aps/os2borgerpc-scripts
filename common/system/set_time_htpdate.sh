@@ -18,8 +18,12 @@ SERVERS_TO_CHECK="0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org ww
 
 export DEBIAN_FRONTEND=noninteractive
 
+if [ "$(lsb_release --release --short | cut --delimiter '.' --fields 1)" -ge 24 ]; then
+  HWCLOCK_PACKAGE="util-linux-extra"
+fi
+
 apt-get update
-apt-get install --assume-yes htpdate
+apt-get install --assume-yes htpdate "$HWCLOCK_PACKAGE"
 
 # Ensure that the htpdate service is disabled in case the script times out before htpdate is removed
 systemctl disable --now htpdate
