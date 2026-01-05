@@ -47,9 +47,6 @@ LIGHTDM_SUSPEND_SCRIPT_LOG="/etc/lightdm/scriptlogs/suspend_after_time.log"
 LIGHTDM_GREETER_SETUP_SCRIPT="/etc/lightdm/greeter_setup_script.sh"
 LIGHTDM_GREETER_SCRIPTS_DIR="/etc/lightdm/greeter-setup-scripts"
 
-# Stop Debconf from interrupting when interacting with the package system
-export DEBIAN_FRONTEND=noninteractive
-
 error() {
   echo "$1"
   exit 1
@@ -91,7 +88,7 @@ fi
 [ -z "$DIALOG_TEXT" ] && DIALOG_TEXT="Du er inaktiv og bliver logget ud om kort tid..."
 [ -z "$BUTTON_TEXT" ] && BUTTON_TEXT="OK"
 
-# xprintidle uses milliseconds, so convert the user inputted minutes to that
+# org.gnome.Mutter.IdleMonitor.GetIdletime uses milliseconds, so convert the user inputted minutes to that
 LOGOUT_TIME_MS=$(( LOGOUT_TIME_MINS * 60 * 1000 ))
 DIALOG_TIME_MS=$(( DIALOG_TIME_MINS * 60 * 1000 ))
 
@@ -170,19 +167,6 @@ EOF
   systemctl enable "$(basename $GDM_SUSPEND_SERVICE)"
 fi
 
-# Install xprintidle
-apt-get update
-
-# Only try installing if it isn't already as otherwise it will exit with nonzero
-# and stop the script
-if ! dpkg --get-selections | grep -v deinstall | grep --quiet xprintidle; then
-  if ! apt-get install --assume-yes xprintidle; then
-    # apt install could fail due to debian frontend lock being unavailable
-    # during automatic updates
-    error "apt failed to install xprintidle"
-  fi
-fi
-
 # if line already added to crontab: skip
 if ! crontab -l | grep "$SUSPEND_SCRIPT"; then
 	line="* * * * * $SUSPEND_SCRIPT"
@@ -191,60 +175,75 @@ fi
 
 # New auto_logout file, running as root
 cat <<- EOF > $SUSPEND_SCRIPT
-	#!/usr/bin/env bash
+#!/usr/bin/env bash
 
-	# If the user is inactive for too long, a dialog will appear, warning the user that the session will end.
-	# If the user do not touch the mouse or press any keyboard key the session will end.
-	# Only have one dialog at a time, so remove preexisting ones.
-	# Create a new message every time, in case someone didn't close it but
-	# just put e.g. a browser in front, to ensure they or someone else gets a
-	# new warning when/if inactivity is reached again
+# If the user is inactive for too long, a dialog will appear, warning the user that the session will end.
+# If the user do not touch the mouse or press any keyboard key the session will end.
+# Only have one dialog at a time, so remove preexisting ones.
+# Create a new message every time, in case someone didn't close it but
+# just put e.g. a browser in front, to ensure they or someone else gets a
+# new warning when/if inactivity is reached again
 
-	export DISPLAY=\$(who | grep -w '$OUR_USER' | sed -rn 's/.*\((:[0-9]*)\).*/\1/p')
+# There doesn't seem to be a way to determine the DISPLAY that works
+# for both Wayland and Xorg so we try one method and then the other
+# if the first returns nothing. Xorg first
+USER_DISPLAY=\$(who | grep -w '$OUR_USER' | sed -rn 's/.*\((:[0-9]*)\).*/\1/p')
+if [ -z "\$USER_DISPLAY" ]; then
+  USER_DISPLAY=\$(find /tmp/.X11-unix/ -user $OUR_USER -type s -printf "%f\n" | sort -g | head -n 1 | tr X :)
+fi
+export DISPLAY=\$USER_DISPLAY
 
-	# Used by xprintidle
-	su $OUR_USER -c "xhost si:localuser:root"
+# If we are using Wayland, it is also necessary to export its XAUTHORITY, which
+# changes every login
+WAYLAND_XAUTHORITY=\$(find /var/run/user/\$(id -u $OUR_USER)/ -maxdepth 1 -iname ".mutter-Xwaylandauth.*" -print -quit)
+# Only export Waylands XAUTHORITY if it exists (i.e. we are using Wayland) to prevent problems
+# when using Xorg
+if [ ! -z "\$WAYLAND_XAUTHORITY" ]; then
+  export XAUTHORITY=\$WAYLAND_XAUTHORITY
+fi
 
-	# If the pc has a time plan, don't use systemctl suspend, but instead rtcwake -m mem,
-	# which is functionally the same and allows the machine to wake up in time to be shut down
-	# by the time plan
+IDLE_TIME=\$(DBUS_SESSION_BUS_ADDRESS="unix:path=/var/run/user/\$(id -u $OUR_USER)/bus" runuser -u $OUR_USER -- dbus-send --print-reply --dest=org.gnome.Mutter.IdleMonitor /org/gnome/Mutter/IdleMonitor/Core org.gnome.Mutter.IdleMonitor.GetIdletime | grep "uint64" | cut --delimiter " " --fields 5)
 
-	if [ \$(xprintidle) -ge $LOGOUT_TIME_MS ]; then
-	  pkill -KILL -u $OUR_USER
-	  # If the pc has a time plan, don't use systemctl suspend, but instead rtcwake -m mem,
-	  # which is functionally the same and allows the machine to wake up in time to be shut down
-	  # by the time plan
-	  re="([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) .+"
-	  if [[ \$(crontab -l | grep scheduled_off) =~ \$re ]]; then
-	    MINUTES=\${BASH_REMATCH[1]}
-	    HOURS=\${BASH_REMATCH[2]}
-	    DAY=\${BASH_REMATCH[3]}
-	    MONTH=\${BASH_REMATCH[4]}
-	    YEAR=\$(date +%Y)
-	    # wake up 1 minute before shut down
-	    MINM1P60=\$(( \$(( MINUTES - 1)) + 60))
-	    # Rounding minutes
-	    MINS=\$(( MINM1P60 % 60))
-	    HRCORR=\$(( 1 - \$(( MINM1P60 / 60))))
-	    HRS=\$(( HOURS - HRCORR))
-	    HRS=\$(( \$(( HRS + 24)) % 24))
-	    # When run from the crontab, rtcwake needs the full path for some reason or it won't work
-	    /usr/sbin/rtcwake -m mem --date "\$YEAR-\$MONTH-\$DAY \$HRS:\$MINS"
-	  else
-	    systemctl suspend
-	  fi
-	  exit 0
-	fi
-	# if idle time is past the dialog time: show the dialog
-	if [ \$(xprintidle) -ge $DIALOG_TIME_MS ]; then
-	  # Do spare the poor lives of potential other zenity windows.
-	  PID_ZENITY="\$(pgrep --full 'Inaktivitet')"
-	  if [ -n "\$PID_ZENITY" ]; then
-	    kill \$PID_ZENITY
-	  fi
-	  # We use the --title to match against above
-	  runuser -u $OUR_USER -- zenity --warning --text="$DIALOG_TEXT" --ok-label="$BUTTON_TEXT" --no-wrap --title "Inaktivitet"
-	fi
+# If the pc has a time plan, don't use systemctl suspend, but instead rtcwake -m mem,
+# which is functionally the same and allows the machine to wake up in time to be shut down
+# by the time plan
+
+if [ \$IDLE_TIME -ge $LOGOUT_TIME_MS ]; then
+  pkill -KILL -u $OUR_USER
+  # If the pc has a time plan, don't use systemctl suspend, but instead rtcwake -m mem,
+  # which is functionally the same and allows the machine to wake up in time to be shut down
+  # by the time plan
+  re="([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) .+"
+  if [[ \$(crontab -l | grep scheduled_off) =~ \$re ]]; then
+    MINUTES=\${BASH_REMATCH[1]}
+    HOURS=\${BASH_REMATCH[2]}
+    DAY=\${BASH_REMATCH[3]}
+    MONTH=\${BASH_REMATCH[4]}
+    YEAR=\$(date +%Y)
+    # wake up 1 minute before shut down
+    MINM1P60=\$(( \$(( MINUTES - 1)) + 60))
+    # Rounding minutes
+    MINS=\$(( MINM1P60 % 60))
+    HRCORR=\$(( 1 - \$(( MINM1P60 / 60))))
+    HRS=\$(( HOURS - HRCORR))
+    HRS=\$(( \$(( HRS + 24)) % 24))
+    # When run from the crontab, rtcwake needs the full path for some reason or it won't work
+    /usr/sbin/rtcwake -m mem --date "\$YEAR-\$MONTH-\$DAY \$HRS:\$MINS"
+  else
+    systemctl suspend
+  fi
+  exit 0
+fi
+# if idle time is past the dialog time: show the dialog
+if [ \$IDLE_TIME -ge $DIALOG_TIME_MS ]; then
+  # Do spare the poor lives of potential other zenity windows.
+  PID_ZENITY="\$(pgrep --full 'Inaktivitet')"
+  if [ -n "\$PID_ZENITY" ]; then
+    kill \$PID_ZENITY
+  fi
+  # We use the --title to match against above
+  runuser -u $OUR_USER -- zenity --warning --text="$DIALOG_TEXT" --ok-label="$BUTTON_TEXT" --no-wrap --title "Inaktivitet"
+fi
 EOF
 
 chmod 700 $SUSPEND_SCRIPT
