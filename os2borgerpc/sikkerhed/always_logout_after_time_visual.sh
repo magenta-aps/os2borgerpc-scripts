@@ -126,6 +126,8 @@ if [ "$ACTIVATE" = "True" ]; then
 		done
 
 		pkill -KILL -u user
+		# Alternatively use gnome-session-quit for the purporse
+		# runuser -l user --command "DBUS_SESSION_BUS_ADDRESS=unix:path=/var/run/user/$(id -u user)/bus gnome-session-quit --logout --no-prompt"
 	EOF
 
 	# Simply a small script that launches the timer in the background and immediately exits

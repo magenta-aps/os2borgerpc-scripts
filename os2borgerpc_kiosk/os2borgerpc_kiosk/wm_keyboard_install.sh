@@ -39,6 +39,12 @@ XINITRC="/home/$USER/.xinitrc"
 ONBOARD_OPTIONS="--theme=/usr/share/onboard/themes/HighContrast.theme --layout /usr/share/onboard/layouts/Compact.onboard"
 # For apt installations/removals
 export DEBIAN_FRONTEND=noninteractive
+RELEASE=$(lsb_release --release --short)
+
+if [ "$RELEASE" = "24.04" ]; then
+  # To fix an issue in 24.04 with keys being "sticky"
+  BSPWM_SWALLOW_FIRST_CLICK="bspc config swallow_first_click true"
+fi
 
 if [ "$ACTIVATE" = "True" ]; then
 
@@ -51,10 +57,9 @@ if [ "$ACTIVATE" = "True" ]; then
   # work on 24.04, and is not installed by default on 24.04
   apt-get update
   apt-get install -y language-pack-da bspwm onboard lemonbar- dmenu- dbus-x11
- 
 
-  # We experienced a bug when running the script on 24.04, where the keyboard would appear 
-  # but crash when trying to interact with it. We have at the moment not found any other solution, 
+  # We experienced a bug when running the script on 24.04, where the keyboard would appear
+  # but crash when trying to interact with it. We have at the moment not found any other solution,
   # than switching to GTK. Setting input source to GTK does not cause problems on 22.04.
   runuser -u $USER dbus-launch gsettings set org.onboard.keyboard input-event-source 'GTK'
 
@@ -62,11 +67,11 @@ if [ "$ACTIVATE" = "True" ]; then
   # Make the directory for the config
   # -p is also there to suppress errors in case someone re-runs this script,
   # and it already exists
-  mkdir -p .config/bspwm
+  mkdir --parents .config/bspwm
 
   # onboard: If we want a non-default keyboard theme this is apparently necessary
   # because it attempts to create a file in there
-  mkdir -p .config/dconf
+  mkdir --parents .config/dconf
   chown $USER:$USER .config/dconf
 
   # Configure bspwm
@@ -79,6 +84,7 @@ bspc config border_width         0
 bspc config window_gap           0
 bspc config borderless_monocle   true
 bspc config gapless_monocle      true
+$BSPWM_SWALLOW_FIRST_CLICK
 
 # leave 20% space for the keyboard
 bspc config split_ratio          0.80
@@ -129,7 +135,7 @@ EOF
   chmod 755 .config/bspwm/bspwmrc
 
   # Don't auto-start chromium from xinitrc
-  sed -i "s,\(.*$CHROMIUM_SCRIPT.*\),#\1," $XINITRC
+  sed --in-place "s,\(.*$CHROMIUM_SCRIPT.*\),#\1," $XINITRC
 
   # Instead start autostarting bspwm - don't add it multiple times though
 if ! grep -q -- 'exec bspwm' "$XINITRC"; then
@@ -373,10 +379,14 @@ EOF
   # Give it the same permission as the file it overwrites
   chmod 644 /usr/share/onboard/layouts/Compact.onboard
 
+  runuser -u $USER dbus-launch gsettings set org.onboard.keyboard long-press-delay 10.0
+
 else # Go back to not using a wm or the onscreen keyboard
 
-  apt-get remove -y bspwm onboard
-  apt-get autoremove -y
+  apt-get remove --assume-yes bspwm onboard
+  apt-get autoremove --assume-yes
+
+  runuser -u $USER dbus-launch gsettings set org.onboard.keyboard long-press-delay 0.5
 
   # Restore the original Compact layout in case it hasn't been deleted - ignore
   # errors if fx. the dir no longer exists.
@@ -384,6 +394,6 @@ else # Go back to not using a wm or the onscreen keyboard
   cp /usr/share/onboard/layouts/Compact_orig.onboard /usr/share/onboard/layouts/Compact.onboard 2>/dev/null || true
 
   # Start chromium from xinitrc instead of bspwm
-  sed -i "s,#\(.*$CHROMIUM_SCRIPT.*\),\1," $XINITRC
-  sed -i "/\(exec bspwm\)/d" $XINITRC
+  sed --in-place "s,#\(.*$CHROMIUM_SCRIPT.*\),\1," $XINITRC
+  sed --in-place "/\(exec bspwm\)/d" $XINITRC
 fi
