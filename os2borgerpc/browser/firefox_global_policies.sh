@@ -61,6 +61,9 @@ if [ -n "$ADDITIONAL_PAGES" ]; then
   PAGES_STRING+="]," # finish array-string
 fi
 
+# Determine locale
+LOCALE=$(grep LANG= /etc/default/locale | cut --delimiter '=' --fields 2 | tr --delete '"' | cut --delimiter '_' --fields 1)
+
 cat << EOF > "$POLICY_FILE"
 {
   "policies": {
@@ -110,6 +113,7 @@ cat << EOF > "$POLICY_FILE"
     "Preferences": {
       "datareporting.policy.dataSubmissionPolicyBypassNotification": true
     },
+    "RequestedLocales": "$LOCALE",
     "SanitizeOnShutdown": {
       "Cache": true,
       "Cookies": true,
