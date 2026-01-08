@@ -23,6 +23,11 @@ if ! get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   exit 1
 fi
 
+if [ ! -f "$START_CHROMIUM_SCRIPT" ]; then
+  echo "Chromium Autostart must be run before this script. Exiting without doing anything."
+  exit 1
+fi
+
 set -x
 
 replace_start_page() {

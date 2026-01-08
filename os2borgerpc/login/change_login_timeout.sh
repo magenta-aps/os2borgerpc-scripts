@@ -21,7 +21,17 @@ LIGHTDM_CONFIG="/etc/lightdm/lightdm.conf"
 DEFAULT_DM_FILE="/etc/X11/default-display-manager"
 
 if grep --quiet gdm3 $DEFAULT_DM_FILE; then
-  sed --in-place "s/sleep .*/sleep $NEW_TIMEOUT_IN_SECONDS/" $GDM_AUTOLOGIN_SCRIPT
+  if [ -f "$GDM_AUTOLOGIN_SCRIPT" ]; then
+    sed --in-place "s/sleep .*/sleep $NEW_TIMEOUT_IN_SECONDS/" $GDM_AUTOLOGIN_SCRIPT
+  else
+    echo "Automatic login is currently disabled. It must be enabled before running this script."
+    exit 1
+  fi
 else
-  sed --in-place "s/\(autologin-user-timeout=\).*/\1$NEW_TIMEOUT_IN_SECONDS/" $LIGHTDM_CONFIG
+  if grep --quiet "autologin-user-timeout" $LIGHTDM_CONFIG; then
+    sed --in-place "s/\(autologin-user-timeout=\).*/\1$NEW_TIMEOUT_IN_SECONDS/" $LIGHTDM_CONFIG
+  else
+    echo "Automatic login is currently disabled. It must be enabled before running this script."
+    exit 1
+  fi
 fi

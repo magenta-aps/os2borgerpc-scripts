@@ -23,6 +23,12 @@ SHADOW_USER=".skjult"
 SHADOW_DESKTOP="/home/$SHADOW_USER/$DESKTOP"
 AUTOSTART_DIR="/home/$SHADOW_USER/.config/autostart"
 
+if [ ! -f "$SHADOW_DESKTOP/$SHORTCUT_NAME.desktop" ]; then
+  echo "The chosen desktop shortcut does not exist."
+  echo "Please add the desired desktop shortcut before running this script."
+  exit 1
+fi
+
 mkdir --parents $AUTOSTART_DIR
 
 cp "$SHADOW_DESKTOP/$SHORTCUT_NAME.desktop" $AUTOSTART_DIR/
