@@ -30,6 +30,7 @@ fi
 
 STARTPAGE="$1"
 ADDITIONAL_PAGES="$2"
+DEFAULT_SEARCH_ENGINE="$3"
 
 POLICY_DIR="/etc/firefox/policies"
 POLICY_FILE="$POLICY_DIR/policies.json"
@@ -63,6 +64,82 @@ fi
 
 # Determine locale
 LOCALE=$(grep LANG= /etc/default/locale | cut --delimiter '=' --fields 2 | tr --delete '"' | cut --delimiter '_' --fields 1)
+
+# Set search engine: Google is default
+if [ "$DEFAULT_SEARCH_ENGINE" = "ecosia" ]; then
+SEARCH_ENGINE_TEXT="$(cat << EOF
+    "SearchEngines": {
+      "Add": [
+        {
+          "Name": "Ecosia",
+          "URLTemplate": "https://www.ecosia.org/search?q={searchTerms}&addon=firefoxgpo",
+          "Method": "GET",
+          "IconURL": "https://cdn-static.ecosia.org/static/icons/favicon.ico",
+          "Description": "Ecosia search engine",
+          "SuggestURLTemplate": "https://ac.ecosia.org/autocomplete?q={searchTerms}&type=list"
+        }
+      ],
+      "Default": "Ecosia",
+      "PreventInstalls": true
+    }
+EOF
+)"
+elif [ "$DEFAULT_SEARCH_ENGINE" = "qwant" ]; then
+SEARCH_ENGINE_TEXT="$(cat << EOF
+    "SearchEngines": {
+      "Add": [
+        {
+          "Name": "Qwant",
+          "URLTemplate": "https://www.qwant.com/?q={searchTerms}",
+          "Method": "GET",
+          "IconURL": "https://qwant.com/public/favicon.066f5ee2ab77b590bb5846c32c57cb84.ico",
+          "Description": "Qwant search engine",
+          "SuggestURLTemplate": "https://api.qwant.com/api/suggest/?q={searchTerms}&type=web"
+        }
+      ],
+      "Default": "Qwant",
+      "PreventInstalls": true
+    }
+EOF
+)"
+elif [ "$DEFAULT_SEARCH_ENGINE" = "startpage" ]; then
+SEARCH_ENGINE_TEXT="$(cat << EOF
+    "SearchEngines": {
+      "Add": [
+        {
+          "Name": "StartPage",
+          "URLTemplate": "https://www.startpage.com/sp/search?query={searchTerms}&cat=web&pl=chrome",
+          "Method": "GET",
+          "IconURL": "https://cdn.startpage.com/sp/cdn/favicons/favicon-96x96.png",
+          "Description": "StartPage search engine",
+          "SuggestURLTemplate": "https://www.startpage.com/osuggestions?q=%s"
+        }
+      ],
+      "Default": "StartPage",
+      "PreventInstalls": true
+    }
+EOF
+)"
+elif [ "$DEFAULT_SEARCH_ENGINE" = "duckduckgo" ]; then
+SEARCH_ENGINE_TEXT="$(cat << EOF
+    "SearchEngines": {
+      "Add": [
+        {
+          "Name": "DuckDuckGo",
+          "URLTemplate": "https://duckduckgo.com/?q={searchTerms}",
+          "Method": "GET",
+          "IconURL": "https://duckduckgo.com/favicon.ico",
+          "Description": "DuckDuckGo search engine",
+          "SuggestURLTemplate": "https://duckduckgo.com/ac/?q={searchTerms}&type=list"
+        }
+      ],
+      "Default": "DuckDuckGo",
+      "PreventInstalls": true
+    }
+EOF
+)"
+fi
+
 
 cat << EOF > "$POLICY_FILE"
 {
@@ -125,9 +202,7 @@ cat << EOF > "$POLICY_FILE"
       "Sessions": true,
       "SiteSettings": true
     },
-    "SearchEngines": {
-      "PreventInstalls": true
-    }
+    $SEARCH_ENGINE_TEXT
   }
 }
 EOF
