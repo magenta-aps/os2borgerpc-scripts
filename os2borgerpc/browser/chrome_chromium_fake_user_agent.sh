@@ -10,73 +10,13 @@ set -x
 
 ACTIVATE=$1
 
-OLD_USER_AGENT="Mozilla\/5.0 (Windows NT 10.0\; Win64\; x64) AppleWebKit\/537.36 (KHTML\, like Gecko) Chrome\/119.0.0.0 Safari\/537.36"
-USER_AGENT="Mozilla\/5.0 (Windows NT 10.0\; Win64\; x64) AppleWebKit\/537.36 (KHTML\, like Gecko) Chrome\/140.0.0.0 Safari\/537.36"
+USER_AGENT_UPDATE_SCRIPT="/usr/share/os2borgerpc/bin/chrome_chromium_update_user_agent.sh"
+USER_AGENT_UPDATE_SERVICE="/etc/systemd/system/os2borgerpc_chrome-chromium-update-user-agent.service"
+USER_AGENT_REMOVAL_STRING="--user-agent=.*537\.36'"
+CHROME_BIN_FILE="/usr/bin/google-chrome"
+CHROMIUM_BIN_FILE="/snap/bin/chromium"
+IS_KIOSK="False"
 
-if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
-  CHROMIUM_SCRIPT='/usr/share/os2borgerpc/bin/start_chromium.sh'
-  if [ ! -f "$CHROMIUM_SCRIPT" ]; then
-    echo 'You need to run "OS2borgerPC Kiosk - Chromium Autostart" before running this script.'
-    exit 1
-  fi
-  if [ "$ACTIVATE" = "True" ] && ! grep --quiet -- "--user-agent='$USER_AGENT'" $CHROMIUM_SCRIPT; then
-    sed --in-place "s@chromium-browser@chromium-browser --user-agent='$USER_AGENT'@" $CHROMIUM_SCRIPT
-  elif [ "$ACTIVATE" = "False" ]; then
-    sed --in-place "s@ --user-agent='$USER_AGENT'@@g" $CHROMIUM_SCRIPT
-  fi
-  exit 0
-fi
-
-SHADOW=".skjult"
-
-export "$(grep LANG= /etc/default/locale | tr -d '"')"
-runuser -u user xdg-user-dirs-update
-DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
-
-CHROME_ORIGINAL_FILE="/usr/share/applications/google-chrome.desktop"
-CHROME_DESKTOP_FILE_1="/home/$SHADOW/.local/share/applications/google-chrome.desktop"
-CHROME_DESKTOP_FILE_2="/home/$SHADOW/$DESKTOP/google-chrome.desktop"
-CHROME_DESKTOP_FILE_3="/home/$SHADOW/.config/autostart/google-chrome.desktop"
-CHROME_FILES="$CHROME_DESKTOP_FILE_1 $CHROME_DESKTOP_FILE_2 $CHROME_DESKTOP_FILE_3"
-CHROMIUM_ORIGINAL_FILE="/var/lib/snapd/desktop/applications/chromium_chromium.desktop"
-CHROMIUM_DESKTOP_FILE_1="/home/$SHADOW/.local/share/applications/chromium_chromium.desktop"
-CHROMIUM_DESKTOP_FILE_2="/home/$SHADOW/$DESKTOP/chromium_chromium.desktop"
-CHROMIUM_DESKTOP_FILE_3="/home/$SHADOW/.config/autostart/chromium_chromium.desktop"
-CHROMIUM_FILES="$CHROMIUM_DESKTOP_FILE_1 $CHROMIUM_DESKTOP_FILE_2 $CHROMIUM_DESKTOP_FILE_3"
-
-if [ ! -f "$CHROME_ORIGINAL_FILE" ] && [ ! -f "$CHROMIUM_ORIGINAL_FILE" ]; then
-  echo "Neither Chrome nor Chromium are installed. Exiting without doing anything."
-  exit 1
-fi
-
-# Ensure that the local copy exists
-mkdir --parents "$(dirname "$CHROME_DESKTOP_FILE_1")"
-if [ ! -f "$CHROME_DESKTOP_FILE_1" ]; then
-  cp "$CHROME_ORIGINAL_FILE" "$CHROME_DESKTOP_FILE_1"
-fi
-if [ ! -f "$CHROMIUM_DESKTOP_FILE_1" ]; then
-  cp "$CHROMIUM_ORIGINAL_FILE" "$CHROMIUM_DESKTOP_FILE_1"
-fi
-
-# Takes a parameter to add to Chrome and a list of .desktop files to add it to
-add_to_desktop_files() {
-  PARAMETER="$1"
-  shift # Now remove the parameter so we can loop over what remains: The files
-  for FILE in "$@"; do
-    # Only continue if the particular file exists
-    if [ -f "$FILE" ]; then
-      # Don't add the parameter multiple times
-      if ! grep --quiet -- "$PARAMETER" "$FILE"; then
-        # Snap handling
-        if ! grep --quiet 'Exec.*/snap/' "$FILE"; then
-          sed --in-place "s,\(Exec=\S*\)\(.*\),\1 $PARAMETER\2," "$FILE"
-        else
-          sed --in-place "s,\(Exec=.*/snap/bin/\S*\)\(.*\),\1 $PARAMETER\2," "$FILE"
-        fi
-      fi
-    fi
-  done
-}
 # Takes a parameter to remove and a list of .desktop files to remove it from
 remove_from_desktop_files() {
   PARAMETER="$1"
@@ -89,21 +29,139 @@ remove_from_desktop_files() {
   done
 }
 
-# Old versions of Chrome autostart had this .desktop-file-name instead
-OLD_DESKTOP_FILE="/home/.skjult/.config/autostart/chrome.desktop"
-if [ -f $OLD_DESKTOP_FILE ]; then
-  echo "Genkør venligst Chrome - Autostart tilføj/fjern"
-  exit 1
+if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
+  CHROMIUM_SCRIPT='/usr/share/os2borgerpc/bin/start_chromium.sh'
+  if [ ! -f "$CHROMIUM_SCRIPT" ]; then
+    echo 'You need to run "OS2borgerPC Kiosk - Chromium Autostart" before running this script.'
+    exit 1
+  fi
+  IS_KIOSK="True"
+else
+  SHADOW=".skjult"
+
+  export "$(grep LANG= /etc/default/locale | tr -d '"')"
+  runuser -u user xdg-user-dirs-update
+  DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
+
+  CHROME_ORIGINAL_FILE="/usr/share/applications/google-chrome.desktop"
+  CHROME_DESKTOP_FILE_1="/home/$SHADOW/.local/share/applications/google-chrome.desktop"
+  CHROME_DESKTOP_FILE_2="/home/$SHADOW/$DESKTOP/google-chrome.desktop"
+  CHROME_DESKTOP_FILE_3="/home/$SHADOW/.config/autostart/google-chrome.desktop"
+  CHROME_FILES="$CHROME_DESKTOP_FILE_1 $CHROME_DESKTOP_FILE_2 $CHROME_DESKTOP_FILE_3"
+  CHROMIUM_ORIGINAL_FILE="/var/lib/snapd/desktop/applications/chromium_chromium.desktop"
+  CHROMIUM_DESKTOP_FILE_1="/home/$SHADOW/.local/share/applications/chromium_chromium.desktop"
+  CHROMIUM_DESKTOP_FILE_2="/home/$SHADOW/$DESKTOP/chromium_chromium.desktop"
+  CHROMIUM_DESKTOP_FILE_3="/home/$SHADOW/.config/autostart/chromium_chromium.desktop"
+  CHROMIUM_FILES="$CHROMIUM_DESKTOP_FILE_1 $CHROMIUM_DESKTOP_FILE_2 $CHROMIUM_DESKTOP_FILE_3"
+  if [ ! -f "$CHROME_ORIGINAL_FILE" ] && [ ! -f "$CHROMIUM_ORIGINAL_FILE" ]; then
+    echo "Neither Chrome nor Chromium are installed. Exiting without doing anything."
+    exit 1
+  fi
+
+  # Ensure that the local copy exists
+  mkdir --parents "$(dirname "$CHROME_DESKTOP_FILE_1")"
+  if [ ! -f "$CHROME_DESKTOP_FILE_1" ] && [ -f "$CHROME_ORIGINAL_FILE" ]; then
+    cp "$CHROME_ORIGINAL_FILE" "$CHROME_DESKTOP_FILE_1"
+  fi
+  if [ ! -f "$CHROMIUM_DESKTOP_FILE_1" ] && [ -f "$CHROMIUM_ORIGINAL_FILE" ]; then
+    cp "$CHROMIUM_ORIGINAL_FILE" "$CHROMIUM_DESKTOP_FILE_1"
+  fi
 fi
 
-# Remove the old fake user-agent if it's there
-# shellcheck disable=SC2086 # We want to split the files back into separate arguments
-remove_from_desktop_files "--user-agent='$OLD_USER_AGENT'" $CHROME_FILES $CHROMIUM_FILES
-
 if [ "$ACTIVATE" = "True" ]; then
-  # shellcheck disable=SC2086 # We want to split the files back into separate arguments
-  add_to_desktop_files "--user-agent='$USER_AGENT'" $CHROME_FILES $CHROMIUM_FILES
+
+  mkdir --parents "$(dirname $USER_AGENT_UPDATE_SCRIPT)"
+
+  cat << EOF > $USER_AGENT_UPDATE_SCRIPT
+#!/usr/bin/env bash
+
+int_re="^[0-9]+\$"
+BASE_USER_AGENT="Mozilla\/5.0 (Windows NT 10.0\; Win64\; x64) AppleWebKit\/537.36 (KHTML\, like Gecko) Chrome\/VERSION.0.0.0 Safari\/537.36"
+
+# Takes a parameter to remove and a list of .desktop files to remove it from
+remove_from_desktop_files() {
+  PARAMETER="\$1"
+  shift # Now remove the parameter so we can loop over what remains: The files
+  for FILE in "\$@"; do
+    # Only continue if the particular file exists
+    if [ -f "\$FILE" ]; then
+      sed --in-place "s/ \$PARAMETER//g" "\$FILE"
+    fi
+  done
+}
+
+EOF
+if [ "$IS_KIOSK" = "True" ]; then
+  cat << EOF >> $USER_AGENT_UPDATE_SCRIPT
+if [ -f "$CHROMIUM_BIN_FILE" ]; then
+  CHROMIUM_VERSION=\$(chromium-browser --version | cut --delimiter " " --fields 2 | cut --delimiter "." --fields 1)
+  if [[ "\$CHROMIUM_VERSION" =~ \$int_re ]]; then
+    USER_AGENT=\$(echo \$BASE_USER_AGENT | sed "s/VERSION/\$CHROMIUM_VERSION/")
+    remove_from_desktop_files "$USER_AGENT_REMOVAL_STRING" $CHROMIUM_SCRIPT
+    sed --in-place "s@chromium-browser@chromium-browser --user-agent='\$USER_AGENT'@" $CHROMIUM_SCRIPT
+  fi
+fi
+EOF
 else
+cat << EOF >> $USER_AGENT_UPDATE_SCRIPT
+# Takes a parameter to add to Chrome and a list of .desktop files to add it to
+add_to_desktop_files() {
+  PARAMETER="\$1"
+  shift # Now remove the parameter so we can loop over what remains: The files
+  for FILE in "\$@"; do
+    # Only continue if the particular file exists
+    if [ -f "\$FILE" ]; then
+      # Don't add the parameter multiple times
+      if ! grep --quiet -- "\$PARAMETER" "\$FILE"; then
+        # Snap handling
+        if ! grep --quiet 'Exec.*/snap/' "\$FILE"; then
+          sed --in-place "s,\(Exec=\S*\)\(.*\),\1 \$PARAMETER\2," "\$FILE"
+        else
+          sed --in-place "s,\(Exec=.*/snap/bin/\S*\)\(.*\),\1 \$PARAMETER\2," "\$FILE"
+        fi
+      fi
+    fi
+  done
+}
+
+if [ -f "$CHROME_BIN_FILE" ]; then
+  CHROME_VERSION=\$(google-chrome --version | cut --delimiter " " --fields 3 | cut --delimiter "." --fields 1)
+  if [[ "\$CHROME_VERSION" =~ \$int_re ]]; then
+    USER_AGENT=\$(echo \$BASE_USER_AGENT | sed "s/VERSION/\$CHROME_VERSION/")
+    remove_from_desktop_files "$USER_AGENT_REMOVAL_STRING" $CHROME_FILES
+    add_to_desktop_files "--user-agent='\$USER_AGENT'" $CHROME_FILES
+  fi
+fi
+if [ -f "$CHROMIUM_BIN_FILE" ]; then
+  CHROMIUM_VERSION=\$(chromium --version | cut --delimiter " " --fields 2 | cut --delimiter "." --fields 1)
+  if [[ "\$CHROMIUM_VERSION" =~ \$int_re ]]; then
+    USER_AGENT=\$(echo \$BASE_USER_AGENT | sed "s/VERSION/\$CHROMIUM_VERSION/")
+    remove_from_desktop_files "$USER_AGENT_REMOVAL_STRING" $CHROMIUM_FILES
+    add_to_desktop_files "--user-agent='\$USER_AGENT'" $CHROMIUM_FILES
+  fi
+fi
+EOF
+fi
+
+  chmod 700 $USER_AGENT_UPDATE_SCRIPT
+
+  cat << EOF > $USER_AGENT_UPDATE_SERVICE
+[Unit]
+Description=OS2borgerPC chrome/chromium fake user agent update service
+
+[Service]
+Type=simple
+ExecStart=$USER_AGENT_UPDATE_SCRIPT
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  systemctl enable --now "$(basename $USER_AGENT_UPDATE_SERVICE)"
+
+else
+  systemctl disable "$(basename $USER_AGENT_UPDATE_SERVICE)"
+  rm --force $USER_AGENT_UPDATE_SCRIPT $USER_AGENT_UPDATE_SERVICE
   # shellcheck disable=SC2086 # We want to split the files back into separate arguments
-  remove_from_desktop_files "--user-agent='$USER_AGENT'" $CHROME_FILES $CHROMIUM_FILES
+  remove_from_desktop_files "$USER_AGENT_REMOVAL_STRING" $CHROME_FILES $CHROMIUM_FILES $CHROMIUM_SCRIPT
 fi
