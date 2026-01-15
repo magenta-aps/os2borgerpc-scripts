@@ -65,8 +65,15 @@ fi
 # Determine locale
 LOCALE=$(grep LANG= /etc/default/locale | cut --delimiter '=' --fields 2 | tr --delete '"' | cut --delimiter '_' --fields 1)
 
-# Set search engine: Google is default
-if [ "$DEFAULT_SEARCH_ENGINE" = "ecosia" ]; then
+# Set search engine
+if [ "$DEFAULT_SEARCH_ENGINE" = "google" ]; then
+SEARCH_ENGINE_TEXT="$(cat << EOF
+   "SearchEngines": {
+      "PreventInstalls": true
+    }
+EOF
+)"
+elif [ "$DEFAULT_SEARCH_ENGINE" = "ecosia" ]; then
 SEARCH_ENGINE_TEXT="$(cat << EOF
     "SearchEngines": {
       "Add": [
@@ -84,6 +91,7 @@ SEARCH_ENGINE_TEXT="$(cat << EOF
     }
 EOF
 )"
+# Would've added an IconURL here as well - not important though - but it seems the path to their favicon changes
 elif [ "$DEFAULT_SEARCH_ENGINE" = "qwant" ]; then
 SEARCH_ENGINE_TEXT="$(cat << EOF
     "SearchEngines": {
@@ -92,7 +100,6 @@ SEARCH_ENGINE_TEXT="$(cat << EOF
           "Name": "Qwant",
           "URLTemplate": "https://www.qwant.com/?q={searchTerms}",
           "Method": "GET",
-          "IconURL": "https://qwant.com/public/favicon.066f5ee2ab77b590bb5846c32c57cb84.ico",
           "Description": "Qwant search engine",
           "SuggestURLTemplate": "https://api.qwant.com/api/suggest/?q={searchTerms}&type=web"
         }
@@ -138,6 +145,8 @@ SEARCH_ENGINE_TEXT="$(cat << EOF
     }
 EOF
 )"
+else
+  printf "%s\n" "Invalid default search engine selected. Exiting." && exit 1
 fi
 
 

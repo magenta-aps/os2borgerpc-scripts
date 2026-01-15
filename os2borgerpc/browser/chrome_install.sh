@@ -150,7 +150,7 @@ if [ "$DEFAULT_SEARCH_ENGINE" = "google" ]; then
   # the browser is opened.
   # Chrome will default to using Google if we leave DefaultSearchProviderSearchURL
   # blank
-  cat > "$SEARCH_POLICY" <<- EOF
+  cat << EOF > $SEARCH_POLICY
 {
     "DefaultSearchProviderEnabled": true,
     "DefaultSearchProviderSearchURL": ""
@@ -162,8 +162,8 @@ elif [ "$DEFAULT_SEARCH_ENGINE" = "ecosia" ]; then
     "DefaultSearchProviderEnabled": true,
     "DefaultSearchProviderName": "Ecosia",
     "DefaultSearchProviderKeyword": "ecosia",
-    "DefaultSearchProviderSearchURL": "https://www.ecosia.org/search?q={searchTerms}&addon=chromegpo&tt=xxxxxxxx",
-    "DefaultSearchProviderNewTabURL": "https://www.ecosia.org/newtab/?addon=chromegpo&tt=xxxxxxxx",
+    "DefaultSearchProviderSearchURL": "https://www.ecosia.org/search?q={searchTerms}&addon=chromegpo",
+    "DefaultSearchProviderNewTabURL": "https://www.ecosia.org/newtab/?addon=chromegpo",
     "DefaultSearchProviderSuggestURL": "https://ac.ecosia.org/autocomplete?q={searchTerms}&type=list"
 }
 EOF
