@@ -57,7 +57,6 @@ print("Installed plyvel.")
 # It isn't at the top because plyvel hasn't been installed at that point.
 import plyvel  # noqa: E402
 
-
 if len(sys.argv) == 3:
     url = sys.argv[1]
     # Remove trailing slash if the user typed the URL in with one

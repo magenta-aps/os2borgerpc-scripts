@@ -20,8 +20,10 @@ if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
 fi
 
 INSTALL="$1"
+DEFAULT_SEARCH_ENGINE="$2"
 
 export DEBIAN_FRONTEND=noninteractive
+SKELETON=".skjult"
 
 ### START SHARED BLOCK BETWEEN CHROMIUM BROWSERS: CHROMIUM, CHROME ###
 setup_policies() {
@@ -68,7 +70,6 @@ setup_policies() {
 
   # Create the new policies
   POLICY="/etc/opt/chrome/policies/managed/os2borgerpc-defaults.json"
-  SKELETON=".skjult"
 
   mkdir --parents "$(dirname "$POLICY")"
 
@@ -137,19 +138,70 @@ cat > "$HOMEPAGE_POLICY" <<- END
 END
   fi
 
-  # Set the default search provider to Google so Chrome stops asking every time
+SEARCH_POLICY="/etc/opt/chrome/policies/managed/os2borgerpc-search-provider.json"
+
+# DefaultSearchProviderEnabled: Default search is performed when a user enters non-URL text in the address bar. The default search provider can not be changed by a user.
+# DefaultSearchProviderIconURL: Specifies the default search provider's favorite icon URL.
+# DefaultSearchProviderName: Specifies the default search provider's name.
+# DefaultSearchProviderSearchURL: Specifies the URL of the search provider used during a default search.
+# DefaultSearchProviderSuggestURL: Specifies the URL of the search provider to provide search suggestions.
+if [ "$DEFAULT_SEARCH_ENGINE" = "google" ]; then
+  # Set the default search provider to Google, so Chrome stops asking every time
   # the browser is opened.
   # Chrome will default to using Google if we leave DefaultSearchProviderSearchURL
   # blank
-  SEARCH_POLICY="/etc/opt/chrome/policies/managed/os2borgerpc-search-provider.json"
-  if [ ! -f "$SEARCH_POLICY" ]; then
-    cat > "$SEARCH_POLICY" <<- END
+  cat << EOF > $SEARCH_POLICY
 {
     "DefaultSearchProviderEnabled": true,
     "DefaultSearchProviderSearchURL": ""
 }
-END
-  fi
+EOF
+elif [ "$DEFAULT_SEARCH_ENGINE" = "ecosia" ]; then
+  cat << EOF > $SEARCH_POLICY
+{
+    "DefaultSearchProviderEnabled": true,
+    "DefaultSearchProviderName": "Ecosia",
+    "DefaultSearchProviderKeyword": "ecosia",
+    "DefaultSearchProviderSearchURL": "https://www.ecosia.org/search?q={searchTerms}&addon=chromegpo",
+    "DefaultSearchProviderNewTabURL": "https://www.ecosia.org/newtab/?addon=chromegpo",
+    "DefaultSearchProviderSuggestURL": "https://ac.ecosia.org/autocomplete?q={searchTerms}&type=list"
+}
+EOF
+elif [ "$DEFAULT_SEARCH_ENGINE" = "qwant" ]; then
+  cat << EOF > $SEARCH_POLICY
+{
+    "DefaultSearchProviderEnabled": true,
+    "DefaultSearchProviderName": "Qwant",
+    "DefaultSearchProviderKeyword": "qwant",
+    "DefaultSearchProviderSearchURL": "https://www.qwant.com/?q={searchTerms}",
+    "DefaultSearchProviderNewTabURL": "https://www.qwant.com",
+    "DefaultSearchProviderSuggestURL": "https://api.qwant.com/api/suggest/?q={searchTerms}&type=web"
+}
+EOF
+elif [ "$DEFAULT_SEARCH_ENGINE" = "startpage" ]; then
+  cat << EOF > $SEARCH_POLICY
+{
+    "DefaultSearchProviderEnabled": true,
+    "DefaultSearchProviderName": "StartPage",
+    "DefaultSearchProviderKeyword": "startpage",
+    "DefaultSearchProviderSearchURL": "https://www.startpage.com/sp/search?query={searchTerms}&cat=web&pl=chrome",
+    "DefaultSearchProviderNewTabURL": "https://www.startpage.com",
+    "DefaultSearchProviderSuggestURL": "https://www.startpage.com/osuggestions?q=%s"
+  }
+EOF
+elif [ "$DEFAULT_SEARCH_ENGINE" = "duckduckgo" ]; then
+  cat << EOF > $SEARCH_POLICY
+{
+    "DefaultSearchProviderEnabled": true,
+    "DefaultSearchProviderName": "DuckDuckGo",
+    "DefaultSearchProviderKeyword": "duckduckgo",
+    "DefaultSearchProviderSearchURL": "https://duckduckgo.com/?q={searchTerms}",
+    "DefaultSearchProviderNewTabURL": "https://www.duckduckgo.com",
+    "DefaultSearchProviderSuggestURL": "https://duckduckgo.com/ac/?q={searchTerms}&type=list"
+}
+EOF
+fi
+
 }
 ### END SHARED BLOCK BETWEEN CHROMIUM BROWSERS: CHROMIUM, CHROME ###
 
