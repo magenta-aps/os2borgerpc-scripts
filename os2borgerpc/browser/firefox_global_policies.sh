@@ -68,7 +68,7 @@ LOCALE=$(grep LANG= /etc/default/locale | cut --delimiter '=' --fields 2 | tr --
 # Set search engine
 if [ "$DEFAULT_SEARCH_ENGINE" = "google" ]; then
 SEARCH_ENGINE_TEXT="$(cat << EOF
-   "SearchEngines": {
+    "SearchEngines": {
       "PreventInstalls": true
     }
 EOF
@@ -211,7 +211,7 @@ cat << EOF > "$POLICY_FILE"
       "Sessions": true,
       "SiteSettings": true
     },
-    $SEARCH_ENGINE_TEXT
+$SEARCH_ENGINE_TEXT
   }
 }
 EOF
