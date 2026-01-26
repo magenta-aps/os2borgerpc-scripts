@@ -58,11 +58,15 @@ KEYBOARD_POLICY="/etc/dconf/db/os2borgerpc.d/01-keyboard-layout"
 KEYBOARD_POLICY_LOCK="/etc/dconf/db/os2borgerpc.d/locks/01-keyboard-layout"
 FIREFOX_POLICIES="/etc/firefox/policies/policies.json"
 
+# Locale used for Firefox language
+LOCALE=$(grep LANG= /etc/default/locale | cut --delimiter '=' --fields 2 | tr --delete '"' | cut --delimiter '_' --fields 1)
+
 if [ "$ACTIVATE" != "True" ]; then
   systemctl disable --now "$(basename $LANGUAGE_INSTALL_SERVICE_PATH)"
   rm --force "$LANGUAGE_SELECT_BUTTON" $LANGUAGE_SELECT_SCRIPT $LANGUAGE_INSTALL_SCRIPT $LANGUAGE_INSTALL_SERVICE $LANGUAGE_INSTALL_SERVICE_PATH $LANGUAGE_CHANGE_SCRIPT $NEW_LANGUAGE_FILE $KEYBOARD_POLICY $KEYBOARD_POLICY_LOCK
   sed --in-place "/rsync/,/xdg-user-dir DESKTOP/ {/xdg-user-dir DESKTOP\|$(basename $LANGUAGE_CHANGE_SCRIPT)/d}" $USER_CLEANUP
   sed --in-place "/RequestedLocales/d" $FIREFOX_POLICIES
+  sed --in-place "/SanitizeOnShutdown/i \ \ \ \ \"RequestedLocales\": \"$LOCALE\"," $FIREFOX_POLICIES
   dconf update
   exit 0
 fi
@@ -302,6 +306,7 @@ else # Ensure that the language is correctly reverted to the default
   \$(grep LANG= /etc/default/locale | tr -d '"') runuser -u $USERNAME xdg-user-dirs-update
   # Revert the change to the Firefox policy file
   sed --in-place "/RequestedLocales/d" $FIREFOX_POLICIES
+  sed --in-place "/SanitizeOnShutdown/i \ \ \ \ \"RequestedLocales\": \"$LOCALE\"," $FIREFOX_POLICIES
   # Delete the keyboard layout policy files.
   # It's done this way to avoid running dconf update on every logout
   if [ -f "$KEYBOARD_POLICY" ]; then
