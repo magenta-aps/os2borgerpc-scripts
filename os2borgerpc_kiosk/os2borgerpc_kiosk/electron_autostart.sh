@@ -66,10 +66,10 @@ export LANG=en_US.UTF-8
 export DEBIAN_FRONTEND=noninteractive
 
 if uname -m | grep --quiet x86; then
-  DOWNLOAD_URL="https://os2borgerpc-media.magenta.dk/assorted/os2borgerPC-webview-1.1.0.AppImage"
+  DOWNLOAD_URL="https://os2borgerpc-media.magenta.dk/assorted/os2borgerPC-webview-1.2.0.AppImage"
   ARCHITECTURE_DEPS="libatk1.0-0t64 libatk-bridge2.0-0t64 libcups2t64 libgtk-3-0t64 libnss3-dev"
 else
-  DOWNLOAD_URL="https://os2borgerpc-media.magenta.dk/assorted/os2borgerPC-webview-1.1.0-arm64.AppImage"
+  DOWNLOAD_URL="https://os2borgerpc-media.magenta.dk/assorted/os2borgerPC-webview-1.2.0-arm64.AppImage"
   ARCHITECTURE_DEPS="zlib1g-dev"
 fi
 
