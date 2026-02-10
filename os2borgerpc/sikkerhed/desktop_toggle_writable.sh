@@ -28,6 +28,8 @@ fi
 set -x
 
 USERNAME="user"
+LANGUAGE_CHANGE_SCRIPT="/usr/share/os2borgerpc/bin/language_change.sh"
+GIO_LAUNCHER="/usr/share/os2borgerpc/bin/gio-fix-desktop-file-permissions.sh"
 # Determine the name of the user desktop directory. This is done via xdg-user-dir,
 # which checks the /home/user/.config/user-dirs.dirs file. To ensure this file exists,
 # we run xdg-user-dirs-update, which generates it based on the environment variable
@@ -45,8 +47,8 @@ make_desktop_writable() {
 	# All of the matched lines are deleted. This function thus serves to undo write access removal
 	# shellcheck disable=SC2016
 	sed --in-place --expression "/chattr [-+]i/d" --expression "/chown -R root:/d" \
-		  --expression "/$COMMENT/d" --expression '/runuser/d' --expression '/export/d' \
-		  --expression "/chown \$USERNAME/d" --expression "/.config/d" --expression "/The exact cause/d" \
+		  --expression "/$COMMENT/d" --expression "/chown \$USERNAME/d" \
+		  --expression "/.config/d" --expression "/The exact cause/d" \
 		  --expression "/The lines below/d" --expression "/login issues/d" $USER_CLEANUP
 	chattr -i "$DESKTOP"
 }
@@ -56,21 +58,34 @@ mkdir --parents "/home/.skjult/$(basename "$DESKTOP")"
 
 # Undo write access removal - always do this to prevent adding the same lines multiple times (idempotency)
 make_desktop_writable
+if [ "$ACTIVATE" = "True" ] || [ ! -f "$LANGUAGE_CHANGE_SCRIPT" ]; then
+  # If we're undoing write access removal and the computer uses the language change button script,
+  # we do not remove the lines matching the following expressions as they're necessary for the
+  # language change. In all other cases, the matching lines are deleted to clean up
+  # or ensure idempotency
+  sed --in-place --expression '/runuser/d' --expression '/export/d' $USER_CLEANUP
+  # If the computer is using the language change button script, the above command will
+  # also remove a line added/needed for the language change (because it's identical to a line
+  # added by this script). In that case, we add the particular line again
+  if [ -f "$LANGUAGE_CHANGE_SCRIPT" ]; then
+    sed --in-place "\@$GIO_LAUNCHER@a DESKTOP=\$(runuser -u \$USERNAME xdg-user-dir DESKTOP)" $USER_CLEANUP
+  fi
+fi
 
 if [ "$ACTIVATE" = "True" ]; then
 	# Prepend temporarily setting DESKTOP mutable before copying new files in, as otherwise that will fail
 	# We first determine the name of the user desktop directory as before
 	sed --in-place "/USERNAME=\"$USERNAME\"/a \
 export \$(grep LANG= \/etc\/default\/locale | tr -d \'\"\')\n\
-runuser -u $USERNAME xdg-user-dirs-update\n\
-DESKTOP=\$(runuser -u $USERNAME xdg-user-dir DESKTOP)\n\
-chattr -i \$DESKTOP" $USER_CLEANUP
+runuser -u \$USERNAME xdg-user-dirs-update\n\
+DESKTOP=\$(runuser -u \$USERNAME xdg-user-dir DESKTOP)\n\
+chattr -i \"\$DESKTOP\"" $USER_CLEANUP
 
 	# Append setting the more restrictive permissions
 	cat <<- EOF >> $USER_CLEANUP
 		$COMMENT
-		chown -R root:\$USERNAME \$DESKTOP
-		chattr +i \$DESKTOP
+		chown -R root:\$USERNAME "\$DESKTOP"
+		chattr +i "\$DESKTOP"
 		# The exact cause is unclear, but xdg-user-dir will rarely fail in such
 		# a way that DESKTOP=/home/user. The lines below prevent this error
 		# from causing login issues.
