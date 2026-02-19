@@ -35,14 +35,19 @@ HORIZON_DEFAULT_CONFIG_PATH="$ETC_OMNISSA_DIR/horizon-default-config"
 
 echo ""
 
+INSTALLED_DEBIAN_VERSION=$(dpkg --list "$DEBIAN_NAME" | grep "$DEBIAN_NAME" | grep '^ii' | awk '{ print $3}')
+
 if [ "$INSTALL" = "False" ]; then
     echo "Removing manually installed Omnissa Horizon config files from directory '$ETC_OMNISSA_DIR'"
     rm --recursive --force "$HORIZON_MANDATORY_CONFIG_PATH"
     rm --recursive --force "$HORIZON_DEFAULT_CONFIG_PATH"
     echo ""
 
-    echo "Removing Omnissa Horizon Debian package '$DEBIAN_NAME'";
-    if dpkg --list "$DEBIAN_NAME"; then
+    echo "Checking Omnissa Horizon Debian package '$DEBIAN_NAME'";
+    if [ -z "$INSTALLED_DEBIAN_VERSION" ] ; then
+        echo "Omnissa Horizon Debian package '$DEBIAN_NAME' is not installed";
+    else
+        echo "Removing Omnissa Horizon Debian package '$DEBIAN_NAME'";
         if apt-get remove --assume-yes "$DEBIAN_NAME";
         then
             echo "Omnissa Horizon Debian package '$DEBIAN_NAME' sucessfully removed";
@@ -57,7 +62,6 @@ fi
 # Omnissa Horizon Debian package fetch and install from providers own web site
 # this installs ./usr/bin/horizon-client among others
 
-INSTALLED_DEBIAN_VERSION=$(dpkg --status "$DEBIAN_NAME" 2>/dev/null | grep 'Version:' | cut -d ' ' -f2)
 if [ "$DEBIAN_VERSION" = "$INSTALLED_DEBIAN_VERSION" ]; then
     echo "Omnissa Horizon Debian package '$DEBIAN_NAME' version '$INSTALLED_DEBIAN_VERSION' is already installed";
 else
@@ -81,17 +85,18 @@ else
     echo "Installing Omnissa Horizon Debian package";
     dpkg --install "$TMP_DEB"
     [ -d "$TMP_DIR" ] && rm --recursive --force "$TMP_DIR"
-fi
 
-if dpkg --list "$DEBIAN_NAME"; then
-    echo "Omnissa Horizon Debian package sucessfully installed";
-else
-    echo "Error: Omnissa Horizon Debian package install failed";
+    INSTALLED_DEBIAN_VERSION=$(dpkg --list "$DEBIAN_NAME" | grep "$DEBIAN_NAME" | grep '^ii' | awk '{ print $3}')
+    if [ "$DEBIAN_VERSION" = "$INSTALLED_DEBIAN_VERSION" ]; then
+        echo "Omnissa Horizon Debian package '$DEBIAN_NAME' version '$INSTALLED_DEBIAN_VERSION' successfully installed";
+    else
+        echo "Error: Omnissa Horizon Debian package '$DEBIAN_NAME' version '$DEBIAN_VERSION' install failed";
     exit 1
+    fi
 fi
 
 # Install admin portal supplied config files in ETC_OMNISSA_DIR
-# which exists after Debian package install
+# which exists after above Debian package install
 echo ""
 echo "Check existence of mandatory and optional arguments when INSTALL=True"
 
