@@ -52,8 +52,7 @@ INSTALLED_DEBIAN_VERSION=$(dpkg --list "$DEBIAN_NAME" | grep "$DEBIAN_NAME" | gr
 
 if [ "$INSTALL" = "False" ]; then
     echo "Removing manually installed Omnissa Horizon config files from directory '$ETC_OMNISSA_DIR'"
-    rm --recursive --force "$HORIZON_MANDATORY_CONFIG_PATH"
-    rm --recursive --force "$HORIZON_DEFAULT_CONFIG_PATH"
+    rm --recursive --force "$HORIZON_MANDATORY_CONFIG_PATH" "$HORIZON_DEFAULT_CONFIG_PATH"
     echo ""
 
     echo "Removing manually installed Omnissa Horizon desktop launcher '$HORIZON_DESKTOP'"
