@@ -32,6 +32,19 @@ DEBIAN_VERSION="2512-8.17.0-20187591429"
 ETC_OMNISSA_DIR="/etc/omnissa"
 HORIZON_MANDATORY_CONFIG_PATH="$ETC_OMNISSA_DIR/horizon-mandatory-config"
 HORIZON_DEFAULT_CONFIG_PATH="$ETC_OMNISSA_DIR/horizon-default-config"
+HORIZON_CLIENT="/usr/bin/horizon-client"
+HORIZON_ICON="/usr/share/icons/horizon-client.png"
+
+# Determine the name of the user desktop directory. This is done via
+# xdg-user-dir, which checks the /home/user/.config/user-dirs.dirs file. To ensure
+# this file exists, we run xdg-user-dirs-update, which generates it based on the
+# environment variable LANG. This variable is empty in lightdm so we first export it
+# based on the value stored in /etc/default/locale
+export "$(grep LANG= /etc/default/locale | tr -d '"')"
+runuser -u user xdg-user-dirs-update
+DEFAULT_DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
+SKJULT_DESKTOP_DIR="/home/.skjult/$DEFAULT_DESKTOP"
+HORIZON_DESKTOP="$SKJULT_DESKTOP_DIR/horizon-client.desktop"
 
 echo ""
 
@@ -41,6 +54,10 @@ if [ "$INSTALL" = "False" ]; then
     echo "Removing manually installed Omnissa Horizon config files from directory '$ETC_OMNISSA_DIR'"
     rm --recursive --force "$HORIZON_MANDATORY_CONFIG_PATH"
     rm --recursive --force "$HORIZON_DEFAULT_CONFIG_PATH"
+    echo ""
+
+    echo "Removing manually installed Omnissa Horizon desktop launcher '$HORIZON_DESKTOP'"
+    rm --force "$HORIZON_DESKTOP"
     echo ""
 
     echo "Checking Omnissa Horizon Debian package '$DEBIAN_NAME'";
@@ -94,6 +111,19 @@ else
     exit 1
     fi
 fi
+
+echo "Installing Omnissa Horizon desktop launcher '$HORIZON_DESKTOP'"
+mkdir --parents --verbose "$SKJULT_DESKTOP_DIR"
+cat << EOF > "$HORIZON_DESKTOP"
+[Desktop Entry]
+Version=$DEBIAN_VERSION
+Type=Application
+Name=Horizon client
+Comment=Omnissa Horizon VPN client
+Icon=$HORIZON_ICON
+Exec=$HORIZON_CLIENT
+EOF
+echo ""
 
 # Install admin portal supplied config files in ETC_OMNISSA_DIR
 # which exists after above Debian package install
