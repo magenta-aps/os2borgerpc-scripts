@@ -9,6 +9,7 @@ The top level categories are as follows:
 | Category          | Description                                                                |
 | ------------------| ---------------------------------------------------------------------------|
 | common            | Scripts that work on both OS2borgerPC and OS2borgerPC Kiosk                |
+| openworkplace     | Scripts that only work on OS2PC                                            |
 | os2borgerpc       | Scripts that only work on OS2BorgerPC                                      |
 | os2borgerpc_kiosk | Scripts that only work on OS2BorgerPC Kiosk                                |
 
@@ -23,6 +24,12 @@ Below `common` we have the following categories
 | security          | Security scripts                                                                          |
 | sikkerhed         | Scripts that enhance or weaken security (OS2borgerPC and OS2borgerPC Kiosk)               |
 | system            | Uncategorized scripts that work on Ubuntu generally (OS2borgerPC and OS2borgerPC Kiosk)   |
+
+Below `openworkplace` we have the following categories
+
+| Category      | Description                                                                |
+| ------------- | ---------------------------------------------------------------------------|
+| vpn           | Related to VPN and remote clients                                          |
 
 Below `os2borgerpc` we have the following categories
 
