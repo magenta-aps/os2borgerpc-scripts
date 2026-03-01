@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-#
+
 # SPDX-FileCopyrightText: 2026 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -19,21 +19,23 @@ restore_original_filename() {
 
 set -x
 
+# Remove empty arguments
+for i do
+  [ -z "$i" ] || set -- "$@" "$i"
+  shift
+done
+
 # Check that all files passed are CRT files
 for F in "$@"; do
-  if [ -n "$F" ]; then
-    if ! echo "$F" | grep --ignore-case --fixed-strings ".crt"; then
-      echo "Certificate must be a .crt file. Exiting."
-      exit 1
-    fi
+  if ! echo "$F" | grep --ignore-case --fixed-strings ".crt"; then
+    echo "Certificate must be a .crt file. Exiting."
+    exit 1
   fi
 done
 
 # Copy your certificates to the local CA certificates directory
 for F in "$@"; do
-  if [ -n "$F" ]; then
-    cp "$F" "/usr/local/share/ca-certificates/$(restore_original_filename "$F")"
-  fi
+  cp "$F" "/usr/local/share/ca-certificates/$(restore_original_filename "$F")"
 done
 
 # Add the certificate to your trust store
@@ -41,8 +43,6 @@ update-ca-certificates
 
 # Verify that your certificates are in PEM format (that they were added successfully)
 for F in "$@"; do
-  if [ -n "$F" ]; then
-    FILE="$(restore_original_filename "$F")"
-    find /etc/ssl/certs/ -iname "${FILE%.*}*" # Removing the extension dynamically
-  fi
+  FILE="$(restore_original_filename "$F")"
+  find /etc/ssl/certs/ -iname "${FILE%.*}*" # Removing the extension dynamically
 done
