@@ -14,7 +14,7 @@
 
 set -x
 
-SERVERS_TO_CHECK="0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org www.wikipedia.org"
+SERVERS_TO_CHECK="0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org ft.dk regioner.dk e-boks.com"
 
 export DEBIAN_FRONTEND=noninteractive
 
