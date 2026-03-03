@@ -16,21 +16,19 @@
 set -x
 
 if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
-  echo "Dette script er ikke designet til at blive anvendt på en kiosk-maskine."
-  exit 1
+  POLICIES_DIR="/var/snap/chromium/current/policies/managed"
+else
+  POLICIES_DIR="/etc/opt/chrome/policies/managed"
 fi
 
 ACTIVATE=$1
 EXTENSIONS_ARRAY=$2
 
-POLICIES_DIR="/etc/opt/chrome/policies/managed"
 POLICY_FILE="os2borgerpc-extension-settings.json"
 
 if [ "$ACTIVATE" = "True" ]; then
 
-  if [ ! -d "$(dirname "$POLICY_FILE")" ]; then
-    mkdir --parents "$(dirname "$POLICY_FILE")"
-  fi
+  mkdir --parents "$POLICIES_DIR"
 
   EXTENSIONS_DICT=""
   if [ -n "$EXTENSIONS_ARRAY" ]; then
@@ -38,8 +36,7 @@ if [ "$ACTIVATE" = "True" ]; then
     ARR_LEN="${#EXTENSIONS_ARRAY[@]}"
 
     C=0
-    for EXTENSION in "${EXTENSIONS_ARRAY[@]}"
-    do
+    for EXTENSION in "${EXTENSIONS_ARRAY[@]}"; do
       DICT_TEMPLATE="\"$EXTENSION\": {
       \"installation_mode\": \"force_installed\",
       \"toolbar_pin\": \"force_pinned\",
