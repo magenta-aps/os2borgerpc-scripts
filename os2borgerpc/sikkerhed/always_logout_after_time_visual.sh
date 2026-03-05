@@ -95,7 +95,7 @@ if [ "$ACTIVATE" = "True" ]; then
 	# Fetch and install gnome extension
 	wget $EXTENSION_GIT_URL
 	unzip $BRANCH.zip
-	$REPO_NAME-$BRANCH/install.sh whatever $EXTENSION_NAME true true true
+	$REPO_NAME-$BRANCH/install.sh $EXTENSION_NAME true
 	rm --recursive $BRANCH.zip $REPO_NAME-$BRANCH
 
 	# Now overwrite the testing config with what the user inputted/defaults in this script
