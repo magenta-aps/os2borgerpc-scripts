@@ -23,7 +23,7 @@ if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
   exit 1
 fi
 
-# Dconv prevent the user from printing and print setup changes
+# Dconf prevent the user from printing and print setup changes
 # Supported on Ubuntu 22.04 24.04 25.10
 # schema org.gnome.desktop.lockdown
 # key disable-print-setup Prevent the user from modifying print settings
@@ -35,32 +35,69 @@ fi
 
 POLICIES=("disable-print-setup" "disable-printing")
 POLICY_PATH="org/gnome/desktop/lockdown"
-POLICY_PREFIX="03-"
 POLICY_VALUE="true"
+
+POLICY_PREFIX="03-"
+POLICY_FILE_NAME="disable-printing-all"
+POLICY_FILE="/etc/dconf/db/os2borgerpc.d/$POLICY_PREFIX$POLICY_FILE_NAME"
+POLICY_LOCK_FILE="/etc/dconf/db/os2borgerpc.d/locks/$POLICY_PREFIX$POLICY_FILE_NAME"
 
 ACTIVATE=$1
 
-for POLICY in "${POLICIES[@]}"; do
-    POLICY_FILE="/etc/dconf/db/os2borgerpc.d/$POLICY_PREFIX$POLICY"
-    POLICY_LOCK_FILE="/etc/dconf/db/os2borgerpc.d/locks/$POLICY_PREFIX$POLICY"
+if [ "$ACTIVATE" = "True" ]; then
 
-    if [ "$ACTIVATE" = "True" ]; then
-
-	cat > "$POLICY_FILE" <<-END
+    # policy file header
+    cat > "$POLICY_FILE" <<-END
 [$POLICY_PATH]
+END
+
+    # empty policy lock file
+    rm --force "$POLICY_LOCK_FILE"
+    touch "$POLICY_LOCK_FILE"
+
+    for POLICY in "${POLICIES[@]}"; do
+        cat >> "$POLICY_FILE" <<-END
 $POLICY=$POLICY_VALUE
 END
 
 	# Tell the system that the values of the dconf keys we've just set can no
 	# longer be overridden by the user
-	cat > "$POLICY_LOCK_FILE" <<-END
+	cat >> "$POLICY_LOCK_FILE" <<-END
 /$POLICY_PATH/$POLICY
 END
+    done
 
-        else
-            rm --force "$POLICY_FILE" "$POLICY_LOCK_FILE"
-    fi
-done
+    # sync system's dconf databases
+    dconf update
 
-# Incorporate all of the text files we've just created into the system's dconf databases
-dconf update
+    # stop and disable local cups print daimon and network printing
+    systemctl stop cups
+    systemctl disable cups
+    systemctl status cups
+
+    systemctl stop cups-browsed
+    systemctl disable cups-browsed
+    systemctl status cups-browsed
+
+elif [ "$ACTIVATE" = "False" ]; then
+
+    rm --force "$POLICY_FILE" "$POLICY_LOCK_FILE"
+
+    # sync system's dconf databases
+    dconf update
+
+    # start and enable local cups print daimon and network printing
+    systemctl start cups
+    systemctl enable cups
+    systemctl status cups
+
+    systemctl start cups-browsed
+    systemctl enable cups-browsed
+    systemctl status cups-browsed
+
+else
+
+    echo "Error: expected True|False as first argument, but got argument '$ACTIVATE'"
+    exit 1
+
+fi
