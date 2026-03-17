@@ -37,7 +37,7 @@ POLICIES=("disable-print-setup" "disable-printing")
 POLICY_PATH="org/gnome/desktop/lockdown"
 POLICY_VALUE="true"
 
-POLICY_PREFIX="03-"
+POLICY_PREFIX="50-"
 POLICY_FILE_NAME="disable-printing-all"
 POLICY_FILE="/etc/dconf/db/os2borgerpc.d/$POLICY_PREFIX$POLICY_FILE_NAME"
 POLICY_LOCK_FILE="/etc/dconf/db/os2borgerpc.d/locks/$POLICY_PREFIX$POLICY_FILE_NAME"
