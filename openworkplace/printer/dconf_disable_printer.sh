@@ -71,13 +71,23 @@ END
     dconf update
 
     # stop and disable local cups print daimon and network printing
-    systemctl stop cups
-    systemctl disable cups
-    systemctl status cups
 
-    systemctl stop cups-browsed
-    systemctl disable cups-browsed
-    systemctl status cups-browsed
+    # Notice Debian and Ubuntu reverse dependency chain
+    # cups.service
+    # ● ├─cups-browsed.service
+    # ● └─multi-user.target
+    # ●   └─graphical.target
+
+    # Notice order stop -> disable -> mask needed to succeed
+    systemctl stop cups-browsed.service
+    systemctl disable cups-browsed.service
+    systemctl mask cups-browsed.service
+    systemctl status cups-browsed.service
+
+    systemctl stop cups.service
+    systemctl disable cups.service
+    systemctl mask cups.service.service
+    systemctl status cups
 
 elif [ "$ACTIVATE" = "False" ]; then
 
@@ -87,13 +97,16 @@ elif [ "$ACTIVATE" = "False" ]; then
     dconf update
 
     # start and enable local cups print daimon and network printing
-    systemctl start cups
-    systemctl enable cups
-    systemctl status cups
+    # Notice order unmask -> enable -> start needed to succeed
+    systemctl unmask cups.service
+    systemctl enable cups.service
+    systemctl start cups.service
+    systemctl status cups.service
 
-    systemctl start cups-browsed
-    systemctl enable cups-browsed
-    systemctl status cups-browsed
+    systemctl unmask cups-browsed.service
+    systemctl enable cups-browsed.service
+    systemctl start cups-browsed.service
+    systemctl status cups-browsed.service
 
 else
 
