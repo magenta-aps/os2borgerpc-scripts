@@ -210,6 +210,8 @@ if [ "$WIDTH" = "auto" ] || [ "$HEIGHT" = "auto" ]; then
   fi
 fi
 
+# Ensure that the Chromium SingletonLock has been deleted
+rm --force /home/chrome/snap/chromium/common/chromium/SingletonLock
 
 if [ "\$WM" == "wm" ]; then
   chromium-browser "\$BPC_KIOSK" "\$IURL" "\$COMMON_SETTINGS"
