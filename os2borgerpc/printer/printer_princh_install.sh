@@ -17,8 +17,8 @@ export DEBIAN_FRONTEND=noninteractive
 URL="https://packages.princh.com/linux/debian/amd64/PrinchCloudPrinter/production/current"
 
 # This will return "" if not installed, which is also fine as that means it'll be installed
-PRINCH_VERSION_AVAILABLE="$(wget --server-response --spider $URL 2>&1 | grep --ignore-case version | cut --delimiter ' ' --fields 4 | cut --delimiter '.' --fields 1,2,3)"
-PRINCH_VERSION_INSTALLED="$(dpkg --status princh-cloud-printer | grep Version | cut --delimiter ' ' --fields 2)"
+PRINCH_VERSION_AVAILABLE="$(wget --output-document - --quiet $URL.version)"
+PRINCH_VERSION_INSTALLED="$(dpkg --status princh-cloud-printer | grep Version | grep --only-matching '[0-9]\+.[0-9]\+.[0-9]\+.[0-9]\+')" || true
 
 [ -z "$PRINCH_VERSION_AVAILABLE" ] && printf "%s\n" "Failed to obtain the current Princh version from Princh's servers" && exit 1
 
