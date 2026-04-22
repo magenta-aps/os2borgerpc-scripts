@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2026 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# SPDX-FileContributor: Andreas Poulsen
+#
+# SYNOPSIS
+#    edge_policy_homepage.sh URL [EXTRA_URLS_LIST]
+#
+# DESCRIPTION
+#    This script adds a Microsoft Edge policy that defines one or more homepages,
+#    adds the "Home" button to the main browser bar, and causes the homepage(s) to
+#    be opened automatically when the browser starts.
+#
+#    Adding a Microsoft Edge policy does not require that Microsoft Edge is
+#    already installed, although obviously the policy won't take effect
+#    until it has been.
+#
+# DEVELOPER NOTES
+#    The policies we set and why:
+#
+#    ShowHomeButton: A button to go back to the homepage. Not crucial.
+#    HomepageIsNewTabPage: Don't allow someone to override the homepage with the new tab page
+#    HomepageLocation: Sets the page the HomeButton links to, if visible. Confusingly this does not set the homepage that Edge opens on startup!
+#    RestoreOnStartup: Controls what happens on startup. Also prevents users from changing the startup URLs when reopening the browser without logging out of the OS first. Possibly not needed with Guest mode, incognito or ephemeral.
+#    RestoreOnStartupURLs: This is, confusingly, what can actually control the homepage(s), but only if RestoreOnStartup is set to "4".
+
+set -x
+
+if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
+  echo "Dette script er ikke designet til at blive anvendt på en kiosk-maskine."
+  exit 1
+fi
+
+HOMEPAGE_POLICY="/etc/opt/edge/policies/managed/os2borgerpc-homepage.json"
+mkdir --parents "$(dirname "$HOMEPAGE_POLICY")"
+
+STARTPAGE="$1"
+ADDITIONAL_PAGES="$2"
+
+PAGES_STRING=""
+if [ -n "$ADDITIONAL_PAGES" ]; then
+  IFS='|' read -ra PAGES_ARRAY <<< "$ADDITIONAL_PAGES"
+
+  for PAGE in "${PAGES_ARRAY[@]}"
+  do
+      PAGES_STRING+="\"$PAGE\","
+  done
+fi
+
+cat > "$HOMEPAGE_POLICY" <<END
+{
+    "ShowHomeButton": true,
+    "HomepageIsNewTabPage": false,
+    "HomepageLocation": "$STARTPAGE",
+
+    "RestoreOnStartup": 4,
+    "RestoreOnStartupURLs": [
+        "$STARTPAGE",$PAGES_STRING
+    ]
+}
+END

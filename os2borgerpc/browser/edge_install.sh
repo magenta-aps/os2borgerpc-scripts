@@ -23,6 +23,7 @@ INSTALL="$1"
 
 export DEBIAN_FRONTEND=noninteractive
 POLICY="/etc/opt/edge/policies/managed/os2borgerpc-defaults.json"
+HOMEPAGE_POLICY="/etc/opt/edge/policies/managed/os2borgerpc-homepage.json"
 
 setup_policies() {
   # DEVELOPER NOTES:
@@ -107,6 +108,20 @@ setup_policies() {
     ]
 }
 END
+  # This entire policy file is overwritten if you later run the script to change the homepage
+  # We set it here too so all machines have a startpage set, to prevent someone from manually setting the homepage to
+  # some malicious site
+  cat << EOF > $HOMEPAGE_POLICY
+{
+    "HomepageLocation": "https://borger.dk",
+    "RestoreOnStartup": 4,
+    "ShowHomeButton": true,
+    "HomepageIsNewTabPage": false,
+    "RestoreOnStartupURLs": [
+        "https://borger.dk"
+    ]
+}
+EOF
 }
 
 PACKAGE="microsoft-edge-stable"
@@ -129,5 +144,5 @@ if [ "$INSTALL" = "True" ]; then
 else
   # Remove the browser. Leave the desktop files?
   apt-get remove --assume-yes $PACKAGE
-  rm $POLICY
+  rm --force $POLICY $HOMEPAGE_POLICY
 fi
