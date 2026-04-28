@@ -383,10 +383,12 @@ EOF
 
 else # Go back to not using a wm or the onscreen keyboard
 
+  # This command might fail if onboard is not installed.
+  # Don't stop execution if that is the case
+  runuser -u $USER dbus-launch gsettings set org.onboard.keyboard long-press-delay 0.5 || true
+
   apt-get remove --assume-yes bspwm onboard
   apt-get autoremove --assume-yes
-
-  runuser -u $USER dbus-launch gsettings set org.onboard.keyboard long-press-delay 0.5
 
   # Restore the original Compact layout in case it hasn't been deleted - ignore
   # errors if fx. the dir no longer exists.
