@@ -41,8 +41,8 @@ else
 fi
 # shellcheck disable=SC2034   # It exists in an included file
 LOGOUT_TIMER_CONF="/usr/share/gnome-shell/extensions/$EXTENSION_NAME/config.json"
-SMS_LOGIN_INTERFACE_PYTHON3=/usr/share/os2borgerpc/bin/sms_login_interface_python3.py
-LOGIN_FINALIZE_INTERFACE_PYTHON3=/usr/share/os2borgerpc/bin/sms_login_finalize_python3.py
+SMS_LOGIN_INTERFACE_PYTHON3="/usr/share/os2borgerpc/bin/sms_login_interface_python3.py"
+LOGIN_FINALIZE_INTERFACE_PYTHON3="/usr/share/os2borgerpc/bin/sms_login_finalize_python3.py"
 CITIZEN_HASH_FILE="/etc/os2borgerpc/citizen_hash.txt"
 LOG_ID_FILE="/etc/os2borgerpc/login_log_id.txt"
 LOGOUT_SCRIPT_LIGHTDM="/etc/lightdm/greeter-setup-scripts/general_citizen_logout.py"
@@ -53,6 +53,7 @@ GREETER_SETUP_DIR="/etc/lightdm/greeter-setup-scripts"
 LIGHTDM_CONFIG="/etc/lightdm/lightdm.conf"
 GDM_CONFIG="/etc/gdm3/custom.conf"
 POST_SESSION_FILE="/etc/gdm3/PostSession/Default"
+WAKE_PLAN_FILE="/etc/os2borgerpc/plan.json"
 
 # For backwards compatibility with a previous version of the script
 if grep -q "sms-booking-pam-module" "$LIGHTDM_PAM"; then
@@ -280,6 +281,7 @@ cat << EOF > $PAM_PYTHON_MODULE
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
 from subprocess import check_output
 import json
 from os.path import exists
@@ -413,6 +415,36 @@ def pam_sm_authenticate(pamh, flags, argv):
                     pamh.conversation(result_msg)
 
                     return pamh.PAM_AUTH_ERR
+
+        # If they are using on/off schedules, check if there is a
+        # scheduled off before the allowed login time runs out and
+        # use the time until the scheduled off instead, if that is the case
+        if exists("$WAKE_PLAN_FILE"):
+          try:
+            # This check_output command raises an exception
+            # if the crontab does not contain a scheduled off
+            scheduled_off = check_output("crontab -l | grep scheduled_off", shell=True)
+          except:
+            scheduled_off = ""
+          if scheduled_off:
+            scheduled_off = scheduled_off.split(b" ")
+            minute = int(scheduled_off[0])
+            hour = int(scheduled_off[1])
+            day = int(scheduled_off[2])
+            month = int(scheduled_off[3])
+
+            now = datetime.now()
+
+            # Handle late stop on new years
+            if day == 1 and month == 1 and day != now.day:
+              year = now.year + 1
+            else:
+              year = now.year
+
+            scheduled_off_datetime = datetime(year, month, day, hour, minute)
+            time_until_scheduled_off = (scheduled_off_datetime - now).total_seconds() // 60
+            if time_until_scheduled_off > 0 and time_until_scheduled_off < time:
+              time = time_until_scheduled_off
 
         # We only need the finalize function if we are not using booking,
         # if idle login is allowed or if a log should be saved
