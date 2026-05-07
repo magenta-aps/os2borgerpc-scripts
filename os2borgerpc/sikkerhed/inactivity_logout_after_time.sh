@@ -26,8 +26,8 @@ fi
 ENABLE=$1
 DIALOG_TIME_MINS=$2
 LOGOUT_TIME_MINS=$3
-DIALOG_TEXT=$4
-BUTTON_TEXT=$5
+DIALOG_TEXT=${4:-"Du er inaktiv og bliver logget ud om kort tid..."}
+BUTTON_TEXT=${5:-"OK"}
 
 OUR_USER="user"
 INACTIVITY_SCRIPT="/usr/share/os2borgerpc/bin/inactive_logout.sh"
@@ -35,6 +35,7 @@ INACTIVITY_SCRIPT_LOG="/usr/share/os2borgerpc/bin/inactive_logout.log"
 LIGHTDM_SCRIPT="/etc/lightdm/greeter-setup-scripts/suspend_after_time.sh"
 GDM_SCRIPT="/etc/os2borgerpc/post-session-scripts/suspend_after_time.sh"
 GDM_SUSPEND_SERVICE="/etc/systemd/system/suspend_after_time.service"
+CRON_D_FILE="/etc/cron.d/os2borgerpc-inactive-logout"
 
 error() {
   echo "$1"
@@ -49,34 +50,33 @@ rm --force $INACTIVITY_SCRIPT_LOG
 systemctl disable --now "$(basename $GDM_SUSPEND_SERVICE)"
 rm --force $GDM_SCRIPT $GDM_SUSPEND_SERVICE $LIGHTDM_SCRIPT
 
+# Clean up after the previous version of this script
+OLDCRON="/tmp/oldcron"
+crontab -l > $OLDCRON
+if [ -f "$OLDCRON" ]; then
+  sed --in-place "\@$INACTIVITY_SCRIPT@d" $OLDCRON
+  crontab $OLDCRON
+  rm --force $OLDCRON
+fi
+
 # Handle deactivating inactivity logout
 if [ "$ENABLE" = "False" ]; then
-  rm --force $INACTIVITY_SCRIPT
-  OLDCRON="/tmp/oldcron"
-  crontab -l > $OLDCRON
-  if [ -f "$OLDCRON" ]; then
-    sed --in-place "\@$INACTIVITY_SCRIPT@d" $OLDCRON
-    crontab $OLDCRON
-    rm --force $OLDCRON
-  fi
-  exit
+  rm --force $INACTIVITY_SCRIPT $CRON_D_FILE
+  exit 0
 fi
 
 [ -z "$DIALOG_TIME_MINS" ] && error 'Please insert the time the user has to be inactive before dialog is shown.'
 [ -z "$LOGOUT_TIME_MINS" ] && error 'Please insert the time the user has to be inactive before being logged out.'
 [ "$DIALOG_TIME_MINS" -gt "$LOGOUT_TIME_MINS" ] && error 'Dialog time is greater than logout time and dialog will therefore not be shown. Edit dialog time!'
-[ -z "$DIALOG_TEXT" ] && DIALOG_TEXT="Du er inaktiv og bliver logget ud om kort tid..."
-[ -z "$BUTTON_TEXT" ] && BUTTON_TEXT="OK"
 
 # org.gnome.Mutter.IdleMonitor.GetIdletime uses milliseconds, so convert the user inputted minutes to that
 LOGOUT_TIME_MS=$(( LOGOUT_TIME_MINS * 60 * 1000 ))
 DIALOG_TIME_MS=$(( DIALOG_TIME_MINS * 60 * 1000 ))
 
-# if line already added to crontab: skip
-if ! crontab -l | grep "$INACTIVITY_SCRIPT"; then
-	line="* * * * * $INACTIVITY_SCRIPT"
-	(crontab -l -u root; echo "$line") | crontab -u root -
-fi
+# Create the cron.d file
+cat << EOF > $CRON_D_FILE
+* * * * * root $INACTIVITY_SCRIPT
+EOF
 
 # New auto_logout file, running as root
 cat <<- EOF > $INACTIVITY_SCRIPT
