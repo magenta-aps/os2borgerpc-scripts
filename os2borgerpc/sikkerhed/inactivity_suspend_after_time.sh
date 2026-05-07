@@ -33,8 +33,8 @@ set -x
 ENABLE=$1
 DIALOG_TIME_MINS=$2
 LOGOUT_TIME_MINS=$3
-DIALOG_TEXT=$4
-BUTTON_TEXT=$5
+DIALOG_TEXT=${4:-"Du er inaktiv og bliver logget ud om kort tid..."}
+BUTTON_TEXT=${5:-"OK"}
 
 OUR_USER="user"
 SUSPEND_SCRIPT="/usr/share/os2borgerpc/bin/inactive_logout.sh"
@@ -46,6 +46,7 @@ LIGHTDM_SUSPEND_SCRIPT="/etc/lightdm/greeter-setup-scripts/suspend_after_time.sh
 LIGHTDM_SUSPEND_SCRIPT_LOG="/etc/lightdm/scriptlogs/suspend_after_time.log"
 LIGHTDM_GREETER_SETUP_SCRIPT="/etc/lightdm/greeter_setup_script.sh"
 LIGHTDM_GREETER_SCRIPTS_DIR="/etc/lightdm/greeter-setup-scripts"
+CRON_D_FILE="/etc/cron.d/os2borgerpc-inactive-logout"
 
 error() {
   echo "$1"
@@ -65,28 +66,28 @@ else
   GREETER_SUSPEND_SCRIPT=$LIGHTDM_SUSPEND_SCRIPT
 fi
 
+# CLean up after the previous version of this script
+OLDCRON="/tmp/oldcron"
+crontab -l > $OLDCRON
+ if [ -f "$OLDCRON" ]; then
+  sed --in-place "\@$SUSPEND_SCRIPT@d" $OLDCRON
+  crontab $OLDCRON
+  rm --force $OLDCRON
+fi
+
 # Handle deactivating inactivity suspend
 if [ "$ENABLE" = "False" ]; then
   if [ -f "$GDM_SUSPEND_SERVICE" ]; then
     systemctl disable --now "$(basename $GDM_SUSPEND_SERVICE)"
     rm $GDM_SUSPEND_SERVICE
   fi
-  rm --force $SUSPEND_SCRIPT $GREETER_SUSPEND_SCRIPT
-  OLDCRON="/tmp/oldcron"
-  crontab -l > $OLDCRON
-  if [ -f "$OLDCRON" ]; then
-    sed --in-place "\@$SUSPEND_SCRIPT@d" $OLDCRON
-    crontab $OLDCRON
-    rm --force $OLDCRON
-  fi
-  exit
+  rm --force $SUSPEND_SCRIPT $GREETER_SUSPEND_SCRIPT $CRON_D_FILE
+  exit 0
 fi
 
 [ -z "$DIALOG_TIME_MINS" ] && error 'Please insert the time the user has to be inactive before dialog is shown.'
 [ -z "$LOGOUT_TIME_MINS" ] && error 'Please insert the time the user has to be inactive before being logged out.'
 [ "$DIALOG_TIME_MINS" -gt "$LOGOUT_TIME_MINS" ] && error 'Dialog time is greater than logout time and dialog will therefore not be shown. Edit dialog time!'
-[ -z "$DIALOG_TEXT" ] && DIALOG_TEXT="Du er inaktiv og bliver logget ud om kort tid..."
-[ -z "$BUTTON_TEXT" ] && BUTTON_TEXT="OK"
 
 # org.gnome.Mutter.IdleMonitor.GetIdletime uses milliseconds, so convert the user inputted minutes to that
 LOGOUT_TIME_MS=$(( LOGOUT_TIME_MINS * 60 * 1000 ))
@@ -167,11 +168,10 @@ EOF
   systemctl enable "$(basename $GDM_SUSPEND_SERVICE)"
 fi
 
-# if line already added to crontab: skip
-if ! crontab -l | grep "$SUSPEND_SCRIPT"; then
-	line="* * * * * $SUSPEND_SCRIPT"
-	(crontab -l -u root; echo "$line") | crontab -u root -
-fi
+# Create the cron.d file
+cat << EOF > $CRON_D_FILE
+* * * * * root $SUSPEND_SCRIPT
+EOF
 
 # New auto_logout file, running as root
 cat <<- EOF > $SUSPEND_SCRIPT
