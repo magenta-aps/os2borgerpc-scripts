@@ -25,6 +25,11 @@ if lsb_release -d | grep --quiet 24 && echo "$APPNAMES" | grep --quiet pinta; th
   APPNAMES="${APPNAMES//pinta/}"
 fi
 
+# Firefox is a snap on 22.04 and 24.04
+if echo "$APPNAMES" | grep --quiet firefox; then
+  FIREFOX_SNAP="True"
+fi
+
 # Install or remove the chosen package
 if [ "$INSTALL" = "True" ]; then
   # shellcheck disable=SC2086  # We want word-splitting to handle multiple apps
@@ -37,6 +42,9 @@ else
   apt-get --assume-yes remove $APPNAMES
   if [ "$PINTA_SNAP" = "True" ]; then
     snap remove pinta
+  fi
+  if [ "$FIREFOX_SNAP" = "True" ]; then
+    snap remove firefox
   fi
 fi
 
