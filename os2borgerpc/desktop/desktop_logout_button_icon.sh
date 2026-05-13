@@ -36,6 +36,7 @@ DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
 
 OLD_DESKTOP_FILE=/home/.skjult/"$DESKTOP"/Logout.desktop
 DESKTOP_FILE=/home/.skjult/"$DESKTOP"/logout.desktop
+USER_DESKTOP_FILE="/home/user/$DESKTOP/logout.desktop"
 
 rm --force "$OLD_DESKTOP_FILE"
 
@@ -91,5 +92,5 @@ cat <<- EOF > "$DESKTOP_FILE"
 EOF
 
 else
-  rm "$DESKTOP_FILE"
+  rm --force "$DESKTOP_FILE" "$USER_DESKTOP_FILE" 2> /dev/null
 fi

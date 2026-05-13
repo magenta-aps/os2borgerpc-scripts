@@ -26,7 +26,7 @@ if [ ! -f "$POLICY" ]; then
 fi
 
 if [ "$ACTIVATE" = "False" ]; then
-  rm --recursive --force "$CHROME_PROFILE_PATH/Local Extension Settings"
+  rm --recursive --force "$CHROME_PROFILE_PATH/Local Extension Settings" "$EXTENSION_SETTINGS_PATH"
   echo "Deleted the saved extension settings."
   exit 0
 fi

@@ -36,6 +36,7 @@ runuser -u user xdg-user-dirs-update
 DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
 
 SHADOW_DESKTOP="/home/.skjult/$DESKTOP"
+USER_DESKTOP="/home/user/$DESKTOP"
 SNAP_DESKTOP_FILE_PATH="/var/lib/snapd/desktop/applications"
 APT_DESKTOP_FILE_PATH="/usr/share/applications"
 
@@ -84,5 +85,5 @@ else
   if [ -f "$SHADOW_DESKTOP/${PROGRAM}_$PROGRAM.desktop" ]; then
     PROGRAM=${PROGRAM}_$PROGRAM
   fi
-  rm --force "$SHADOW_DESKTOP/$PROGRAM.desktop"
+  rm --force "$SHADOW_DESKTOP/$PROGRAM.desktop" "$USER_DESKTOP/$PROGRAM.desktop" 2> /dev/null
 fi

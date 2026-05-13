@@ -26,6 +26,7 @@ set -x
 PROGRAM="$1"
 ADD="$2"
 
+USER_AUTOSTART_DIR="/home/user/.config/autostart"
 AUTOSTART_DIR="/home/.skjult/.config/autostart"
 LOCAL_COPY_DIR="/home/.skjult/.local/share/applications"
 
@@ -40,10 +41,12 @@ fi
 if [ -f "/var/lib/snapd/desktop/applications/${PROGRAM}_$PROGRAM.desktop" ]; then
 
   INSTALLED_APP_FILE="/var/lib/snapd/desktop/applications/${PROGRAM}_$PROGRAM.desktop"
+  USER_AUTOSTART_FILE="$USER_AUTOSTART_DIR/${PROGRAM}_$PROGRAM.desktop"
   AUTOSTART_FILE="$AUTOSTART_DIR/${PROGRAM}_$PROGRAM.desktop"
   LOCAL_COPY_FILE="$LOCAL_COPY_DIR/${PROGRAM}_$PROGRAM.desktop"
 else
   INSTALLED_APP_FILE="/usr/share/applications/$PROGRAM.desktop"
+  USER_AUTOSTART_FILE="$USER_AUTOSTART_DIR/$PROGRAM.desktop"
   AUTOSTART_FILE="$AUTOSTART_DIR/$PROGRAM.desktop"
   LOCAL_COPY_FILE="$LOCAL_COPY_DIR/$PROGRAM.desktop"
 fi
@@ -65,4 +68,6 @@ if [ "$ADD" = "True" ]; then
   ln --symbolic --force "$LOCAL_COPY_FILE" "$AUTOSTART_FILE"
 
   exit "$?"
+else
+  rm --force "$USER_AUTOSTART_FILE"
 fi

@@ -64,7 +64,9 @@ EXTENSION_GIT_URL=https://github.com/magenta-aps/$REPO_NAME/archive/refs/heads/$
 # either needs to remain on disk or be downloaded anew just to delete an extension...?
 # It seems better to handle it there once for all extensions, instead of re-implementing installation/removal in every
 # single extensi1n script
-EXTENSION_ACTIVATION_DESKTOP_FILE="/home/$SHADOW/.config/autostart/logout-timer-user.desktop"
+DESKTOP_FILE_NAME="logout-timer-user.desktop"
+EXTENSION_ACTIVATION_DESKTOP_FILE="/home/$SHADOW/.config/autostart/$DESKTOP_FILE_NAME"
+USER_DESKTOP_FILE="/home/user/.config/autostart/$DESKTOP_FILE_NAME"
 
 # CLEANUP AFTER PREVIOUS RUNS OF THIS SCRIPT
 rm --force /usr/share/os2borgerpc/logout_timer.conf /usr/share/os2borgerpc/bin/logout_timer_visual.sh /home/$SHADOW/.config/autostart/logout-timer_user.desktop
@@ -170,7 +172,7 @@ else # Stop the timers and delete everything related to them
 	gnome-extensions disable $EXTENSION_NAME  # Note: Don't do this if we make "disable" run "gnome-session-quit --logout" as well!
 
 	sed --in-place "\@$LOGOUT_TIMER_SESSION_CLEANUP_FILE@d" $SESSION_CLEANUP_FILE
-	rm --recursive $LOGOUT_TIMER_ACTUAL $LOGOUT_TIMER_ACTUAL_LAUNCHER $EXTENSION_ACTIVATION_DESKTOP_FILE "$(dirname "$LOGOUT_TIMER_CONF")" $LOGOUT_TIMER_SESSION_CLEANUP_FILE
+	rm --force --recursive $LOGOUT_TIMER_ACTUAL $LOGOUT_TIMER_ACTUAL_LAUNCHER $EXTENSION_ACTIVATION_DESKTOP_FILE $USER_DESKTOP_FILE "$(dirname "$LOGOUT_TIMER_CONF")" $LOGOUT_TIMER_SESSION_CLEANUP_FILE
 
 	#	Alternate solution: Kill all processes started by user in user-cleanup.sh? Maybe that's a better idea anyway,
 	#	which we should do for everyone in the future?

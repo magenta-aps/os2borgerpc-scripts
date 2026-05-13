@@ -12,7 +12,9 @@ FORCE_DUPLICATE_SCREENS="$1"
 
 PKG_NAME="xdotool"
 SKELETON_USER=".skjult"
-AUTOSTART_DESKTOP_FILE="/home/$SKELETON_USER/.config/autostart/set_multiple_monitors_to_duplicate.desktop"
+DESKTOP_FILE_NAME="set_multiple_monitors_to_duplicate.desktop"
+AUTOSTART_DESKTOP_FILE="/home/$SKELETON_USER/.config/autostart/$DESKTOP_FILE_NAME"
+USER_AUTOSTART_DESKTOP_FILE="/home/user/.config/autostart/$DESKTOP_FILE_NAME"
 DUPLICATE_MONITORS_SCRIPT="/usr/share/os2borgerpc/bin/autostart_duplicate_monitors.sh"
 
 set -x
@@ -45,6 +47,6 @@ EOF
 
   chmod o+x $DUPLICATE_MONITORS_SCRIPT
 else
-  rm --force $AUTOSTART_DESKTOP_FILE
+  rm --force $AUTOSTART_DESKTOP_FILE $USER_AUTOSTART_DESKTOP_FILE
   # Leaving it installed in case other scripts use it...?
 fi

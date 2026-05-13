@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# SPDX-FileContributor: Marcus Funch
+# SPDX-FileContributor: Marcus Funch, Andreas Poulsen
 #
 # Test it like this, preferably from another machine:
 # smbclient '\\<IP_ADDRESS_HERE>\<SHARE_NAME>' -U <USER>
@@ -19,8 +19,17 @@ SAMBA_USER_PASSWORD="$3"
 AUTH_DISALLOW_NTLM_V1="$4"
 ALLOW_NETBIOS="$5"
 
-SCAN_DIRECTORY_SOURCE="/home/.skjult/Skrivebord/$DIRECTORY_NAME_ON_DESKTOP"
-SCAN_DIRECTORY_DESTINATION=$(echo "$SCAN_DIRECTORY_SOURCE" | sed 's/.skjult/user/')
+# Determine the name of the user desktop directory. This is done via xdg-user-dir,
+# which checks the /home/user/.config/user-dirs.dirs file. To ensure this file exists,
+# we run xdg-user-dirs-update, which generates it based on the environment variable
+# LANG. This variable is empty in lightdm so we first export it
+# based on the value stored in /etc/default/locale
+export "$(grep LANG= /etc/default/locale | tr -d '"')"
+runuser -u user xdg-user-dirs-update
+DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
+
+SCAN_DIRECTORY_SOURCE="/home/.skjult/$DESKTOP/$DIRECTORY_NAME_ON_DESKTOP"
+SCAN_DIRECTORY_DESTINATION="/home/user/$DESKTOP/$DIRECTORY_NAME_ON_DESKTOP"
 SAMBA_CONFIG=/etc/samba/smb.conf
 # This share name can really be anything
 SHARE_NAME="scan"
@@ -31,7 +40,7 @@ SAMBA_USER="samba"
 
 if [ "$ACTIVATE" != "True" ]; then
   apt-get purge --assume-yes samba samba-common-bin
-  rm --recursive "$SCAN_DIRECTORY_SOURCE"
+  rm --force --recursive "$SCAN_DIRECTORY_SOURCE" "$SCAN_DIRECTORY_DESTINATION" 2> /dev/null
   userdel $SAMBA_USER
   groupdel $SAMBA_USER
   exit 0

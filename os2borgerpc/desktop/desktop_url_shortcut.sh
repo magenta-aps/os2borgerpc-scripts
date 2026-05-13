@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# SPDX-FileContributor: Marcus Funch, Emil Nordahn Andersen
+# SPDX-FileContributor: Marcus Funch, Emil Nordahn Andersen, Andreas Poulsen
 
 # Creates a customly named shortcut on the desktop for the normal user, which
 # opens the URL given as an argument in the default browser.
@@ -42,6 +42,7 @@ DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
 
 SHADOW=".skjult"
 DESKTOP_FILE="/home/$SHADOW/$DESKTOP/$SHORTCUT_NAME.desktop"
+USER_DESKTOP_FILE="/home/user/$DESKTOP/$SHORTCUT_NAME.desktop"
 
 if [ "$ACTIVATE" = "True" ]; then
 
@@ -82,7 +83,7 @@ if [ "$ACTIVATE" = "True" ]; then
 
 	chmod +x "$DESKTOP_FILE"
 else
-	rm "$DESKTOP_FILE"
+	rm --force "$DESKTOP_FILE" "$USER_DESKTOP_FILE" 2> /dev/null
 	# Backwards compatibility:
 	# In case they have an URL shortcut made with the previous version of this script,
 	# this version should still allow them to remove that (it was an extensionless shell script)
