@@ -38,14 +38,34 @@ if [ -f "$TMP_ROOTCRON" ]; then
   crontab -r || true
 fi
 
-# Prevent the upgrade from removing python while we are using it to run jobmanager
-apt-mark hold python3.10
+# Ensure that dbus-x11 is installed if they are using onboard keyboard
+ONBOARD_FILE="/usr/share/onboard/layouts/Compact_orig.onboard"
+if [ -f "$ONBOARD_FILE" ]; then
+  apt-get install --assume-yes dbus-x11
+fi
 
-# Make sure release-upgrade prompt is not never so that the upgrade can run
-# Also set the prompt to lts so that the upgrader will only look for lts releases
-release_upgrades_file=/etc/update-manager/release-upgrades
+# Handle possible error state where the upgrade succeeded, but this script failed afterwards
+if lsb_release -d | grep --quiet 24 && pipx list | grep --quiet "os2borgerpc-client"; then
+  if [ -f "$ONBOARD_FILE" ]; then
+    # Ensure that the input-event-source is set to GTK as
+    # the onboard keyboard will not work on 24.04 otherwise
+    runuser -u chrome dbus-launch gsettings set org.onboard.keyboard input-event-source 'GTK'
+  fi
 
-sed --in-place "s/Prompt=.*/Prompt=lts/" $release_upgrades_file
+  # Update the os_release config
+  RELEASE=$(lsb_release --release --short)
+  set_os2borgerpc_config _os_release "$RELEASE"
+  os2borgerpc_push_config_keys _os_release
+
+  # Delete the backup of jobmanager, which we no longer need
+  rm --force "/etc/os2borgerpc/jobmanager"
+
+  rm --force $PREVIOUS_STEP_DONE
+
+  touch /etc/os2borgerpc/third_24_upgrade_step_done
+
+  exit 0
+fi
 
 # Make sure that we have a backup of jobmanager, just in case
 if [ ! -f "/etc/os2borgerpc/jobmanager" ]; then
@@ -54,6 +74,14 @@ fi
 
 # Perform the actual upgrade with some error handling
 if lsb_release -d | grep --quiet 22; then
+  # Prevent the upgrade from removing python while we are using it to run jobmanager
+  apt-mark hold python3.10
+
+  # Make sure release-upgrade prompt is not never so that the upgrade can run
+  # Also set the prompt to lts so that the upgrader will only look for lts releases
+  release_upgrades_file=/etc/update-manager/release-upgrades
+  sed --in-place "s/Prompt=.*/Prompt=lts/" $release_upgrades_file
+
   do-release-upgrade -f DistUpgradeViewNonInteractive >  /var/log/os2borgerpc_upgrade_1.log || true
 fi
 
@@ -85,7 +113,7 @@ if ! lsb_release -d | grep --quiet 24; then
 fi
 
 # If they were using an onboard keyboard, maintain our custom settings
-if [ -f /usr/share/onboard/layouts/Compact_orig.onboard ]; then
+if [ -f "$ONBOARD_FILE" ]; then
   cat << EOF > /usr/share/onboard/layouts/Compact.onboard
 <?xml version="1.0" ?>
 <!-- OS2borgerPC Kiosk: Comment out Control, Alt, Quit and Settings buttons -->
@@ -316,7 +344,7 @@ chmod 644 /usr/share/onboard/layouts/Compact.onboard
 
 # Ensure that the input-event-source is set to GTK as
 # the onboard keyboard will not work on 24.04 otherwise
-runuser -u chrome dbus-launch gsettings set org.onboard.keyboard input-event-source 'GTK'
+runuser -u chrome dbus-launch gsettings set org.onboard.keyboard input-event-source 'GTK' || true
 fi
 
 # Update the os_release config
