@@ -30,8 +30,6 @@ CHROME_POLICIES_PATH="/etc/opt/chrome/policies"
 CHROMIUM_POLICIES_PATH="/var/snap/chromium/current/policies"
 USER_CLEANUP="/usr/share/os2borgerpc/bin/user-cleanup.bash"
 
-mkdir --parents "$(dirname $CHROMIUM_POLICIES_PATH)"
-
 ### START SHARED BLOCK BETWEEN CHROMIUM BROWSERS: CHROMIUM, CHROME ###
 setup_policies() {
   #
@@ -214,10 +212,10 @@ fi
 
 
 if [ "$ACTIVATE" = "True" ]; then
-  # Fails if /var/snap/chromium/current already exists, which it will be if it's already installed.
-  if ! which chromium > /dev/null; then
-    snap install chromium
-  fi
+  snap install chromium
+
+  # NOTE: Create policies **after** snap install, as creating it before seems to interfere with the snap installation
+  mkdir --parents "$(dirname $CHROMIUM_POLICIES_PATH)"
   ln --symbolic --force $CHROME_POLICIES_PATH $CHROMIUM_POLICIES_PATH
 
   setup_policies
@@ -241,6 +239,6 @@ EOF
   fi
 else
   snap remove chromium
-  # Remove chromium symlink
+  # Remove chromium policies directory and symlink - removing the dir is significant
   rm --force $CHROMIUM_POLICIES_PATH
 fi
