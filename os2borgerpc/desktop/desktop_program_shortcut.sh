@@ -71,6 +71,14 @@ if [ "$ADD" = "True" ]; then
     cp "$ORIGINAL_FILE" "$LOCAL_FILE_COPY"
   fi
 
+  # If the program is firefox, we need to ensure that the local copy
+  # points at the icon correctly to prevent the icon from possibly
+  # disappearing
+  # This should no longer be necessary once 24.04 is out of support
+  if [ "$PROGRAM" = "firefox" ]; then
+    sed --in-place "s@Icon=.*@Icon=/snap/firefox/current/default256.png@" "$LOCAL_FILE_COPY"
+  fi
+
   ln --symbolic --force "$LOCAL_FILE_COPY" "$SHADOW_DESKTOP"/
 else
   if [ -f "$SHADOW_DESKTOP/${PROGRAM}_$PROGRAM.desktop" ]; then
