@@ -43,7 +43,9 @@ if [ "$DEFAULT_DESKTOP" = "$USERNAME" ]; then
   exit 1
 fi
 
-LANGUAGE_SELECT_BUTTON="/home/.skjult/$DEFAULT_DESKTOP/language_select.desktop"
+BUTTON_NAME="language_select.desktop"
+LANGUAGE_SELECT_BUTTON="/home/.skjult/$DEFAULT_DESKTOP/$BUTTON_NAME"
+USER_LANGUAGE_SELECT_BUTTON="/home/$USERNAME/$DEFAULT_DESKTOP/$BUTTON_NAME"
 LANGUAGE_SELECT_SCRIPT="/usr/share/os2borgerpc/bin/language_select.sh"
 LANGUAGE_INSTALL_SCRIPT="/usr/share/os2borgerpc/bin/language_install.sh"
 LANGUAGE_INSTALL_SERVICE="/etc/systemd/system/os2borgerpc-language_install.service"
@@ -63,7 +65,7 @@ LOCALE=$(grep LANG= /etc/default/locale | cut --delimiter '=' --fields 2 | tr --
 
 if [ "$ACTIVATE" != "True" ]; then
   systemctl disable --now "$(basename $LANGUAGE_INSTALL_SERVICE_PATH)"
-  rm --force "$LANGUAGE_SELECT_BUTTON" $LANGUAGE_SELECT_SCRIPT $LANGUAGE_INSTALL_SCRIPT $LANGUAGE_INSTALL_SERVICE $LANGUAGE_INSTALL_SERVICE_PATH $LANGUAGE_CHANGE_SCRIPT $NEW_LANGUAGE_FILE $KEYBOARD_POLICY $KEYBOARD_POLICY_LOCK
+  rm --force "$LANGUAGE_SELECT_BUTTON" "$USER_LANGUAGE_SELECT_BUTTON" $LANGUAGE_SELECT_SCRIPT $LANGUAGE_INSTALL_SCRIPT $LANGUAGE_INSTALL_SERVICE $LANGUAGE_INSTALL_SERVICE_PATH $LANGUAGE_CHANGE_SCRIPT $NEW_LANGUAGE_FILE $KEYBOARD_POLICY $KEYBOARD_POLICY_LOCK 2> /dev/null
   sed --in-place "/rsync/,/xdg-user-dir DESKTOP/ {/xdg-user-dir DESKTOP\|$(basename $LANGUAGE_CHANGE_SCRIPT)/d}" $USER_CLEANUP
   sed --in-place "/RequestedLocales/d" $FIREFOX_POLICIES
   sed --in-place "/SanitizeOnShutdown/i \ \ \ \ \"RequestedLocales\": \"$LOCALE\"," $FIREFOX_POLICIES

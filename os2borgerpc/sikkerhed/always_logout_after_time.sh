@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# SPDX-FileContributor: Carsten Agger, Marcus Funch
+# SPDX-FileContributor: Carsten Agger, Marcus Funch, Andreas Poulsen
 #
 # Logout the user from the graphical user interface after N minutes.
 
@@ -21,7 +21,9 @@ fi
 ACTIVATE=$1
 LOGIN_SESSION_LENGTH_IN_MINS=$2
 
-AUTO_LOGOUT_DESKTOP_FILE="/home/.skjult/.config/autostart/auto_logout.sh.desktop"
+DESKTOP_FILE_NAME="auto_logout.sh.desktop"
+AUTO_LOGOUT_DESKTOP_FILE="/home/.skjult/.config/autostart/$DESKTOP_FILE_NAME"
+USER_DESKTOP_FILE="/home/user/.config/autostart/$DESKTOP_FILE_NAME"
 AUTO_LOGOUT_SCHEDULE_SCRIPT="/usr/share/os2borgerpc/bin/auto_logout.sh"
 export DEBIAN_FRONTEND=noninteractive
 
@@ -35,7 +37,7 @@ fi
 
 if [ "$ACTIVATE" = "False" ]; then
     # Clean up
-    rm --force $AUTO_LOGOUT_SCHEDULE_SCRIPT $AUTO_LOGOUT_DESKTOP_FILE
+    rm --force $AUTO_LOGOUT_SCHEDULE_SCRIPT $AUTO_LOGOUT_DESKTOP_FILE $USER_DESKTOP_FILE
     atq | cut --fields 1 | xargs --no-run-if-empty atrm
     exit 0
 fi

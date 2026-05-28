@@ -44,5 +44,5 @@ if [ "$ACTIVATE" = "True" ]; then
 else # Delete the persistent dir with the specified NAME
 
   rm --force --recursive "$DIR"
-  rm --force "/home/$SHADOW/$DESKTOP/$NAME"
+  rm --force "/home/$SHADOW/$DESKTOP/$NAME" "/home/user/$DESKTOP/$NAME" 2> /dev/null
 fi

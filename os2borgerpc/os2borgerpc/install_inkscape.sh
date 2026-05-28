@@ -17,10 +17,11 @@ INSTALL="$1"
 
 PKG_NAME="inkscape"
 CONFIG="/home/.skjult/.config/inkscape/preferences.xml"
+USER_CONFIG_DIR="/home/user/.config/inkscape/"
 
 if [ "$INSTALL" = "False" ]; then
     apt-get remove --assume-yes $PKG_NAME
-    rm --recursive "$(dirname $CONFIG)"
+    rm --force --recursive "$(dirname $CONFIG)" "$USER_CONFIG_DIR"
 else
     apt-get install --assume-yes $PKG_NAME
 

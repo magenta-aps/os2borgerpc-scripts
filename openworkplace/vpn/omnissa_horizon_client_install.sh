@@ -43,8 +43,9 @@ HORIZON_ICON="/usr/share/icons/horizon-client.png"
 export "$(grep LANG= /etc/default/locale | tr -d '"')"
 runuser -u user xdg-user-dirs-update
 DEFAULT_DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
-SKJULT_DESKTOP_DIR="/home/.skjult/$DEFAULT_DESKTOP"
-HORIZON_DESKTOP="$SKJULT_DESKTOP_DIR/horizon-client.desktop"
+SHORTCUT_NAME="horizon-client.desktop"
+HORIZON_DESKTOP="/home/.skjult/$DEFAULT_DESKTOP/$SHORTCUT_NAME"
+USER_DESKTOP_FILE="/home/user/$DEFAULT_DESKTOP/$SHORTCUT_NAME"
 
 echo ""
 
@@ -56,7 +57,7 @@ if [ "$INSTALL" = "False" ]; then
     echo ""
 
     echo "Removing manually installed Omnissa Horizon desktop launcher '$HORIZON_DESKTOP'"
-    rm --force "$HORIZON_DESKTOP"
+    rm --force "$HORIZON_DESKTOP" "$USER_DESKTOP_FILE" 2> /dev/null
     echo ""
 
     echo "Checking Omnissa Horizon Debian package '$DEBIAN_NAME'";
@@ -112,7 +113,7 @@ else
 fi
 
 echo "Installing Omnissa Horizon desktop launcher '$HORIZON_DESKTOP'"
-mkdir --parents --verbose "$SKJULT_DESKTOP_DIR"
+mkdir --parents "$(dirname "$HORIZON_DESKTOP")"
 cat << EOF > "$HORIZON_DESKTOP"
 [Desktop Entry]
 Version=$DEBIAN_VERSION

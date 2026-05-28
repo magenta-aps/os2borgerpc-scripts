@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# SPDX-FileContributor: Carsten Agger, Heini Leander Ovason, Marcus Funch
+# SPDX-FileContributor: Carsten Agger, Heini Leander Ovason, Marcus Funch, Andreas Poulsen
 
 PDF_READER_TO_SWITCH_TO=$1
 
@@ -26,6 +26,8 @@ GLOBAL_MIME_FILE="/etc/xdg/mimeapps.list"
 OLD_GLOBAL_MIME_FILE="/usr/share/applications/defaults.list"
 OKULAR_CONFIG_1="/home/.skjult/.config/okularpartrc"
 OKULAR_CONFIG_2="/home/.skjult/.local/share/kxmlgui5/okular/part.rc"
+USER_OKULAR_CONFIG_1="/home/user/.config/okularpartrc"
+USER_OKULAR_CONFIG_2="/home/user/.local/share/kxmlgui5/okular/part.rc"
 
 PDF_TYPE_1=application/pdf
 PDF_TYPE_2=application/x-bzpdf
@@ -242,5 +244,5 @@ else
   apt-get remove --assume-yes okular
   set_default_pdf_reader "$PDF_READER_TO_SWITCH_TO"
 
-  rm --force $OKULAR_CONFIG_1 $OKULAR_CONFIG_2
+  rm --force $OKULAR_CONFIG_1 $OKULAR_CONFIG_2 $USER_OKULAR_CONFIG_1 $USER_OKULAR_CONFIG_2
 fi

@@ -24,12 +24,14 @@ HEIGHT="$6"
 FULL_LOGIN_TIME="$7"
 POPUP_TIMER=${8:-0}
 
-POPUP_AUTOSTART="/home/.skjult/.config/autostart/user_info.desktop"
+AUTOSTART_FILE_NAME="user_info.desktop"
+USER_POPUP_AUTOSTART="/home/user/.config/autostart/$AUTOSTART_FILE_NAME"
+POPUP_AUTOSTART="/home/.skjult/.config/autostart/$AUTOSTART_FILE_NAME"
 POPUP_SCRIPT="/home/.skjult/user_info.sh"
 USER_POPUP_SCRIPT="/home/user/user_info.sh"
 
 if [ "$ACTIVATE" = "False" ]; then
-  rm --force $POPUP_AUTOSTART $POPUP_SCRIPT
+  rm --force $POPUP_AUTOSTART $POPUP_SCRIPT $USER_POPUP_AUTOSTART $USER_POPUP_SCRIPT
   exit 0
 fi
 

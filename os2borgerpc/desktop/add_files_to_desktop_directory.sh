@@ -41,7 +41,8 @@ export "$(grep LANG= /etc/default/locale | tr -d '"')"
 runuser -u user xdg-user-dirs-update
 DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
 
-DESTINATION_DIR=/home/$SKEL/"$DESKTOP"/"$DIRECTORY_NAME"
+DESTINATION_DIR="/home/$SKEL/$DESKTOP/$DIRECTORY_NAME"
+USER_DESKTOP_DIR="/home/user/$DESKTOP/$DIRECTORY_NAME"
 
 if [ "$ADD" = "True" ]; then
 
@@ -59,5 +60,5 @@ if [ "$ADD" = "True" ]; then
   echo "Note: You need to logout before the script takes effect!"
 else
   echo "Deleting the specified directory:"
-  rm --recursive "$DESTINATION_DIR"
+  rm --force --recursive "$DESTINATION_DIR" "$USER_DESKTOP_DIR" 2> /dev/null
 fi

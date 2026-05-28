@@ -34,6 +34,7 @@ runuser -u user xdg-user-dirs-update
 DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
 
 SHADOW_DESKTOP="/home/.skjult/$DESKTOP"
+USER_DESKTOP="/home/user/$DESKTOP"
 
 mkdir --parents "$SHADOW_DESKTOP"
 
@@ -41,5 +42,5 @@ if [ "$ADD" = "True" ]; then
   # Note: "ln" doesn't care if the destination ($DIRECTORY) exists
   ln --symbolic --force "$DIRECTORY" "$SHADOW_DESKTOP/$SHORTCUT_NAME"
 else
-  rm "$SHADOW_DESKTOP/$SHORTCUT_NAME"
+  rm --force "$SHADOW_DESKTOP/$SHORTCUT_NAME" "$USER_DESKTOP/$SHORTCUT_NAME" 2> /dev/null
 fi
