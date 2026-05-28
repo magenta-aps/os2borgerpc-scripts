@@ -56,6 +56,10 @@ mkdir --parents "$LOCAL_COPY_DIR"
 if [ ! -f "$FIREFOX_DESKTOP_LOCAL_COPY" ]; then
   cp "$ORIGINAL_FILE" "$FIREFOX_DESKTOP_LOCAL_COPY"
 fi
+# Ensure that the local copy points at the icon correctly
+# to prevent the icon from possibly disappearing
+# This should no longer be necessary once 24.04 is out of support
+sed --in-place "s@Icon=.*@Icon=/snap/firefox/current/default256.png@" "$FIREFOX_DESKTOP_LOCAL_COPY"
 
 if [ "$ACTIVATE" = "True" ]; then
   add_to_desktop_files "$LAUNCH_ARGS" $FIREFOX_DESKTOP_LOCAL_COPY
