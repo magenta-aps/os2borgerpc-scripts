@@ -199,17 +199,7 @@ cat << EOF > "$POLICY_FILE"
       "datareporting.policy.dataSubmissionPolicyBypassNotification": true
     },
     "RequestedLocales": "$LOCALE",
-    "SanitizeOnShutdown": {
-      "Cache": true,
-      "Cookies": true,
-      "Downloads": false,
-      "FormData": true,
-      "History": true,
-      "Locked": true,
-      "OfflineApps": true,
-      "Sessions": true,
-      "SiteSettings": true
-    },
+    "SanitizeOnShutdown": true,
 $SEARCH_ENGINE_TEXT
   }
 }
