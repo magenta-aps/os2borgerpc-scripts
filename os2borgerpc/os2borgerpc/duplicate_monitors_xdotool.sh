@@ -16,12 +16,23 @@ DESKTOP_FILE_NAME="set_multiple_monitors_to_duplicate.desktop"
 AUTOSTART_DESKTOP_FILE="/home/$SKELETON_USER/.config/autostart/$DESKTOP_FILE_NAME"
 USER_AUTOSTART_DESKTOP_FILE="/home/user/.config/autostart/$DESKTOP_FILE_NAME"
 DUPLICATE_MONITORS_SCRIPT="/usr/share/os2borgerpc/bin/autostart_duplicate_monitors.sh"
+MONITOR_SETTINGS_SUPERUSER_COPY="/usr/share/os2borgerpc/bin/monitor-settings-superuser-copy.sh"
 
 set -x
 
 mkdir --parents "$(dirname $AUTOSTART_DESKTOP_FILE)"
 
 if [ "$FORCE_DUPLICATE_SCREENS" = "True" ]; then
+
+  # Fail without doing anything if they are using the "copy settings from superuser" script
+  # because using these scripts together can cause unintended behavior
+  if [ -f "$MONITOR_SETTINGS_SUPERUSER_COPY" ]; then
+    echo "This script should not be used together with" \
+         "\"Desktop - Genvej til at kopiere skærmindstillinger fra superuser til Borger\"."
+    echo "Please deactivate that script first if you wish to use this script."
+    exit 1
+  fi
+
   apt-get update
   apt-get install --assume-yes $PKG_NAME
 
