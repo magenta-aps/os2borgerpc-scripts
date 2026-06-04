@@ -32,6 +32,9 @@ if [ -f "$REBOOT_REQUIRED_FILE" ]; then
   exit 1
 fi
 
+# Stop Debconf from doing anything
+export DEBIAN_FRONTEND=noninteractive
+
 # Make double sure that the crontab has been emptied
 TMP_ROOTCRON=/etc/os2borgerpc/tmp_rootcronfile
 if [ -f "$TMP_ROOTCRON" ]; then
@@ -82,7 +85,8 @@ if lsb_release -d | grep --quiet 22; then
   release_upgrades_file=/etc/update-manager/release-upgrades
   sed --in-place "s/Prompt=.*/Prompt=lts/" $release_upgrades_file
 
-  do-release-upgrade -f DistUpgradeViewNonInteractive >  /var/log/os2borgerpc_upgrade_1.log || true
+  echo "Upgrade attempted $(date)" >> /var/log/os2borgerpc_upgrade_2.log
+  do-release-upgrade -f DistUpgradeViewNonInteractive >> /var/log/os2borgerpc_upgrade_2.log || true
 fi
 
 apt-get --assume-yes --fix-broken install || true

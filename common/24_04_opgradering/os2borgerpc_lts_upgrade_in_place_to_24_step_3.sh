@@ -32,6 +32,9 @@ if [ -f "$REBOOT_REQUIRED_FILE" ]; then
   exit 1
 fi
 
+# Stop Debconf from doing anything
+export DEBIAN_FRONTEND=noninteractive
+
 # Ensure that user crontab is reset after logout
 USERCRON=/etc/os2borgerpc/usercron
 USER_CLEANUP="/usr/share/os2borgerpc/bin/user-cleanup.bash"
@@ -174,7 +177,8 @@ fi
 
 # Perform the actual upgrade with some error handling
 if lsb_release -d | grep --quiet 22; then
-  do-release-upgrade -f DistUpgradeViewNonInteractive > /var/log/os2borgerpc_upgrade_2.log || true
+  echo "Upgrade attempted $(date)" >> /var/log/os2borgerpc_upgrade_2.log
+  do-release-upgrade -f DistUpgradeViewNonInteractive >> /var/log/os2borgerpc_upgrade_2.log || true
 fi
 
 # Change the release-upgrade prompt back to never.

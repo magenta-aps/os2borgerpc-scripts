@@ -26,6 +26,9 @@ if [ ! -f "$PREVIOUS_STEP_DONE" ]; then
   exit 1
 fi
 
+# Stop Debconf from doing anything
+export DEBIAN_FRONTEND=noninteractive
+
 # Make double sure that the crontab has been emptied
 TMP_ROOTCRON=/etc/os2borgerpc/tmp_rootcronfile
 if [ -f "$TMP_ROOTCRON" ]; then
