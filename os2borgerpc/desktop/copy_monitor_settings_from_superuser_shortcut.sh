@@ -15,6 +15,7 @@ MONITOR_SETTINGS_FILE_SKELETON="/home/$SKELETON_USER/.config/monitors.xml"
 MONITOR_SETTINGS_FILE_USER="/home/user/.config/monitors.xml"
 MONITOR_SCRIPT="/usr/share/os2borgerpc/bin/monitor-settings-superuser-copy.sh"
 MONITOR_SUDOERS_SCRIPT="/etc/sudoers.d/monitor-script-nopasswd"
+DUPLICATE_MONITORS_SCRIPT="/usr/share/os2borgerpc/bin/autostart_duplicate_monitors.sh"
 
 DESKTOP=$(basename "$(runuser -u $SUPERUSER xdg-user-dir DESKTOP)")
 
@@ -25,6 +26,16 @@ set -x
 mkdir --parents "$(dirname $MONITOR_SETTINGS_FILE_SKELETON)"
 
 if [ "$ACTIVATE" = "True" ]; then
+
+  # Fail without doing anything if they are using the "duplicate monitors" script
+  # because using these scripts together can cause unintended behavior
+  if [ -f "$DUPLICATE_MONITORS_SCRIPT" ]; then
+    echo "This script should not be used together with" \
+         "\"OS2borgerPC - Dupliker skærm frem for udvid\"."
+    echo "Please deactivate that script first if you wish to use this script."
+    exit 1
+  fi
+
 cat << EOF > $MONITOR_SCRIPT
 #!/usr/bin/env sh
 
