@@ -32,6 +32,9 @@ if [ -f "$REBOOT_REQUIRED_FILE" ]; then
   exit 1
 fi
 
+# Stop Debconf from doing anything
+export DEBIAN_FRONTEND=noninteractive
+
 # Make double sure that the crontab has been emptied
 TMP_ROOTCRON=/etc/os2borgerpc/tmp_rootcronfile
 if [ -f "$TMP_ROOTCRON" ]; then
@@ -384,7 +387,7 @@ if [ -f "$LOGOUT_TIMER_CONF_OLD" ]; then
   rm --force $EXTENSION_ACTIVATION_DESKTOP_FILE $OLD_EXTENSION_ACTIVATION_DESKTOP_FILE "/usr/share/os2borgerpc/logout_timer.conf" "/usr/share/os2borgerpc/bin/logout_timer_visual.sh"
   wget $EXTENSION_GIT_URL
   unzip main.zip
-  os2borgerpc-gnome-extensions-main/install.sh whatever $NEW_EXTENSION_NAME true true true
+  os2borgerpc-gnome-extensions-main/install.sh $NEW_EXTENSION_NAME true
   rm --recursive main.zip os2borgerpc-gnome-extensions-main
   cat << EOF > $LOGOUT_TIMER_CONF_NEW
 {
