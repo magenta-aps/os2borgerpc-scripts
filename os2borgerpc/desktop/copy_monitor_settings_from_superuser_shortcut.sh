@@ -15,6 +15,8 @@ MONITOR_SETTINGS_FILE_SKELETON="/home/$SKELETON_USER/.config/monitors.xml"
 MONITOR_SETTINGS_FILE_USER="/home/user/.config/monitors.xml"
 MONITOR_SCRIPT="/usr/share/os2borgerpc/bin/monitor-settings-superuser-copy.sh"
 MONITOR_SUDOERS_SCRIPT="/etc/sudoers.d/monitor-script-nopasswd"
+FRACTIONAL_SCALING_POLICY_FILE="/etc/dconf/db/os2borgerpc.d/10-fractional-scaling"
+FRACTIONAL_SCALING_POLICY_LOCK_FILE="/etc/dconf/db/os2borgerpc.d/locks/10-fractional-scaling"
 DUPLICATE_MONITORS_SCRIPT="/usr/share/os2borgerpc/bin/autostart_duplicate_monitors.sh"
 
 DESKTOP=$(basename "$(runuser -u $SUPERUSER xdg-user-dir DESKTOP)")
@@ -35,6 +37,18 @@ if [ "$ACTIVATE" = "True" ]; then
     echo "Please deactivate that script first if you wish to use this script."
     exit 1
   fi
+
+  # Add a dconf policy to enforce fractional scaling as copying monitor settings
+  # that use fractional scaling will not work otherwise
+  cat << EOF > $FRACTIONAL_SCALING_POLICY_FILE
+[org/gnome/mutter]
+experimental-features=['x11-randr-fractional-scaling']
+EOF
+
+  # Ensure that the above dconf policy cannot be overridden by the user
+  cat << EOF > $FRACTIONAL_SCALING_POLICY_LOCK_FILE
+/org/gnome/mutter/experimental-features
+EOF
 
 cat << EOF > $MONITOR_SCRIPT
 #!/usr/bin/env sh
@@ -92,5 +106,7 @@ chown superuser:superuser "$MONITOR_SCRIPT" "$MONITOR_SCRIPT_DESKTOP_FILE"
 chmod 500 $MONITOR_SCRIPT "$MONITOR_SCRIPT_DESKTOP_FILE"
 chmod 440 $MONITOR_SUDOERS_SCRIPT
 else
-    rm --force "$MONITOR_SETTINGS_FILE_SKELETON" "$MONITOR_SETTINGS_FILE_USER" "$MONITOR_SCRIPT" "$MONITOR_SCRIPT_DESKTOP_FILE" "$MONITOR_SUDOERS_SCRIPT"
+    rm --force "$MONITOR_SETTINGS_FILE_SKELETON" "$MONITOR_SETTINGS_FILE_USER" "$MONITOR_SCRIPT" "$MONITOR_SCRIPT_DESKTOP_FILE" "$MONITOR_SUDOERS_SCRIPT" "$FRACTIONAL_SCALING_POLICY_FILE" "$FRACTIONAL_SCALING_POLICY_LOCK_FILE"
 fi
+
+dconf update
