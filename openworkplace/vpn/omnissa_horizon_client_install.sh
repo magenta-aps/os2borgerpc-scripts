@@ -46,6 +46,8 @@ DEFAULT_DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
 SHORTCUT_NAME="horizon-client.desktop"
 HORIZON_DESKTOP="/home/.skjult/$DEFAULT_DESKTOP/$SHORTCUT_NAME"
 USER_DESKTOP_FILE="/home/user/$DEFAULT_DESKTOP/$SHORTCUT_NAME"
+GLOBAL_MIME_FILE="/etc/xdg/mimeapps.list"
+X_SCHEME_HANDLER="x-scheme-handler/vmware-view=$SHORTCUT_NAME"
 
 echo ""
 
@@ -58,6 +60,12 @@ if [ "$INSTALL" = "False" ]; then
 
     echo "Removing manually installed Omnissa Horizon desktop launcher '$HORIZON_DESKTOP'"
     rm --force "$HORIZON_DESKTOP" "$USER_DESKTOP_FILE" 2> /dev/null
+    echo ""
+
+    echo "Removing manually installed Omnissa Horizon desktop x-scheme-handler"
+    if grep --quiet "$SHORTCUT_NAME" $GLOBAL_MIME_FILE ; then
+        sed --in-place "s|${X_SCHEME_HANDLER}\n||" $GLOBAL_MIME_FILE
+    fi
     echo ""
 
     echo "Checking Omnissa Horizon Debian package '$DEBIAN_NAME'";
@@ -122,7 +130,22 @@ Name=Horizon client
 Comment=Omnissa Horizon VPN client
 Icon=$HORIZON_ICON
 Exec=$HORIZON_CLIENT
+Terminal=false
+MimeType=x-scheme-handler/vmware-view;
 EOF
+echo ""
+
+echo "Installing Omnissa Horizon desktop x-scheme-handler"
+# Make sure the mime file exists
+if [ ! -f $GLOBAL_MIME_FILE ]; then
+	cat <<- EOF > $GLOBAL_MIME_FILE
+[Default Applications]
+EOF
+fi
+if ! grep --quiet "$SHORTCUT_NAME" $GLOBAL_MIME_FILE ; then
+    # Make sure our extra line ends in '[Default Applications]' section
+    sed --in-place "s|\[Default Applications\]|\[Default Applications\]\n${X_SCHEME_HANDLER}|" $GLOBAL_MIME_FILE
+fi
 echo ""
 
 # Install admin portal supplied config files in ETC_OMNISSA_DIR
