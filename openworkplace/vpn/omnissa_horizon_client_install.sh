@@ -68,8 +68,8 @@ if [ "$INSTALL" = "False" ]; then
     echo ""
 
     echo "Removing manually installed Omnissa Horizon mime scheme handlers"
-    sed --in-place "\|${X_SCHEME_HANDLER_HORIZON_CLIENT}|d" $GLOBAL_MIME_FILE
-    sed --in-place "\|${X_SCHEME_HANDLER_VMWARE_VIEW}|d" $GLOBAL_MIME_FILE
+    sed --in-place --expression "\|$X_SCHEME_HANDLER_HORIZON_CLIENT|d" \
+        --expression "\|$X_SCHEME_HANDLER_VMWARE_VIEW|d" $GLOBAL_MIME_FILE
     echo ""
 
     echo "Checking Omnissa Horizon Debian package '$DEBIAN_NAME'";
@@ -125,16 +125,12 @@ else
 fi
 
 echo "Installing Omnissa Horizon desktop launcher '$HORIZON_DESKTOP_LINK_SKJULT'"
+# ln can't overwrite existing files so we make sure to delete them first
+rm --force "$HORIZON_DESKTOP_LINK_SKJULT" "$HORIZON_DESKTOP_LINK_USER"
 mkdir --parents "$(dirname "$HORIZON_APPLICATION_FILE_SKJULT")"
 cp  /usr/share/applications/horizon-client.desktop "$HORIZON_APPLICATION_FILE_SKJULT"
 mkdir --parents "$(dirname "$HORIZON_DESKTOP_LINK_SKJULT")"
-ln -s "$HORIZON_APPLICATION_FILE_SKJULT" "${HORIZON_DESKTOP_LINK_SKJULT}"
-
-echo "Installing Omnissa Horizon desktop launcher '$HORIZON_DESKTOP_LINK_USER'"
-mkdir --parents "$(dirname "$HORIZON_APPLICATION_FILE_USER")"
-cp /usr/share/applications/horizon-client.desktop "$HORIZON_APPLICATION_FILE_USER"
-mkdir --parents "$(dirname "$HORIZON_DESKTOP_LINK_USER")"
-ln -s "$HORIZON_APPLICATION_FILE_USER" "${HORIZON_DESKTOP_LINK_USER}"
+ln --symbolic "$HORIZON_APPLICATION_FILE_SKJULT" "$HORIZON_DESKTOP_LINK_SKJULT"
 
 echo "Installing Omnissa Horizon desktop x-scheme-handler"
 # Make sure the mime file exists
@@ -143,10 +139,12 @@ if [ ! -f $GLOBAL_MIME_FILE ]; then
 [Default Applications]
 EOF
 fi
-if ! grep --quiet "$HORIZON_CLIENT_DESKTOP" $GLOBAL_MIME_FILE ; then
-    # Make sure our extra line ends in '[Default Applications]' section only once
-    sed --in-place "/\[Default Applications\]/a ${X_SCHEME_HANDLER_VMWARE_VIEW}" $GLOBAL_MIME_FILE
-    sed --in-place "/\[Default Applications\]/a ${X_SCHEME_HANDLER_HORIZON_CLIENT}" $GLOBAL_MIME_FILE
+# Idempotency - Only add the lines once
+if ! grep --quiet "$HORIZON_CLIENT_DESKTOP" $GLOBAL_MIME_FILE; then
+    # Make sure our extra lines are added to the '[Default Applications]' section
+    sed --in-place "/Default Applications/a \
+$X_SCHEME_HANDLER_VMWARE_VIEW\n\
+$X_SCHEME_HANDLER_HORIZON_CLIENT" $GLOBAL_MIME_FILE
 fi
 echo ""
 
