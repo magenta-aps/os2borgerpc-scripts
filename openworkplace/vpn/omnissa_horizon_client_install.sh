@@ -32,8 +32,6 @@ DEBIAN_VERSION="2512-8.17.0-20187591429"
 ETC_OMNISSA_DIR="/etc/omnissa"
 HORIZON_MANDATORY_CONFIG_PATH="$ETC_OMNISSA_DIR/horizon-mandatory-config"
 HORIZON_DEFAULT_CONFIG_PATH="$ETC_OMNISSA_DIR/horizon-default-config"
-HORIZON_CLIENT="/usr/bin/horizon-client"
-HORIZON_ICON="/usr/share/icons/horizon-client.png"
 
 # Determine the name of the user desktop directory. This is done via
 # xdg-user-dir, which checks the /home/user/.config/user-dirs.dirs file. To ensure
@@ -42,10 +40,19 @@ HORIZON_ICON="/usr/share/icons/horizon-client.png"
 # based on the value stored in /etc/default/locale
 export "$(grep LANG= /etc/default/locale | tr -d '"')"
 runuser -u user xdg-user-dirs-update
+
 DEFAULT_DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
-SHORTCUT_NAME="horizon-client.desktop"
-HORIZON_DESKTOP="/home/.skjult/$DEFAULT_DESKTOP/$SHORTCUT_NAME"
-USER_DESKTOP_FILE="/home/user/$DEFAULT_DESKTOP/$SHORTCUT_NAME"
+HORIZON_CLIENT_DESKTOP="horizon-client.desktop"
+
+HORIZON_DESKTOP_LINK_SKJULT="/home/.skjult/$DEFAULT_DESKTOP/$HORIZON_CLIENT_DESKTOP"
+HORIZON_DESKTOP_LINK_USER="/home/user/$DEFAULT_DESKTOP/$HORIZON_CLIENT_DESKTOP"
+HORIZON_APPLICATION_FILE_SKJULT="/home/.skjult/.local/share/applications/$HORIZON_CLIENT_DESKTOP"
+HORIZON_APPLICATION_FILE_USER="/home/user/.local/share/applications/$HORIZON_CLIENT_DESKTOP"
+
+# add two mime scheme handlers
+GLOBAL_MIME_FILE="/etc/xdg/mimeapps.list"
+X_SCHEME_HANDLER_VMWARE_VIEW="x-scheme-handler/vmware-view=$HORIZON_CLIENT_DESKTOP"
+X_SCHEME_HANDLER_HORIZON_CLIENT="x-scheme-handler/horizon-client=$HORIZON_CLIENT_DESKTOP"
 
 echo ""
 
@@ -56,8 +63,13 @@ if [ "$INSTALL" = "False" ]; then
     rm --recursive --force "$HORIZON_MANDATORY_CONFIG_PATH" "$HORIZON_DEFAULT_CONFIG_PATH"
     echo ""
 
-    echo "Removing manually installed Omnissa Horizon desktop launcher '$HORIZON_DESKTOP'"
-    rm --force "$HORIZON_DESKTOP" "$USER_DESKTOP_FILE" 2> /dev/null
+    echo "Removing manually installed Omnissa Horizon desktop launchers"
+    rm --force "$HORIZON_DESKTOP_LINK_SKJULT" "$HORIZON_DESKTOP_LINK_USER" "$HORIZON_APPLICATION_FILE_SKJULT" "$HORIZON_APPLICATION_FILE_USER" 2> /dev/null
+    echo ""
+
+    echo "Removing manually installed Omnissa Horizon mime scheme handlers"
+    sed --in-place --expression "\|$X_SCHEME_HANDLER_HORIZON_CLIENT|d" \
+        --expression "\|$X_SCHEME_HANDLER_VMWARE_VIEW|d" $GLOBAL_MIME_FILE
     echo ""
 
     echo "Checking Omnissa Horizon Debian package '$DEBIAN_NAME'";
@@ -112,17 +124,28 @@ else
     fi
 fi
 
-echo "Installing Omnissa Horizon desktop launcher '$HORIZON_DESKTOP'"
-mkdir --parents "$(dirname "$HORIZON_DESKTOP")"
-cat << EOF > "$HORIZON_DESKTOP"
-[Desktop Entry]
-Version=$DEBIAN_VERSION
-Type=Application
-Name=Horizon client
-Comment=Omnissa Horizon VPN client
-Icon=$HORIZON_ICON
-Exec=$HORIZON_CLIENT
+echo "Installing Omnissa Horizon desktop launcher '$HORIZON_DESKTOP_LINK_SKJULT'"
+# ln can't overwrite existing files so we make sure to delete them first
+rm --force "$HORIZON_DESKTOP_LINK_SKJULT" "$HORIZON_DESKTOP_LINK_USER"
+mkdir --parents "$(dirname "$HORIZON_APPLICATION_FILE_SKJULT")"
+cp  /usr/share/applications/horizon-client.desktop "$HORIZON_APPLICATION_FILE_SKJULT"
+mkdir --parents "$(dirname "$HORIZON_DESKTOP_LINK_SKJULT")"
+ln --symbolic "$HORIZON_APPLICATION_FILE_SKJULT" "$HORIZON_DESKTOP_LINK_SKJULT"
+
+echo "Installing Omnissa Horizon desktop x-scheme-handler"
+# Make sure the mime file exists
+if [ ! -f $GLOBAL_MIME_FILE ]; then
+    cat <<- EOF > $GLOBAL_MIME_FILE
+[Default Applications]
 EOF
+fi
+# Idempotency - Only add the lines once
+if ! grep --quiet "$HORIZON_CLIENT_DESKTOP" $GLOBAL_MIME_FILE; then
+    # Make sure our extra lines are added to the '[Default Applications]' section
+    sed --in-place "/Default Applications/a \
+$X_SCHEME_HANDLER_VMWARE_VIEW\n\
+$X_SCHEME_HANDLER_HORIZON_CLIENT" $GLOBAL_MIME_FILE
+fi
 echo ""
 
 # Install admin portal supplied config files in ETC_OMNISSA_DIR
