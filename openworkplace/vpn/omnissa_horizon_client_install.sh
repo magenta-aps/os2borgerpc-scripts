@@ -48,11 +48,17 @@ HORIZON_DESKTOP_LINK_SKJULT="/home/.skjult/$DEFAULT_DESKTOP/$HORIZON_CLIENT_DESK
 HORIZON_DESKTOP_LINK_USER="/home/user/$DEFAULT_DESKTOP/$HORIZON_CLIENT_DESKTOP"
 HORIZON_APPLICATION_FILE_SKJULT="/home/.skjult/.local/share/applications/$HORIZON_CLIENT_DESKTOP"
 HORIZON_APPLICATION_FILE_USER="/home/user/.local/share/applications/$HORIZON_CLIENT_DESKTOP"
+GLOBAL_HORIZON_FILE="/usr/share/applications/$HORIZON_CLIENT_DESKTOP"
 
 # add two mime scheme handlers
 GLOBAL_MIME_FILE="/etc/xdg/mimeapps.list"
 X_SCHEME_HANDLER_VMWARE_VIEW="x-scheme-handler/vmware-view=$HORIZON_CLIENT_DESKTOP"
 X_SCHEME_HANDLER_HORIZON_CLIENT="x-scheme-handler/horizon-client=$HORIZON_CLIENT_DESKTOP"
+
+# It turns out that the protocol links from browsers don't work correctly if there is
+# a local copy of horizon-client.desktop in ~/.local/share/applications for some reason
+# We make sure to delete the local copies (backwards compatibility)
+rm --force $HORIZON_APPLICATION_FILE_USER $HORIZON_APPLICATION_FILE_SKJULT 2> /dev/null
 
 echo ""
 
@@ -64,7 +70,7 @@ if [ "$INSTALL" = "False" ]; then
     echo ""
 
     echo "Removing manually installed Omnissa Horizon desktop launchers"
-    rm --force "$HORIZON_DESKTOP_LINK_SKJULT" "$HORIZON_DESKTOP_LINK_USER" "$HORIZON_APPLICATION_FILE_SKJULT" "$HORIZON_APPLICATION_FILE_USER" 2> /dev/null
+    rm --force "$HORIZON_DESKTOP_LINK_SKJULT" "$HORIZON_DESKTOP_LINK_USER" 2> /dev/null
     echo ""
 
     echo "Removing manually installed Omnissa Horizon mime scheme handlers"
@@ -127,10 +133,8 @@ fi
 echo "Installing Omnissa Horizon desktop launcher '$HORIZON_DESKTOP_LINK_SKJULT'"
 # ln can't overwrite existing files so we make sure to delete them first
 rm --force "$HORIZON_DESKTOP_LINK_SKJULT" "$HORIZON_DESKTOP_LINK_USER"
-mkdir --parents "$(dirname "$HORIZON_APPLICATION_FILE_SKJULT")"
-cp  /usr/share/applications/horizon-client.desktop "$HORIZON_APPLICATION_FILE_SKJULT"
 mkdir --parents "$(dirname "$HORIZON_DESKTOP_LINK_SKJULT")"
-ln --symbolic "$HORIZON_APPLICATION_FILE_SKJULT" "$HORIZON_DESKTOP_LINK_SKJULT"
+ln --symbolic "$GLOBAL_HORIZON_FILE" "$HORIZON_DESKTOP_LINK_SKJULT"
 
 echo "Installing Omnissa Horizon desktop x-scheme-handler"
 # Make sure the mime file exists
