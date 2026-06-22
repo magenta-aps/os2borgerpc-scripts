@@ -58,6 +58,6 @@ EOF
 
   chmod o+x $DUPLICATE_MONITORS_SCRIPT
 else
-  rm --force $AUTOSTART_DESKTOP_FILE $USER_AUTOSTART_DESKTOP_FILE
+  rm --force $AUTOSTART_DESKTOP_FILE $USER_AUTOSTART_DESKTOP_FILE $DUPLICATE_MONITORS_SCRIPT
   # Leaving it installed in case other scripts use it...?
 fi
