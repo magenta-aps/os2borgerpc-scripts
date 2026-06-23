@@ -69,13 +69,23 @@ LIGHTDM_AUTOLOGIN_PAM="/etc/pam.d/lightdm-autologin"
 LIGHTDM_PAM_FILES="$LIGHTDM_PAM_FILE $LIGHTDM_GREETER_PAM $LIGHTDM_AUTOLOGIN_PAM"
 LOGOUT_TIMER_ACTUAL_LAUNCHER="/usr/share/os2borgerpc/bin/logout_timer_actual_launcher.sh"
 OUR_USER="user"
+# All of the below variables are used for locking lightdm to Xorg
+# and hiding the env select button
+XORG_FILE="/usr/share/xsessions/ubuntu-xorg.desktop"
+XORG_HIDDEN_FILE="/usr/share/xsessions/hidden/ubuntu-xorg.desktop"
+WAYLAND_FILE="/usr/share/wayland-sessions/ubuntu-wayland.desktop"
+WAYLAND_HIDDEN_FILE="/usr/share/wayland-sessions/hidden/ubuntu-wayland.desktop"
+WAYLAND_FILE_2="/usr/share/wayland-sessions/ubuntu.desktop"
+WAYLAND_HIDDEN_FILE_2="/usr/share/wayland-sessions/hidden/ubuntu.desktop"
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get --assume-yes update
 
 if [ "$CHOSEN_DM" = "lightdm" ]; then
-  apt-get install --assume-yes lightdm
-  echo "/usr/sbin/lightdm" > $DEFAULT_DM_FILE
+  if ! apt-get install --assume-yes lightdm; then
+    echo "Installing lightdm failed. Exiting."
+    exit 1
+  fi
 
   mkdir --parents $LIGHTDM_GREETER_SETUP_DIR
 
@@ -89,11 +99,20 @@ EOF
 
   mkdir --parents "$(dirname $LIGHTDM_DISABLE_WAYLAND_FILE)"
 
-  cat << EOF > $LIGHTDM_DISABLE_WAYLAND_FILE
-# No /usr/share/wayland-sessions please
-[LightDM]
-sessions-directory=/usr/share/xsessions:/usr/share/lightdm/sessions
-EOF
+  # sessions-directory does not seem to be respected by lightdm
+  # anymore so instead we lock lightdm to xorg (and hide the
+  # env select button) by hiding all other sessions files.
+  # This is equivalent to running lightdm_hide_desktop_env_select.sh
+  mkdir --parents "$(dirname "$XORG_HIDDEN_FILE")" "$(dirname "$WAYLAND_HIDDEN_FILE")"
+  if [ -f "$XORG_FILE" ]; then
+    dpkg-divert --rename --divert "$XORG_HIDDEN_FILE" --add "$XORG_FILE"
+  fi
+  if [ -f "$WAYLAND_FILE" ]; then
+    dpkg-divert --rename --divert "$WAYLAND_HIDDEN_FILE" --add "$WAYLAND_FILE"
+  fi
+  if [ -f "$WAYLAND_FILE_2" ]; then
+    dpkg-divert --rename --divert "$WAYLAND_HIDDEN_FILE_2" --add "$WAYLAND_FILE_2"
+  fi
 
   cat << EOF > $LIGHTDM_GREETER_SETUP_SCRIPT
 #!/bin/sh
@@ -133,14 +152,18 @@ EOF
 
     chmod 700 $XSET_FILE
 
-    echo "display-setup-script=$XSET_FILE" >> $LIGHTDM_CONF
+    if ! grep --quiet "display-setup-script" $LIGHTDM_CONF; then
+      echo "display-setup-script=$XSET_FILE" >> $LIGHTDM_CONF
+    fi
   fi
 
   # Maintain numlock settings
   if [ -f $GDM_NUMLOCK_POLICY ]; then
     if [ ! -f "/usr/bin/numlockx" ]; then
-      apt-get update -qq > /dev/null
-      apt-get -yqq install numlockx
+      if ! apt-get -yqq install numlockx; then
+        echo "Installing numlockx failed. Exiting."
+        exit 1
+      fi
     fi
 
     cat << EOF > $LIGHTDM_NUMLOCK_SCRIPT
@@ -155,7 +178,7 @@ EOF
   fi
 
   # Maintain automatic login settings
-  if grep "AutomaticLogin" $GDM_CONF; then
+  if grep --quiet "AutomaticLogin" $GDM_CONF && ! grep --quiet "autologin-user" $LIGHTDM_CONF; then
     AUTOMATIC_LOGIN_TIMEOUT=$(grep "sleep" $GDM_AUTOLOGIN_SCRIPT | cut --delimiter " " --fields 2)
     cat << EOF >> $LIGHTDM_CONF
 autologin-user-timeout=$AUTOMATIC_LOGIN_TIMEOUT
@@ -203,11 +226,18 @@ EOF
     sed --in-place "/include common-account/i# OS2borgerPC custom login\nauth [success=1 default=ignore] pam_succeed_if.so user != user\nauth required pam_python.so $OTHER_PAM_PYTHON_MODULE" $LIGHTDM_PAM_FILE
   fi
 
-  apt-get remove --assume-yes gdm3
+  if ! apt-get remove --assume-yes gdm3; then
+    echo "Removing gdm failed. Exiting."
+    exit 1
+  fi
+
+  echo "/usr/sbin/lightdm" > $DEFAULT_DM_FILE
 
 elif [ "$CHOSEN_DM" = "gdm" ]; then
-  apt-get install --assume-yes gdm3
-  echo "/usr/sbin/gdm3" > $DEFAULT_DM_FILE
+  if ! apt-get install --assume-yes gdm3; then
+    echo "Installing gdm failed. Exiting."
+    exit 1
+  fi
 
   mkdir --parents $GDM_POST_SESSION_DIR
 
@@ -308,8 +338,12 @@ EOF
 
     chmod 700 $GDM_AUTOLOGIN_SCRIPT
 
-    sed --in-place "/exit 0/i $GDM_AUTOLOGIN_SCRIPT &" $GDM_POST_SESSION_SCRIPT
-    sed --in-place "/daemon/a AutomaticLoginEnable=true\nAutomaticLogin=$OUR_USER" $GDM_CONF
+    if ! grep --quiet "$GDM_AUTOLOGIN_SCRIPT" $GDM_POST_SESSION_SCRIPT; then
+      sed --in-place "/exit 0/i $GDM_AUTOLOGIN_SCRIPT &" $GDM_POST_SESSION_SCRIPT
+    fi
+    if ! grep --quiet "AutomaticLogin=$OUR_USER" $GDM_CONF; then
+      sed --in-place "/daemon/a AutomaticLoginEnable=true\nAutomaticLogin=$OUR_USER" $GDM_CONF
+    fi
   fi
 
   # Ensure that the suspend script continues working if enabled
@@ -353,11 +387,16 @@ EOF
     sed --in-place "/include common-account/i# OS2borgerPC custom login\nauth [success=1 default=ignore] pam_succeed_if.so user != user\nauth required pam_python.so $OTHER_PAM_PYTHON_MODULE" $GDM_PAM_FILE
   fi
 
-  apt-get remove --assume-yes lightdm
+  if ! apt-get remove --assume-yes lightdm; then
+    echo "Removing lightdm failed. Exiting."
+    exit 1
+  fi
 
   # Create symlink necessary for gdm to start automatically
   rm --force /etc/systemd/system/display-manager.service
   ln --symbolic /lib/systemd/system/gdm3.service /etc/systemd/system/display-manager.service
+
+  echo "/usr/sbin/gdm3" > $DEFAULT_DM_FILE
 fi
 
 # Update dconf settings

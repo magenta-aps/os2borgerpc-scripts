@@ -27,6 +27,8 @@ XORG_FILE="/usr/share/xsessions/ubuntu-xorg.desktop"
 XORG_HIDDEN_FILE="/usr/share/xsessions/hidden/ubuntu-xorg.desktop"
 WAYLAND_FILE="/usr/share/wayland-sessions/ubuntu-wayland.desktop"
 WAYLAND_HIDDEN_FILE="/usr/share/wayland-sessions/hidden/ubuntu-wayland.desktop"
+WAYLAND_FILE_2="/usr/share/wayland-sessions/ubuntu.desktop"
+WAYLAND_HIDDEN_FILE_2="/usr/share/wayland-sessions/hidden/ubuntu.desktop"
 
 mkdir --parents "$(dirname "$XORG_HIDDEN_FILE")" "$(dirname "$WAYLAND_HIDDEN_FILE")"
 
@@ -37,11 +39,17 @@ if [ "$ACTIVATE" = "True" ]; then
   if [ -f "$WAYLAND_FILE" ]; then
     dpkg-divert --rename --divert "$WAYLAND_HIDDEN_FILE" --add "$WAYLAND_FILE"
   fi
+  if [ -f "$WAYLAND_FILE_2" ]; then
+    dpkg-divert --rename --divert "$WAYLAND_HIDDEN_FILE_2" --add "$WAYLAND_FILE_2"
+  fi
 else
   if [ -f "$XORG_HIDDEN_FILE" ]; then
     dpkg-divert --rename --remove "$XORG_FILE"
   fi
   if [ -f "$WAYLAND_HIDDEN_FILE" ]; then
     dpkg-divert --rename --remove "$WAYLAND_FILE"
+  fi
+  if [ -f "$WAYLAND_HIDDEN_FILE_2" ]; then
+    dpkg-divert --rename --remove "$WAYLAND_FILE_2"
   fi
 fi
