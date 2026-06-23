@@ -26,14 +26,15 @@ if get_os2borgerpc_config os2_product | grep --quiet kiosk; then
 fi
 
 IMAGE_FILE=$1
-OPTION_VALUE=$2
+IMAGE_FILE_DARK=$2
+OPTION_VALUE=$3
 POLICY_FILE="/etc/dconf/db/os2borgerpc.d/00-background"
 POLICY_LOCK_FILE="/etc/dconf/db/os2borgerpc.d/locks/00-background"
 
 # Delete the previous lock file (its name has changed)
 rm --force /etc/dconf/db/os2borgerpc.d/locks/background
 
-if [ -n "$IMAGE_FILE" ]; then
+if [ -n "$IMAGE_FILE" ] && [ -f "$IMAGE_FILE" ]; then
 
 	# Copy the new desktop background into the appropriate folder
 	LOCAL_PATH="/usr/share/backgrounds/$(basename "$IMAGE_FILE")"
@@ -50,8 +51,18 @@ if [ -n "$IMAGE_FILE" ]; then
 		/org/gnome/desktop/background/picture-uri
 		/org/gnome/desktop/background/picture-options
 	END
+
+	if [ -n "$IMAGE_FILE_DARK" ] && [ -f "$IMAGE_FILE_DARK" ]; then
+	  # Copy the dark mode desktop background into the appropriate folder
+	  LOCAL_PATH_DARK="/usr/share/backgrounds/$(basename "$IMAGE_FILE_DARK")"
+	  cp "$IMAGE_FILE_DARK" "$LOCAL_PATH_DARK"
+
+	  # Update the above dconf files to also set the dark mode desktop background
+	  echo "picture-uri-dark='file://$LOCAL_PATH_DARK'" >> "$POLICY_FILE"
+	  echo "/org/gnome/desktop/background/picture-uri-dark" >> "$POLICY_LOCK_FILE"
+	fi
 else
-	printf "This script requires one parameter: The path to a file to be set as background"
+	printf "Missing mandatory image file parameter. Exiting."
 	exit 1
 fi
 
