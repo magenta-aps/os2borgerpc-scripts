@@ -32,7 +32,7 @@ cat << EOF > $CLEANUP_D_FILE
 
 # We also need to delete the user-dirs files to ensure that the
 # directories are recreated correctly
-rm --force --recursive /home/user/* /home/user/.config/user-dirs.*
+rm --force --recursive /home/$USERNAME/* /home/$USERNAME/.config/user-dirs.*
 EOF
 
 chmod 700 $CLEANUP_D_FILE

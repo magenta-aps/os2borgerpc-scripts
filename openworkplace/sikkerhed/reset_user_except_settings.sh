@@ -33,20 +33,20 @@ cat << EOF > $CLEANUP_D_FILE
 # Some settings are saved system-wide and will not be affected by deleting folders in /home/
 # These include wifi and automatic time sync
 # The following files should not be deleted in order to maintain
-# system settings for the user
-# /home/user/.config/dconf/user - user-specific dconf settings
-# /home/user/.config/monitors.xml - screen settings
-# /home/user/.local/share/flatpak/db/notifications - some (but not all) permissions settings for programs
-# /home/user/.local/state/wireplumber/default-routes - sound settings including bluetooth headphones
-# /home/user/.config/mimeapps.list - default programs
-# /home/user/.pam_environment - user-specific language settings
-FILES_TO_KEEP="/home/user/.config/dconf/user /home/user/.config/monitors.xml /home/user/.local/share/flatpak/db/notifications /home/user/.local/state/wireplumber/default-routes /home/user/.config/mimeapps.list /home/user/.pam_environment"
+# system settings for the user $USERNAME
+# /home/$USERNAME/.config/dconf/user - user-specific dconf settings
+# /home/$USERNAME/.config/monitors.xml - screen settings
+# /home/$USERNAME/.local/share/flatpak/db/notifications - some (but not all) permissions settings for programs
+# /home/$USERNAME/.local/state/wireplumber/default-routes - sound settings including bluetooth headphones
+# /home/$USERNAME/.config/mimeapps.list - default programs
+# /home/$USERNAME/.pam_environment - user-specific language settings
+FILES_TO_KEEP="/home/$USERNAME/.config/dconf/user /home/$USERNAME/.config/monitors.xml /home/$USERNAME/.local/share/flatpak/db/notifications /home/$USERNAME/.local/state/wireplumber/default-routes /home/$USERNAME/.config/mimeapps.list /home/$USERNAME/.pam_environment"
 
-# Find all files/directories owned by user in the world-writable directories
-FILES_DIRS=\$(find /tmp/ /var/tmp/ /var/crash/ /var/metrics/ /var/lock/ -user user)
+# Find all files/directories owned by $USERNAME in the world-writable directories
+FILES_DIRS=\$(find /tmp/ /var/tmp/ /var/crash/ /var/metrics/ /var/lock/ -user $USERNAME)
 
 chattr +i \$FILES_TO_KEEP
-rm --force --recursive /dev/shm/* /dev/shm/.??* /home/user/ \$FILES_DIRS
+rm --force --recursive /dev/shm/* /dev/shm/.??* /home/$USERNAME/ \$FILES_DIRS
 chattr -i \$FILES_TO_KEEP
 EOF
 
