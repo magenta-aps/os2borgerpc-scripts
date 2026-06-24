@@ -56,21 +56,19 @@ X_SCHEME_HANDLER_VMWARE_VIEW="x-scheme-handler/vmware-view=$HORIZON_CLIENT_DESKT
 X_SCHEME_HANDLER_HORIZON_CLIENT="x-scheme-handler/horizon-client=$HORIZON_CLIENT_DESKTOP"
 
 # Additional Ubuntu Debian packages needed for Av1, H264, and HEVC media codecs.
-# These will NOT be removed when uninstalling the Omncisa slient, as they may have been installed
+# These will NOT be removed when uninstalling the Omnissa client, as they may have been installed
 # for other purposes before, for example browser based MS Teams meetings.
 # The second additional package depends on the GPU hardware.
 DEBIAN_NAME_EXTRA_1="libopenh264-7"
 GPU_VENDOR="$(lshw -class display | grep vendor: )"
-DEBIAN_NAME_EXTRA_2=$(
-    if echo "$GPU_VENDOR" | grep --quiet --ignore-case "NVIDIA";
-      then echo "libvdpau1";
-    elif echo "$GPU_VENDOR" | grep --quiet --ignore-case -e "AMD" -e "Advanced Micro Devices";
-      then echo "libopengl0"; # probably already installed
-    elif echo "$GPU_VENDOR" | grep --quiet --ignore-case "INTEL";
-      then echo "intel-media-va-driver-non-free";
-    else echo "ERROR: Dont't know what to do with GPU vendor '${GPU_VENDOR}'"; exit 1;
-    fi
-    )
+if echo "$GPU_VENDOR" | grep --quiet --ignore-case "NVIDIA";
+  then DEBIAN_NAME_EXTRA_2="libvdpau1"
+elif echo "$GPU_VENDOR" | grep --quiet --ignore-case -e "AMD" -e "Advanced Micro Devices";
+  then DEBIAN_NAME_EXTRA_2="libopengl0" # probably already installed
+elif echo "$GPU_VENDOR" | grep --quiet --ignore-case "INTEL";
+  then DEBIAN_NAME_EXTRA_2="intel-media-va-driver-non-free"
+else echo "ERROR: Don't know what to do with GPU vendor '${GPU_VENDOR}'"; exit 1
+fi
 
 # It turns out that the protocol links from browsers don't work correctly if there is
 # a local copy of horizon-client.desktop in ~/.local/share/applications for some reason
@@ -85,7 +83,7 @@ INSTALLED_DEBIAN_VERSION=$(dpkg --list "$DEBIAN_NAME" | grep "$DEBIAN_NAME" | gr
 export DEBIAN_FRONTEND=noninteractive
 
 # Resync the local package index from its remote counterpart
-apt-get --assume-yes update
+apt-get update > /dev/null
 
 if [ "$INSTALL" = "False" ]; then
     echo "Removing manually installed Omnissa Horizon config files from directory '$ETC_OMNISSA_DIR'"
@@ -126,9 +124,8 @@ fi
 # Omnissa Horizon Debian package fetch and install from providers own web site
 # this installs ./usr/bin/horizon-client among others
 
-echo "Installling extra Debian packages for Av1, H264, and HEVC media codecs: ${DEBIAN_NAME_EXTRA_1} ${DEBIAN_NAME_EXTRA_2}"
-# Attempt to fix broken or interrupted installations
-apt-get --assume-yes --fix-broken install "$DEBIAN_NAME_EXTRA_1" "$DEBIAN_NAME_EXTRA_2"
+echo "Installing extra Debian packages for Av1, H264, and HEVC media codecs: ${DEBIAN_NAME_EXTRA_1} ${DEBIAN_NAME_EXTRA_2}"
+apt-get --assume-yes install "$DEBIAN_NAME_EXTRA_1" "$DEBIAN_NAME_EXTRA_2"
 
 if [ "$DEBIAN_VERSION" = "$INSTALLED_DEBIAN_VERSION" ]; then
     echo "Omnissa Horizon Debian package '$DEBIAN_NAME' version '$INSTALLED_DEBIAN_VERSION' is already installed";
