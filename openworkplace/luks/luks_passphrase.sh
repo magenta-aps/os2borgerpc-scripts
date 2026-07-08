@@ -8,8 +8,8 @@
 
 # Script arguments
 ACTION=$1
-FIRST_PASSPHRASE=$2
-SECOND_PASSPHRASE=$3
+OLD_PASSPHRASE=$2
+NEW_PASSPHRASE=$3
 
 
 export DEBIAN_FRONTEND=noninteractive
@@ -37,8 +37,8 @@ filsystem.
 Ændringer i LUKS passfraser fortaget ved dette script kræver følgende
 
  - der er eksakt èn partition der indeholder et crypto_LUKS filsystem
- - FIRST_PASSPHRASE er angivet korrekt, denne bliver brugt til verificering af operationen
- - SECOND_PASSPHRASE er angivet korrekt, den bliver tilføjet, slettet, eller første bliver ændret til anden
+ - OLD_PASSPHRASE er angivet korrekt, denne bliver brugt til verificering af operationen
+ - NEW_PASSPHRASE er angivet korrekt, den bliver tilføjet, slettet, eller første bliver ændret til anden
 
 Vigtig:
 
@@ -65,16 +65,16 @@ Vigtig:
 Parametre:
 
   ACTION = help | luksAddKey | luksChangeKey | luksDump | luksRemoveKey
-  FIRST_PASSFRASE = <string> (ASCII-7 printable)
-  SECOND_PASSFRASE = <string> (ASCII-7 printable)
+  OLD_PASSPHRASE = <string> (ASCII-7 printable)
+  NEW_PASSPHRASE = <string> (ASCII-7 printable)
 
 Eksempel:
 
   luks_passphrase.sh help
   luks_passphrase.sh luksDump
-  luks_passphrase.sh luksAddKey FIRST_PASSPHRASE SECOND_PASSPHRASE
-  luks_passphrase.sh luksChangeKey FIRST_PASSPHRASE SECOND_PASSPHRASE
-  luks_passphrase.sh luksRemoveKey FIRST_PASSPHRASE
+  luks_passphrase.sh luksAddKey OLD_PASSPHRASE NEW_PASSPHRASE
+  luks_passphrase.sh luksChangeKey OLD_PASSPHRASE NEW_PASSPHRASE
+  luks_passphrase.sh luksRemoveKey OLD_PASSPHRASE
 
 Mere info:
 
@@ -87,6 +87,12 @@ EOF
 if [ "$ACTION" = "help" ]; then
     echo "$DESCRIPTION"
     exit 0
+fi
+
+# Need jq for json LUKS dump parsing
+if ! jq --version ; then
+    apt-get update
+    apt-get install --assume-yes jq
 fi
 
 LUKS_CRYPTO_PARTITIONS="$(export IFS=""; lsblk -o NAME,FSTYPE,UUID --list | grep 'crypto_LUKS')"
@@ -121,15 +127,15 @@ if [ "$ACTION" = "luksDump" ]; then
 fi
 
 # Check that first passphrase argument is valid and does open device
-if [ -z  "${FIRST_PASSPHRASE}" ]; then
-    echo "ERROR: FIRST_PASSPHRASE er tom"
+if [ -z  "${OLD_PASSPHRASE}" ]; then
+    echo "ERROR: OLD_PASSPHRASE er tom"
     exit 1
 fi
 
-if echo "${FIRST_PASSPHRASE}" | cryptsetup -v luksOpen --test-passphrase --timeout 10  --tries 1 "${LUKS_DEVICE}"; then
-    echo "FIRST_PASSPHRASE åbner LUKS device ${LUKS_DEVICE}"
+if echo "${OLD_PASSPHRASE}" | cryptsetup -v luksOpen --test-passphrase --timeout 10  --tries 1 "${LUKS_DEVICE}"; then
+    echo "OLD_PASSPHRASE åbner LUKS device ${LUKS_DEVICE}"
 else
-    echo "ERROR: FIRST_PASSPHRASE åbner ikke LUKS device ${LUKS_DEVICE}"
+    echo "ERROR: OLD_PASSPHRASE åbner ikke LUKS device ${LUKS_DEVICE}"
     exit 1
 fi
 
@@ -137,23 +143,33 @@ echo "LUKS passfrase opdatering '$ACTION' device ${LUKS_DEVICE}"
 
 if [ "$ACTION" = "luksAddKey" ] || [ "$ACTION" = "luksChangeKey" ]; then
     # Check that second passphrase argument is valid
-    if [ -z "${SECOND_PASSPHRASE}" ]; then
-        echo "ERROR: SECOND_PASSPHRASE er tom"
+    if [ -z "${NEW_PASSPHRASE}" ]; then
+        echo "ERROR: NEW_PASSPHRASE er tom"
         exit 1
     fi
-    printf '%s\n%s' "${FIRST_PASSPHRASE}" "${SECOND_PASSPHRASE}" | cryptsetup "${ACTION}" --timeout 10 "${LUKS_DEVICE}"
-    if ! echo "${SECOND_PASSPHRASE}" | cryptsetup -v luksOpen --test-passphrase --timeout 10  --tries 1 "${LUKS_DEVICE}"; then
-        echo "ERROR: SECOND_PASSPHRASE åbner ikke LUKS device ${LUKS_DEVICE}"
+    printf '%s\n%s' "${OLD_PASSPHRASE}" "${NEW_PASSPHRASE}" | cryptsetup "${ACTION}" --timeout 10 "${LUKS_DEVICE}"
+    if echo "${NEW_PASSPHRASE}" | cryptsetup -v luksOpen --test-passphrase --timeout 10  --tries 1 "${LUKS_DEVICE}"; then
+        echo "NEW_PASSPHRASE åbner LUKS device ${LUKS_DEVICE}"
+    else
+        echo "ERROR: NEW_PASSPHRASE åbner ikke LUKS device ${LUKS_DEVICE}"
         exit 1
     fi
 
 elif [ "$ACTION" = "luksRemoveKey" ]; then
-    echo "${FIRST_PASSPHRASE}" | cryptsetup "${ACTION}" --timeout 10 "${LUKS_DEVICE}"
-    if echo "${FIRST_PASSPHRASE}" | cryptsetup -v luksOpen --test-passphrase --timeout 10  --tries 1 "${LUKS_DEVICE}"; then
-        echo "ERROR: FIRST_PASSPHRASE åbner stadigvæk LUKS device ${LUKS_DEVICE}"
-        echo "Måske var FIRST_PASSPHRASE tilføjet flere gange ?"
+    REMAINING_SLOTS="$(cryptsetup  --dump-json-metadata luksDump "${LUKS_DEVICE}" |  jq '.keyslots | length')" 
+    if [ "${REMAINING_SLOTS}" = "1" ] ; then 
+        echo "ERROR: nægter at slette den sidste LUKS slot på device ${LUKS_DEVICE}"
+        echo "ERROR: det efterlader device ${LUKS_DEVICE} permanent krypteret med data tab til følge"
+        exit 1
+    fi
+    echo "${OLD_PASSPHRASE}" | cryptsetup "${ACTION}" --timeout 10 "${LUKS_DEVICE}"
+    if echo "${OLD_PASSPHRASE}" | cryptsetup -v luksOpen --test-passphrase --timeout 10  --tries 1 "${LUKS_DEVICE}"; then
+        echo "ERROR: OLD_PASSPHRASE åbner stadigvæk LUKS device ${LUKS_DEVICE}"
+        echo "Måske var OLD_PASSPHRASE tilføjet flere gange ?"
         echo "Undersøg hvor mange slots der er med instruks 'luksDump' før du prøver at fjerne den endnu en gang !"
         exit 1
+    else
+        echo "OLD_PASSPHRASE er fjernet fra LUKS device ${LUKS_DEVICE}"
     fi
 
 else
