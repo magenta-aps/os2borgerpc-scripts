@@ -8,8 +8,8 @@
 
 set -x
 
-# Installs a website as a "web app", currently in Chrome.
-# Rewriting to Chromium should not be that hard, but Firefox may work significantly differently.
+# Installs a website as a "web app", currently in Chromium or Chrome.
+# Rewriting to Firefox should be possible, but it will likely need a few more changes.
 
 USR=".skjult"
 APP="teams"
@@ -34,6 +34,13 @@ DESKTOP_FILE_DEST_1="/home/$USR/$DESKTOP/$APP_DESKTOP_FILE_NAME"
 DESKTOP_FILE_DEST_2="/home/$USR/.local/share/applications/$APP_DESKTOP_FILE_NAME"
 
 ACTIVATE=$1
+BROWSER_CHOICE=$2
+
+if [ "$BROWSER_CHOICE" = "google-chrome" ]; then
+  BROWSER="/opt/google/chrome/google-chrome"
+else
+  BROWSER="/snap/bin/chromium"
+fi
 
 if [ "$ACTIVATE" = "True" ]; then
 
@@ -54,7 +61,7 @@ if [ "$ACTIVATE" = "True" ]; then
 		Type=Application
 		Name=Microsoft Teams (PWA)
 		MimeType=x-scheme-handler/web+msteams;x-scheme-handler/google-chrome;
-		Exec=/opt/google/chrome/google-chrome "--profile-directory=Profile 1" --app="https://teams.cloud.microsoft" --class="$APP_DESKTOP_FILE_BASENAME" %U
+		Exec=$BROWSER "--profile-directory=Profile 1" --app="https://teams.cloud.microsoft" --class="$APP_DESKTOP_FILE_BASENAME" %U
 		Icon=$APP_NAME_PROFILE
 		StartupWMClass=$APP_DESKTOP_FILE_BASENAME
 	EOF
