@@ -16,7 +16,6 @@ APP="teams"
 APP_NAME="chrome-ompifgpmddkgmclendfeacglnodjjndh"
 PROFILE="Profile_1"
 APP_NAME_PROFILE="${APP_NAME}-$PROFILE"
-APP_DESKTOP_FILE_BASENAME="$APP_NAME_PROFILE"
 APP_DESKTOP_FILE_NAME="ow-teams.desktop"
 #ICON_DEST="/home/$USR/.local/share/icons" # Path option 1
 ICON_DEST="/usr/share/icons" # Path option 2
@@ -61,9 +60,9 @@ if [ "$ACTIVATE" = "True" ]; then
 		Type=Application
 		Name=Microsoft Teams (PWA)
 		MimeType=x-scheme-handler/web+msteams;x-scheme-handler/google-chrome;
-		Exec=$BROWSER "--profile-directory=Profile 1" --app="https://teams.cloud.microsoft" --class="$APP_DESKTOP_FILE_BASENAME" %U
+		Exec=$BROWSER "--profile-directory=Profile 1" --app="https://teams.cloud.microsoft" --class="$APP_NAME_PROFILE" %U
 		Icon=$APP_NAME_PROFILE
-		StartupWMClass=$APP_DESKTOP_FILE_BASENAME
+		StartupWMClass=$APP_NAME_PROFILE
 	EOF
 
   cp "$DESKTOP_FILE_DEST_1" $DESKTOP_FILE_DEST_2
@@ -72,8 +71,8 @@ if [ "$ACTIVATE" = "True" ]; then
   chmod --recursive a+rX $ICON_DEST/hicolor/
 
   # NOTE: This needs to point directly to a or multiple directories with the index.theme file
+  # If this starts to fail, try gtk-update-icon-cache instead
   update-icon-caches $ICON_DEST/hicolor
-  #gtk-update-icon-cache $ICON_DEST/hicolor
 
   # Cleanup
   rm --recursive $APP ${APP}2.tar.gz
