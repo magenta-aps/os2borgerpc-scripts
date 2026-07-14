@@ -20,7 +20,6 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update --quiet
 
 # Install necessary packages
-# We need expect to handle a password prompt during the join
 if ! apt-get install --assume-yes realmd sssd sssd-tools adcli; then
   echo "Failed to install necessary packages. Exiting."
   exit 1
