@@ -34,17 +34,18 @@ filsystem.
 
 Ændringer i TPM og clevis baseret LUKS dekryptering fortaget ved dette script kræver følgende
 
- - Ubuntu 26.04 med 'dracut' som iniramfs utility - sciptet fejler på alle Ubunu yngre end 25.10
+ - Ubuntu 24.04 med 'update-initramfs' som iniramfs utility - eller
+ - Ubuntu 26.04 med 'dracut' som iniramfs utility - indført med Ubuntu 25.10
  - TPM 2.0 chippen findes i PC'en, og er slået til i BIOS/UEFI boot konfigurationen
  - der er precis èn partition der indeholder et crypto_LUKS filsystem
  - LUKS PASSPHRASE er angivet korrekt, denne bliver brugt til verificering af operationen
 
 Vigtig:
 
- - Ubuntu 26.04 systemet SKAL være installeret med LUKS full-disk kryptering ( kun en root partition )
+ - Ubuntu 24.04 eller 26.04 systemet SKAL være installeret med LUKS full-disk kryptering ( kun en root partition )
    og skal have kendt passphrase - valg 'Encrypt with a passphrase': 'You will need to enter a passphrase
    every time you turn on your computer' under installationen
- - Alternativ til dette script bør man under installation vælge 'Use hardware-backed encryption':
+ - Alternativ til dette script kan man under installation af Ubuntu 2026.0.4 vælge 'Use hardware-backed encryption':
    'The disc will unlock automatically during startup', så behøver man ikke at køre dette script
  - TPM chippen låser disken op ved boot, hvis hardware konfiguration ikke har ændret sig
  - Dette script installer altså IKKE to-faktor authentificering af brugeren før dekryptering af disken
@@ -80,13 +81,6 @@ if [ ! "${INSTALL}" = "True" ] && [ ! "${INSTALL}" = "False" ]; then
     exit 1
 fi
 
-if grep 'Ubuntu 26\.04' /etc/os-release ; then
-    echo "Fundet Ubuntu 26.04, fortsætter ..."
-else
-    echo "ERROR: Ubuntu 26.04 system kræves for dette script kan køre, stopper nu"
-    exit 1
-fi
-
 # Trusted Platform Module 2.0 (TPM2) chip er tilstede ?
 if [ "2" != "$(cat /sys/class/tpm/tpm0/tpm_version_major)" ] ; then
     echo "ERROR: Trusted Platform Module 2.0 (TPM2) chip er IKKE tilstede"
@@ -100,10 +94,19 @@ if [ -z  "${PASSPHRASE}" ]; then
     exit 1
 fi
 
-# Needed packages
+# Needed packages: Ubuntu 2024.04 uses 'update-initramfs', and Ubuntu 2026.04 uses 'dracut' by default
 if ! which clevis ; then
     apt-get update
-    apt-get install --assume-yes clevis clevis-tpm2 clevis-dracut clevis-luks open-iscsi tpm2-tools
+    apt-get install --assume-yes clevis clevis-tpm2 clevis-luks tpm2-tools
+    if which dracut ; then
+        apt-get install --assume-yes clevis-dracut
+    elif which update-initramfs ; then
+        apt-get install --assume-yes clevis-initramfs
+    else
+        echo "ERROR: Bruges der 'dracut' eller 'update-initramfs' på dette system ??"
+        cat /etc/os-release
+        exit 1
+    fi
 fi
 # Need jq for json LUKS dump parsing
 if ! jq --version ; then
@@ -145,7 +148,6 @@ fi
 
 if [ "${INSTALL}" = "True" ]; then
 
-
     if echo "${PASSPHRASE}" | cryptsetup -v luksOpen --test-passphrase --timeout 10  --tries 1 "${LUKS_DEVICE}"; then
         echo "PASSPHRASE åbner LUKS device ${LUKS_DEVICE}"
     else
@@ -171,15 +173,28 @@ if [ "${INSTALL}" = "True" ]; then
     fi
 
     # Update initial ramdisc with these clevis modules and print info
-    # build image, notice  --hostonly option does not work on generic images
-    if dracut --force ; then
-        echo "Iniramfs for den kørende kernel er opgraderet med clevis moduler for device ${LUKS_DEVICE}"
-        uname -a
-        lsinitrd | grep '^clevis'
-        clevis luks list -d "${LUKS_DEVICE}"
-    else
-        echo "ERROR: Iniramfs opgradering med clevis moduler fejlede for device ${LUKS_DEVICE}"
-        exit 1
+    if which dracut ; then
+        # build dracut image, notice  --hostonly option does not work on generic images
+        if dracut --force ; then
+            echo "Iniramfs for den kørende kernel er opgraderet med clevis moduler for device ${LUKS_DEVICE}"
+            uname -a
+            lsinitrd | grep '^clevis' # from dracut-core
+            clevis luks list -d "${LUKS_DEVICE}"
+        else
+            echo "ERROR: Iniramfs opgradering med clevis moduler fejlede for device ${LUKS_DEVICE}"
+            exit 1
+        fi
+    elif which update-initramfs ; then
+        # build initramfs image
+        if update-initramfs -u -k all ; then
+            echo "Iniramfs for den kørende kernel er opgraderet med clevis moduler for device ${LUKS_DEVICE}"
+            uname -a
+            lsinitramfs "/boot/initrd.img-$(uname -r)" | grep 'clevis'
+            clevis luks list -d "${LUKS_DEVICE}"
+        else
+            echo "ERROR: Iniramfs opgradering med clevis moduler fejlede for device ${LUKS_DEVICE}"
+            exit 1
+        fi
     fi
 
     if [ "1" = "$(clevis luks list -d "${LUKS_DEVICE}" | grep -c tpm2 )" ]; then
