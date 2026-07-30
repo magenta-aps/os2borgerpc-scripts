@@ -57,6 +57,8 @@ Vigtig:
    i stedet for, eller sammen med TPM oplåsning
  - Efter install og re-boot bliver der vist en LUKS passphrase box; ignorere man denne og venter lidt,
    bliver disken låst op af TPM 2.0 chippen.
+ - Hvis man efter installering af TPM 2.0 chip dekryptering kører en firmware update, der rører firmware til
+   TPM 2.0 chippen, så taber man automatisk dekryptering derefter !!!
 
 Parametre:
 
