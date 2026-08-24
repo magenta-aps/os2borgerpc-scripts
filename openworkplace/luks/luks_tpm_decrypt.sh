@@ -72,10 +72,10 @@ Eksempel:
 
 Konfigurationer i adminportalen:
 
- - security_luks_device : tom eller navn på LUKS device, som er sat op under installation.
- - security_luks_slots : [0-8] antal af LUKS passphrase slots der er brugt.
- - security_tpm_version : tom (TPM 2.0 chip ikke fundet ) eller tallet 2 (TPM 2.0 chip fundet).
- - security_luks_tpm_slot : tom eller [0-8] det specifikke LUKS slot der indeholder TPM 2.0 koden.
+ - security_luks luks_device : tom eller navn på LUKS device, som er sat op under installation.
+ - security_luks luks_slots : [0-8] antal af LUKS passphrase slots der er brugt.
+ - security_luks tpm_version : tom (TPM 2.0 chip ikke fundet ) eller tallet 2 (TPM 2.0 chip fundet).
+ - security_luks tpm_slot : tom eller [0-8] det specifikke LUKS slot der indeholder TPM 2.0 koden.
 
 Mere info:
 
@@ -107,7 +107,7 @@ set_and_send_config_security_luks() {
             --arg tpm-version '' \
             '$ARGS.named')
     fi
-    # update only 'luks-device' and 'luks-slots', keep possibly other existing alive
+    # update all 4 luks variables
     JSON_STRING=$( echo "${JSON_STRING}" \
             | jq -c '."luks-device"='"\"${LUKS_DEVICE}\"" \
             | jq -c '."luks-slots"='"\"${LUKS_SLOTS}\"" \
@@ -205,7 +205,7 @@ if [ "${INSTALL}" = "True" ]; then
     fi
 
     echo "LUKS passphrase TPM chip opdatering '$INSTALL' device ${LUKS_DEVICE}"
-    if echo "${PASSPHRASE}" | clevis luks bind -d "${LUKS_DEVICE}" tpm2 '{"pcr_ids": "7"}'; then
+    if echo "${PASSPHRASE}" | clevis luks bind -d "${LUKS_DEVICE}" tpm2 '{"pcr_bank":"sha256", "pcr_ids": "7"}'; then
         echo "Bind against Platform Configuration Register (PCR) 7"
         echo "PCR 7: Tracks Secure Boot state and platform integrity policies"
         set_env_luks
