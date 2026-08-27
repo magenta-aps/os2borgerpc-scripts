@@ -37,8 +37,8 @@ filsystem. Navnet på block-device'n afhænger naturligvis af den anvendte hardw
 Ændringer i LUKS passphraser fortaget ved dette script kræver følgende
 
  - Der er eksakt èn partition som indeholder et crypto_LUKS filsystem.
- - OLD_PASSPHRASE er angivet korrekt, denne bliver brugt til verificering af operationen
- - NEW_PASSPHRASE er angivet korrekt, den bliver tilføjet, eller første bliver ændret til anden.
+ - OLD_PASSPHRASE er angivet korrekt, denne bliver brugt til verificering af operationen.
+ - NEW_PASSPHRASE er angivet hvis den skal tilføjes, eller første skal ændres til anden.
 
 Bemærk:
 
@@ -46,7 +46,7 @@ Bemærk:
    passphraser, standard passphrasen er ikke sikker at bruge.
  - Administrator passphrasen bør være forskellig fra PC til PC, og skal opbevares separat i organisationens
    sikre systemer, så der er mulighed for at genåbne en PC's disk, når/hvis brugeren glemmer sin
-   egen passphrase
+   egen passphrase.
  - Gamle, ubrugte passphraser skal fjernes fra LUKS, da de fortsat kan åbne krypteringen.
  - Der er kun garanteret 8 slots til passphraser i LUKS version 1, og 32 slots i LUKS version 2.
  - Fjerner man OLD passphrase, skal man passe på ikke at fjerne den sidste kendte passphrase. Gør man det,
@@ -134,7 +134,6 @@ if ! cryptsetup isLuks "${LUKS_DEVICE}"; then
 fi
 
 LUKS_VERSION="$(cryptsetup luksDump "${LUKS_DEVICE}" | awk '/Version:/ {print $2}')"
-LUKS_SLOTS=""
 set_env_luks_slots
 
 echo "LUKS ${LUKS_VERSION} passphrase '$ACTION' device ${LUKS_DEVICE} slots ${LUKS_SLOTS}"
