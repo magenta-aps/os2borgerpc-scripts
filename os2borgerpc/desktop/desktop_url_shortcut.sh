@@ -26,7 +26,7 @@ fi
 
 ACTIVATE=$1
 URL=$2
-SHORTCUT_NAME="$3"
+SHORTCUT_HUMAN_READABLE_NAME="$3"
 ICON_UPLOAD="$4"
 
 set -x
@@ -39,6 +39,8 @@ set -x
 export "$(grep LANG= /etc/default/locale | tr -d '"')"
 runuser -u user xdg-user-dirs-update
 DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
+
+SHORTCUT_NAME="$(echo "$SHORTCUT_HUMAN_READABLE_NAME" | tr ' ' '-')"
 
 SHADOW=".skjult"
 DESKTOP_FILE="/home/$SHADOW/$DESKTOP/$SHORTCUT_NAME.desktop"
@@ -75,19 +77,19 @@ if [ "$ACTIVATE" = "True" ]; then
 	cat <<- EOF > "$DESKTOP_FILE"
 		[Desktop Entry]
 		Encoding=UTF-8
-		Name=$SHORTCUT_NAME
+		Name=$SHORTCUT_HUMAN_READABLE_NAME
 		Type=Application
 		Exec=xdg-open $URL
 		Icon=$ICON
 	EOF
 
-	chmod +x "$DESKTOP_FILE"
+  chmod +x "$DESKTOP_FILE"
 else
-	rm --force "$DESKTOP_FILE" "$USER_DESKTOP_FILE" 2> /dev/null
-	# Backwards compatibility:
-	# In case they have an URL shortcut made with the previous version of this script,
-	# this version should still allow them to remove that (it was an extensionless shell script)
+  rm --force "$DESKTOP_FILE" "$USER_DESKTOP_FILE" 2> /dev/null
+  # Backwards compatibility:
+  # In case they have an URL shortcut made with the previous version of this script,
+  # this version should still allow them to remove that (it was an extensionless shell script)
   # Don't add recursive here, as otherwise with an empty argument it could delete the Skrivebord
   # directory itself
-	rm --force "$(dirname "$DESKTOP_FILE")/$(basename -s ".desktop" "$DESKTOP_FILE")"
+  rm --force "$(dirname "$DESKTOP_FILE")/$(basename -s ".desktop" "$DESKTOP_FILE")"
 fi
