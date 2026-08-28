@@ -76,6 +76,7 @@ Konfigurationer i adminportalen:
 
  - security_luks luks_device : tom eller navn på LUKS device, som er sat op under installation.
  - security_luks luks_slots : antal af LUKS passphrase slots der er brugt.
+ - security_luks luks_version : tom (ingen cryptsetup), 1 eller 2.
 
 Mere info:
 
@@ -114,6 +115,11 @@ set_and_send_config_security_luks() {
     set_os2borgerpc_config security_luks "${JSON_STRING}"
     os2borgerpc_push_config_keys --read-only security_luks
 }
+
+if ! which cryptsetup > /dev/null; then
+    echo "ERROR: OS is not set up with cryptsetup LUKS block device"
+    exit 1
+fi
 
 LUKS_CRYPTO_PARTITIONS="$(lsblk -o NAME,FSTYPE,UUID --list | grep 'crypto_LUKS')"
 LUKS_CRYPTO_COUNT="$(echo "${LUKS_CRYPTO_PARTITIONS}" | grep -c crypto_LUKS)"
@@ -159,8 +165,9 @@ if [ "$ACTION" = "luksAddKey" ] || [ "$ACTION" = "luksChangeKey" ]; then
 
     # Prevent adding same passphrase multiple times
     if echo "${NEW_PASSPHRASE}" | cryptsetup -v luksOpen --test-passphrase --timeout 10  --tries 1 "${LUKS_DEVICE}"; then
-        echo "ERROR: NEW_PASSPHRASE opens already LUKS device ${LUKS_DEVICE}, will not add it a second time"
-        exit 1
+        echo "NEW_PASSPHRASE already opens LUKS device ${LUKS_DEVICE}, will not add it a second time"
+        set_and_send_config_security_luks
+        exit 0
     fi
 
     printf '%s\n%s' "${OLD_PASSPHRASE}" "${NEW_PASSPHRASE}" | cryptsetup "${ACTION}" --timeout 10 "${LUKS_DEVICE}"
