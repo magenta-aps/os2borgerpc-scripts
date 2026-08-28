@@ -34,21 +34,21 @@ filsystem.
 
 Ændringer i TPM og clevis baseret LUKS dekryptering foretaget ved dette script kræver følgende:
 
- - Ubuntu 24.04 med 'update-initramfs' som iniramfs utility - eller
- - Ubuntu 26.04 med 'dracut' som iniramfs utility - indført med Ubuntu 25.10.
+ - Ubuntu før 25.10 med 'update-initramfs' som iniramfs utility - eller
+ - Ubuntu efter eller lige med 25.10 med 'dracut' som iniramfs utility
  - TPM 2.0 chippen findes i PC'en, og er slået til i BIOS/UEFI boot konfigurationen.
  - Der er præcis èn partition der indeholder et crypto_LUKS filsystem.
  - LUKS PASSPHRASE er angivet korrekt, denne bliver brugt til verificering af operationen.
 
 Bemærk:
 
- - Ubuntu 24.04 eller 26.04 systemet SKAL være installeret med LUKS full-disk kryptering ( kun en root partition )
-   og skal have kendt passphrase.
+ - Ubuntu systemet SKAL være installeret med LUKS full-disk kryptering ( kun en root partition ) og skal
+   have kendt passphrase.
  - TPM chippen låser disken op ved boot, hvis hardware konfiguration ikke har ændret sig.
  - Administrator passphrasen bør være forskellig fra PC til PC, og skal opbevares særligt i organisationens
    sikre systemer, så der er mulighed for at genåbne en PC's disk, når/hvis TPM chippen fejler grundet
    ændrede hardware specifikationer eller firmware opdateringer.
- - Der er kun plads til maksimal 8 passphraser i LUKS version 1, og 32 i LUKS version 2. Scriptet fejler, hvis
+ - Der er kun plads til maksimalt 8 passphraser i LUKS version 1, og 32 i LUKS version 2. Scriptet fejler, hvis
    der ikke er en ledig slot.
  - Ønsker man en mere sikker dekrypteringsprocess end TPM alene, skal man bruge en pre-boot LUKS passphrase
    i stedet for, eller TPM sammen med en lokal Tang netværksserver.
@@ -69,9 +69,10 @@ Eksempel:
 Konfigurationer i adminportalen:
 
  - security_luks luks_device : tom eller navn på LUKS device, som er sat op under installation.
- - security_luks luks_slots : [0-8] antal af LUKS passphrase slots der er brugt.
+ - security_luks luks_slots : [0-8/32] antal af LUKS passphrase slots der er brugt.
+ - security_luks luks_version : tom (ingen cryptsetup), 1 eller 2.
  - security_luks tpm_version : tom (TPM 2.0 chip ikke fundet ) eller tallet 2 (TPM 2.0 chip fundet).
- - security_luks tpm_slot : tom eller [0-8] det specifikke LUKS slot der indeholder TPM 2.0 koden.
+ - security_luks tpm_slot : tom eller [0-8/32] det specifikke LUKS slot der indeholder TPM 2.0 koden.
 
 Mere info:
 
@@ -105,7 +106,7 @@ set_and_send_config_security_luks() {
             --arg tpm-version '' \
             '$ARGS.named')
     fi
-    # update all 4 luks variables
+    # update all 5 luks variables
     JSON_STRING=$( echo "${JSON_STRING}" \
             | jq -c '."luks-device"='"\"${LUKS_DEVICE}\"" \
             | jq -c '."luks-slots"='"\"${LUKS_SLOTS}\"" \
@@ -116,9 +117,14 @@ set_and_send_config_security_luks() {
     os2borgerpc_push_config_keys --read-only security_luks
 }
 
+if ! which cryptsetup > /dev/null; then
+    echo "ERROR: OS is not set up with cryptsetup LUKS block device"
+    exit 1
+fi
+
 TPM_VERSION="$(cat /sys/class/tpm/tpm0/tpm_version_major)"
 
-# Trusted Platform Module 2.0 (TPM2) chip er tilstede ?
+# Trusted Platform Module 2.0 (TPM2) exists and is enabled in BIOS/UEFI ?
 if [ "2" != "${TPM_VERSION}" ] ; then
     echo "ERROR: Trusted Platform Module 2.0 (TPM2) chip is not enabled"
     echo "       Please check the BIOS/UEFI configuration"
@@ -131,7 +137,7 @@ if [ -z "${PASSPHRASE}" ]; then
     exit 1
 fi
 
-# check LUKS setup of coputer
+# check LUKS setup of computer
 LUKS_CRYPTO_PARTITIONS="$(lsblk -o NAME,FSTYPE,UUID --list | grep 'crypto_LUKS')"
 LUKS_CRYPTO_COUNT="$(echo "${LUKS_CRYPTO_PARTITIONS}" | grep -c crypto_LUKS)"
 
@@ -141,7 +147,7 @@ if [ "$LUKS_CRYPTO_COUNT" != "1" ]; then
     exit 1
 fi
 
-# Notice varying amount of whitespaces and tabs in output of 'lsblk' needs squeezing of blanks
+# Notice varying amount of whitespaces and tabs in output of 'lsblk'
 # 'nvme0n1p3         crypto_LUKS 41b75257-eab6-4e9e-bd97-46fc1eea44a2'
 LUKS_DEVICE="/dev/$(echo "${LUKS_CRYPTO_PARTITIONS}" | awk '{print $1}')"
 
@@ -151,7 +157,7 @@ set_env_luks
 if ! which clevis > /dev/null; then
     apt-get update > /dev/null
     apt-get install --assume-yes clevis clevis-tpm2 clevis-luks tpm2-tools
-    if which dracut ; then
+    if which dracut > /dev/null ; then
         apt-get install --assume-yes clevis-dracut
     elif which update-initramfs > /dev/null; then
         apt-get install --assume-yes clevis-initramfs
@@ -169,9 +175,9 @@ if ! jq --version > /dev/null; then
 fi
 
 # Trusted Platform Module 2.0 (TPM2) chip is functional ?
-if ! tpm2_getrandom --hex 16 ; then
-    echo "ERROR: Trusted Platform Module 2.0 (TPM2) chip virker IKKE"
-    echo "Check gerne BIOS/UEFI konfigurationen"
+if ! tpm2_getrandom --hex 16 > /dev/null; then
+    echo "ERROR: Trusted Platform Module 2.0 (TPM2) chip is not working"
+    echo "       Please check the BIOS/UEFI configuration"
     exit 1
 fi
 
@@ -183,16 +189,15 @@ fi
 if [ "${INSTALL}" = "True" ]; then
 
     if [ "0" != "${LUKS_TPM_SLOTS}" ]; then
-        echo "ERROR: TPM 2.0 is already enabled in LUKS"
-        exit 1
+        echo "TPM 2.0 is already enabled in LUKS"
+        set_and_send_config_security_luks
+        exit 0
     fi
 
     echo "LUKS ${LUKS_VERSION} passphrase TPM  ${TPM_VERSION} chip opdatering '$INSTALL' device ${LUKS_DEVICE}"
     if echo "${PASSPHRASE}" | clevis luks bind -d "${LUKS_DEVICE}" tpm2 '{"pcr_bank":"sha256", "pcr_ids": "7"}'; then
         echo "Bind against Platform Configuration Register (PCR) 7"
         echo "PCR 7: Tracks Secure Boot state and platform integrity policies"
-        set_env_luks
-        set_and_send_config_security_luks
     else
         echo "ERROR: Bind against Platform Configuration Register (PCR) 7 failed"
         exit 1
@@ -213,16 +218,20 @@ if [ "${INSTALL}" = "True" ]; then
         fi
     fi
 
+    set_env_luks
+    set_and_send_config_security_luks
+
     if [ "1" = "${LUKS_TPM_SLOTS}" ]; then
         exit 0
     else
-        echo "ERROR: TPM 2.0 konfigurationen i LUKS fejlede"
+        echo "ERROR: TPM 2.0 decryption binding for LUKS failed"
         exit 1
     fi
 
 elif [ "$INSTALL" = "False" ]; then
     if [ "0" = "${LUKS_TPM_SLOTS}" ]; then
         echo "TPM 2.0 is not configured in LUKS."
+        set_and_send_config_security_luks
         exit 0
     fi
 
