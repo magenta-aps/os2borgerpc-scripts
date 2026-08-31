@@ -24,6 +24,7 @@ DEFAULT_SEARCH_ENGINE="$2"
 
 export DEBIAN_FRONTEND=noninteractive
 SKELETON=".skjult"
+BROWSER_HOME="/home/$SKELETON/.config/google-chrome"
 
 ### START SHARED BLOCK BETWEEN CHROMIUM BROWSERS: CHROMIUM, CHROME ###
 setup_policies() {
@@ -255,8 +256,8 @@ if [ "$INSTALL" = "True" ]; then
   #          https://www.google.com/chrome/terms/
   #          Unfortunately it appears like there's no enterprise policy for this,
   #          yet, which would be better
-  mkdir --parents /home/$SKELETON/.config/google-chrome
-  touch "/home/$SKELETON/.config/google-chrome/EULA Accepted"
+  mkdir --parents "$BROWSER_HOME"
+  touch "$BROWSER_HOME/EULA Accepted"
 
   # Chrome: Disable its own check for updates
   # It would be more elegant to control this via a policy, but unfortunately that does not seem to be possible currently
@@ -269,4 +270,5 @@ if [ "$INSTALL" = "True" ]; then
 else
   # Not removing the policies because Chromium may use them, and rerunning Chrome - Install overwrites them anyway.
   apt-get remove --assume-yes $PACKAGE
+  rm --force --recursive "$BROWSER_HOME"
 fi

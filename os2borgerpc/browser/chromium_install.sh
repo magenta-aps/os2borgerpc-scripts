@@ -29,6 +29,8 @@ DEFAULT_SEARCH_ENGINE="$2"
 CHROME_POLICIES_PATH="/etc/opt/chrome/policies"
 CHROMIUM_POLICIES_PATH="/var/snap/chromium/current/policies"
 USER_CLEANUP="/usr/share/os2borgerpc/bin/user-cleanup.bash"
+SKELETON=".skjult"
+BROWSER_HOME="/home/$SKELETON/snap/chromium/common/chromium/"
 
 ### START SHARED BLOCK BETWEEN CHROMIUM BROWSERS: CHROMIUM, CHROME ###
 setup_policies() {
@@ -220,6 +222,13 @@ if [ "$ACTIVATE" = "True" ]; then
 
   setup_policies
 
+  # 2026-08: Prevent popup on first run about a service agreement related to AVC:
+  #          https://www.google.com/chrome/terms/
+  #          Unfortunately it appears like there's no enterprise policy for this,
+  #          yet, which would be better
+  mkdir --parents "$BROWSER_HOME"
+  touch "$BROWSER_HOME/EULA Accepted"
+
   # Alter user-cleanup.bash to prevent problems with chromium
   # This involves altering user-cleanup to not delete everything
   # under /tmp/, but only the user-owned files/directories
@@ -240,5 +249,5 @@ EOF
 else
   snap remove chromium
   # Remove chromium policies directory and symlink - removing the dir is significant
-  rm --force $CHROMIUM_POLICIES_PATH
+  rm --force --recursive $CHROMIUM_POLICIES_PATH "$BROWSER_HOME"
 fi

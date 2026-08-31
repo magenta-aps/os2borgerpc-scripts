@@ -24,6 +24,8 @@ INSTALL="$1"
 export DEBIAN_FRONTEND=noninteractive
 POLICY="/etc/opt/edge/policies/managed/os2borgerpc-defaults.json"
 HOMEPAGE_POLICY="/etc/opt/edge/policies/managed/os2borgerpc-homepage.json"
+SKELETON=".skjult"
+BROWSER_HOME="/home/$SKELETON/.config/microsoft-edge"
 
 setup_policies() {
   # DEVELOPER NOTES:
@@ -139,10 +141,17 @@ if [ "$INSTALL" = "True" ]; then
 
   setup_policies
 
+  # 2026-08: Prevent popup on first run about a service agreement related to AVC:
+  #          https://www.google.com/chrome/terms/
+  #          Unfortunately it appears like there's no enterprise policy for this,
+  #          yet, which would be better
+  mkdir --parents "$BROWSER_HOME"
+  touch "$BROWSER_HOME/EULA Accepted"
+
   # TODO: Haven't added the same "don't check for updates" because ideally the policy AutoUpdateCheckPeriodMinutes
   # should handle that: https://learn.microsoft.com/en-us/deployedge/microsoft-edge-update-policies#autoupdatecheckperiodminutes
 else
   # Remove the browser. Leave the desktop files?
   apt-get remove --assume-yes $PACKAGE
-  rm --force $POLICY $HOMEPAGE_POLICY
+  rm --force --recursive $POLICY $HOMEPAGE_POLICY "$BROWSER_HOME"
 fi
