@@ -42,7 +42,7 @@ filsystem. Navnet på block-device'n afhænger naturligvis af den anvendte hardw
 
 Bemærk:
 
- - Standard administrator passphrase fra installationen skal udskiftes omgående med organisationen egne
+ - Standard administrator passphrase fra installationen skal udskiftes omgående med organisationens egne
    passphraser, standard passphrasen er ikke sikker at bruge.
  - Administrator passphrasen bør være forskellig fra PC til PC, og skal opbevares separat i organisationens
    sikre systemer, så der er mulighed for at genåbne en PC's disk, når/hvis brugeren glemmer sin
@@ -185,7 +185,7 @@ elif [ "$ACTION" = "luksRemoveKey" ]; then
     #       should make sure that 2 slots remain
     if [ "${LUKS_SLOTS}" = "1" ] ; then
         echo "ERROR: will not remove the last LUKS PASSPHRASE slot from device ${LUKS_DEVICE}"
-        echo "NOTICE: in case TMP chip decryption is enabled, the last LUKS PASSPHRASE slot belongs to TPM"
+        echo "NOTICE: in case TPM chip decryption is enabled, the last LUKS PASSPHRASE slot belongs to TPM"
         echo "        and your last LUKS administrator passphrase slot might be lost anyhow"
         exit 1
     fi
