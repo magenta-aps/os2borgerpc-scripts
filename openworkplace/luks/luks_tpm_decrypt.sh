@@ -52,7 +52,7 @@ Bemærk:
    der ikke er en ledig slot.
  - Ønsker man en mere sikker dekrypteringsprocess end TPM alene, skal man bruge en pre-boot LUKS passphrase
    i stedet for, eller TPM sammen med en lokal Tang netværksserver.
- - Efter install og re-boot bliver der vist en LUKS passphrase box; ignorere man denne og venter lidt,
+ - Efter install og re-boot bliver der vist en LUKS passphrase box; ignorerer man denne og venter lidt,
    bliver disken låst op af TPM 2.0 chippen.
  - Opdateringer af firmware til TPM 2.0 chippen kan medføre tab af den automatiske dekryptering.
 
@@ -157,7 +157,7 @@ set_env_luks
 if ! which clevis > /dev/null; then
     apt-get update > /dev/null
     apt-get install --assume-yes clevis clevis-tpm2 clevis-luks tpm2-tools
-    if which dracut > /dev/null ; then
+    if which dracut > /dev/null; then
         apt-get install --assume-yes clevis-dracut
     elif which update-initramfs > /dev/null; then
         apt-get install --assume-yes clevis-initramfs
@@ -204,13 +204,13 @@ if [ "${INSTALL}" = "True" ]; then
     fi
 
     # Update initial ramdisc with these clevis modules and print info
-    if which dracut ; then
+    if which dracut > /dev/null; then
         # build dracut image, notice  --hostonly option does not work on generic images
         if ! dracut --force; then
             echo "ERROR: Clevis update of iniramfs for device ${LUKS_DEVICE} failed"
             exit 1
         fi
-    elif which update-initramfs ; then
+    elif which update-initramfs > /dev/null; then
         # build initramfs image
         if ! update-initramfs -u -k all; then
             echo "ERROR: update-initramfs for device ${LUKS_DEVICE} failed"
@@ -235,7 +235,7 @@ elif [ "$INSTALL" = "False" ]; then
         exit 0
     fi
 
-    if [ "1" = "${LUKS_SLOTS}" ] ; then
+    if [ "1" = "${LUKS_SLOTS}" ]; then
         echo "ERROR: refuse to remove the last LUKS slot on device ${LUKS_DEVICE}"
         exit 1
     fi
