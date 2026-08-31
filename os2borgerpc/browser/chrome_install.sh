@@ -251,6 +251,13 @@ if [ "$INSTALL" = "True" ]; then
 
   setup_policies
 
+  # 2026-08: Prevent popup on first run about a service agreement related to AVC:
+  #          https://www.google.com/chrome/terms/
+  #          Unfortunately it appears like there's no enterprise policy for this,
+  #          yet, which would be better
+  mkdir --parents /home/$SKELETON/.config/google-chrome
+  touch "/home/$SKELETON/.config/google-chrome/EULA Accepted"
+
   # Chrome: Disable its own check for updates
   # It would be more elegant to control this via a policy, but unfortunately that does not seem to be possible currently
   # Add this launch argument to all desktop files in case the customer's
