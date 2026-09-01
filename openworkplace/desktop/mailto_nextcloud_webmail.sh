@@ -21,21 +21,6 @@ handler til at bruge denne Nextcloud Webmail desktop entry.
 Alle applikationer, der respekterer systemes MIME konfigurationer, vil åbne 'mailto:' URI's med den
 valgte Nextcloud Webmail server.
 
-Scriptet virker i en desktop environment som GNOME, KDE, eller XFCE.
-
-Nogle gange er browsere manuel konfigureret anderledes, og det vil kræve lidt tilpasning for at få
-det korrekte 'mailto:' til at virke. Fremgangsmåden ved Firefox og Chrome eller Chromium er følgende:
-
-Firefox:
- - åben 'about:config'
- - sæt 'network.protocol-handler.expose.mailto' -> 'false' (Firefox vil nu bruge system default)
- - klik et 'mailto:' link og vælg 'Nextcloud Webmail' som handler
-
-Chrome/Chromium:
- - åben 'chrome://settings/handlers'
- - sæt 'Allow sites to ask to become default handlers for protocols' -> 'enabled'
- - klik et 'mailto:' link og vælg 'Nextcloud Webmail' som handler
-
 Parametre:
 
   INSTALL = True | False
@@ -48,6 +33,21 @@ Eksempel:
 
 EOF
            )
+
+# The script works in a desktop environment like GNOME, KDE, or XFCE.
+#
+# Sometimes browsers are manually configured differently, and this will require some adjustment to get
+# the correct 'mailto:' to work. The procedure for Firefox and Chrome or Chromium is as follows:
+#
+# Firefox:
+#  - open 'about:config'
+#  - set 'network.protocol-handler.expose.mailto' -> 'false' (Firefox will now use the system default)
+#  - click a 'mailto:' link and select 'Nextcloud Webmail' as the handler
+#
+# Chrome/Chromium:
+#  - open 'chrome://settings/handlers'
+#  - set 'Allow sites to ask to become default handlers for protocols' -> 'enabled'
+#  - click a 'mailto:' link and select 'Nextcloud Webmail' as the handler
 
 APPLICATIONS_DESKTOP_DIR='/usr/share/applications'
 NEXTCLOUD_WEBMAIL_DESKTOP='nextcloud-webmail.desktop'
@@ -71,7 +71,7 @@ SYS_MIMEAPPS_LIST='/etc/xdg/mimeapps.list'
 SYS_MIMEINFO_CACHE='/usr/share/applications/mimeinfo.cache'
 
 add_mimeapps_list_mailto_nextcloud() {
-    mkdir -p "$(dirname "$SYS_MIMEAPPS_LIST")"
+    mkdir --parents "$(dirname "$SYS_MIMEAPPS_LIST")"
 
     # no mimeapps list file exists
     if [ ! -f "$SYS_MIMEAPPS_LIST" ]; then
@@ -79,12 +79,12 @@ add_mimeapps_list_mailto_nextcloud() {
                > "$SYS_MIMEAPPS_LIST"
 
     # mimeapps list file exists and has 'Default applications' section
-    elif grep -q '^\[Default Applications\]' "$SYS_MIMEAPPS_LIST"; then
-        if grep -q '^x-scheme-handler/mailto=' "$SYS_MIMEAPPS_LIST"; then
-            sed -i "s|^x-scheme-handler/mailto=.*|x-scheme-handler/mailto=$NEXTCLOUD_WEBMAIL_DESKTOP|" \
+    elif grep --quiet '^\[Default Applications\]' "$SYS_MIMEAPPS_LIST"; then
+        if grep --quiet '^x-scheme-handler/mailto=' "$SYS_MIMEAPPS_LIST"; then
+            sed --in-place "s|^x-scheme-handler/mailto=.*|x-scheme-handler/mailto=$NEXTCLOUD_WEBMAIL_DESKTOP|" \
                 "$SYS_MIMEAPPS_LIST"
         else
-            sed -i "/^\[Default Applications\]/a x-scheme-handler/mailto=$NEXTCLOUD_WEBMAIL_DESKTOP" \
+            sed --in-place "/^\[Default Applications\]/a x-scheme-handler/mailto=$NEXTCLOUD_WEBMAIL_DESKTOP" \
                 "$SYS_MIMEAPPS_LIST"
         fi
 
@@ -99,25 +99,25 @@ remove_mimeapps_list_mailto_nextcloud() {
     [ -f "$SYS_MIMEAPPS_LIST" ] || return 0
 
     # no mailto entry pointing to nextcloud
-    if ! grep -q "^x-scheme-handler/mailto=${NEXTCLOUD_WEBMAIL_DESKTOP}\$" "$SYS_MIMEAPPS_LIST"; then
+    if ! grep --quiet "^x-scheme-handler/mailto=${NEXTCLOUD_WEBMAIL_DESKTOP}\$" "$SYS_MIMEAPPS_LIST"; then
         return 0
     fi
 
     # delete line with mailto entry pointing to nextcloud
     # this does _not_ re-install the possible mailto handler that did exist before this script was used
     # to add nextcloud web mail
-    sed -i '/^x-scheme-handler\/mailto=/d' "$SYS_MIMEAPPS_LIST"
+    sed --in-place '/^x-scheme-handler\/mailto=/d' "$SYS_MIMEAPPS_LIST"
 
     # drop [Default Applications] header if empty block
-    section_body=$(sed -n '/^\[Default Applications\]/,/^\[/{ /^\[Default Applications\]/d; /^\[/d; p }' \
-                          "$SYS_MIMEAPPS_LIST")
-    if [ -z "$(printf '%s' "$section_body" | tr -d '[:space:]')" ]; then
-        sed -i '/^\[Default Applications\]/d' "$SYS_MIMEAPPS_LIST"
+    section_body=$(sed --quiet '/^\[Default Applications\]/,/^\[/{ /^\[Default Applications\]/d; /^\[/d; p }' \
+                               "$SYS_MIMEAPPS_LIST")
+    if [ -z "$(printf '%s' "$section_body" | tr --delete '[:space:]')" ]; then
+        sed --in-place '/^\[Default Applications\]/d' "$SYS_MIMEAPPS_LIST"
     fi
 
     # drop entire file if empty now
-    if [ -z "$(tr -d '[:space:]' < "$SYS_MIMEAPPS_LIST")" ]; then
-        rm -f "$SYS_MIMEAPPS_LIST"
+    if [ -z "$(tr --delete '[:space:]' < "$SYS_MIMEAPPS_LIST")" ]; then
+        rm --force "$SYS_MIMEAPPS_LIST"
     fi
 }
 
@@ -127,7 +127,7 @@ if [ "$INSTALL" = "True" ]; then
     # Create a desktop entry for Nextcloud Webmail
     echo "${NEXTCLOUD_WEBMAIL_DESKTOP_INI}" > "${NEXTCLOUD_WEBMAIL_DESKTOP_PATH}"
 
-    if ! grep -q "${NEXTCLOUD_WEBMAIL_URI}" "${NEXTCLOUD_WEBMAIL_DESKTOP_PATH}" ;
+    if ! grep --quiet "${NEXTCLOUD_WEBMAIL_URI}" "${NEXTCLOUD_WEBMAIL_DESKTOP_PATH}" ;
     then
         echo "ERROR: expected to find ${NEXTCLOUD_WEBMAIL_URI} in ${NEXTCLOUD_WEBMAIL_DESKTOP_PATH}"
         exit 1
@@ -135,7 +135,7 @@ if [ "$INSTALL" = "True" ]; then
 
     update-desktop-database "${APPLICATIONS_DESKTOP_DIR}"
 
-    if ! grep -q "${NEXTCLOUD_WEBMAIL_DESKTOP}" "${SYS_MIMEINFO_CACHE}"; then
+    if ! grep --quiet "${NEXTCLOUD_WEBMAIL_DESKTOP}" "${SYS_MIMEINFO_CACHE}"; then
         echo "ERROR: expected to find ${NEXTCLOUD_WEBMAIL_DESKTOP} in ${SYS_MIMEINFO_CACHE}"
         exit 1
     fi
@@ -143,7 +143,7 @@ if [ "$INSTALL" = "True" ]; then
     # Set Nextcloud Webmail as the global default mailto handler for all users
     add_mimeapps_list_mailto_nextcloud
 
-    if ! grep -q "${NEXTCLOUD_WEBMAIL_DESKTOP}" "${SYS_MIMEAPPS_LIST}"; then
+    if ! grep --quiet "${NEXTCLOUD_WEBMAIL_DESKTOP}" "${SYS_MIMEAPPS_LIST}"; then
         echo "ERROR: expected to find ${NEXTCLOUD_WEBMAIL_DESKTOP} in ${SYS_MIMEAPPS_LIST}"
         exit 1
     fi
@@ -156,7 +156,7 @@ elif [ "$INSTALL" = "False" ]; then
 
     update-desktop-database "${APPLICATIONS_DESKTOP_DIR}"
 
-    if grep -q "${NEXTCLOUD_WEBMAIL_DESKTOP}" "${SYS_MIMEINFO_CACHE}"; then
+    if grep --quiet "${NEXTCLOUD_WEBMAIL_DESKTOP}" "${SYS_MIMEINFO_CACHE}"; then
         echo "ERROR: expected NOT to find ${NEXTCLOUD_WEBMAIL_DESKTOP} in ${SYS_MIMEINFO_CACHE}"
         exit 1
     fi
@@ -164,7 +164,7 @@ elif [ "$INSTALL" = "False" ]; then
     # Remove Nextcloud Webmail as the global default mailto handler
     remove_mimeapps_list_mailto_nextcloud
 
-    if grep -q "${NEXTCLOUD_WEBMAIL_DESKTOP}" "${SYS_MIMEAPPS_LIST}"; then
+    if grep --quiet "${NEXTCLOUD_WEBMAIL_DESKTOP}" "${SYS_MIMEAPPS_LIST}"; then
         echo "ERROR: expected NOT to find ${NEXTCLOUD_WEBMAIL_DESKTOP} in ${SYS_MIMEAPPS_LIST}"
         exit 1
     fi
