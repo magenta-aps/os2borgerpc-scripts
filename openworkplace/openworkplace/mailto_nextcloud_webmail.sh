@@ -19,18 +19,11 @@ Skriptet sætter en desktop entry for Nextcloud Webmail, og konfigurerer den glo
 handler til at bruge denne Nextcloud Webmail desktop entry.
 
 Alle applikationer, der respekterer systemes MIME konfigurationer, vil åbne 'mailto:' URI's med den
-valgte Nextcloud Webmail domain.
+valgte Nextcloud Webmail domain. Det sker med systemets standard browser, som typisk er Firefox.
 
-Parametre:
+Ønsker man at skifte til en anden standard browser, kan man bruge script'et
 
-  INSTALL = True | False
-  NEXTCLOUD_DOMAIN = <your.nextcloud.domain>
-
-Eksempel:
-
-  mailto_nextcloud_webmail.sh True <your.nextcloud.domain>
-  mailto_nextcloud_webmail.sh False
-
+  Browser - Sæt standard-browser
 EOF
            )
 
@@ -48,6 +41,17 @@ EOF
 #  - open 'chrome://settings/handlers'
 #  - set 'Allow sites to ask to become default handlers for protocols' -> 'enabled'
 #  - click a 'mailto:' link and select 'Nextcloud Webmail' as the handler
+#
+# Parameters:
+#
+#   INSTALL = True | False
+#   NEXTCLOUD_DOMAIN = <your.nextcloud.domain>
+#
+# Examples:
+#
+#   mailto_nextcloud_webmail.sh True <your.nextcloud.domain>
+#   mailto_nextcloud_webmail.sh False
+
 
 APPLICATIONS_DESKTOP_DIR='/usr/share/applications'
 NEXTCLOUD_WEBMAIL_DESKTOP='nextcloud-webmail.desktop'
