@@ -8,7 +8,7 @@
 
 # Script arguments
 INSTALL=$1
-NEXTCLOUD_SERVER=$2
+NEXTCLOUD_DOMAIN=$2
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -19,16 +19,16 @@ Skriptet sætter en desktop entry for Nextcloud Webmail, og konfigurerer den glo
 handler til at bruge denne Nextcloud Webmail desktop entry.
 
 Alle applikationer, der respekterer systemes MIME konfigurationer, vil åbne 'mailto:' URI's med den
-valgte Nextcloud Webmail server.
+valgte Nextcloud Webmail domain.
 
 Parametre:
 
   INSTALL = True | False
-  NEXTCLOUD_SERVER = <your.nextcloud.server>
+  NEXTCLOUD_DOMAIN = <your.nextcloud.domain>
 
 Eksempel:
 
-  mailto_nextcloud_webmail.sh True <your.nextcloud.server>
+  mailto_nextcloud_webmail.sh True <your.nextcloud.domain>
   mailto_nextcloud_webmail.sh False
 
 EOF
@@ -52,7 +52,7 @@ EOF
 APPLICATIONS_DESKTOP_DIR='/usr/share/applications'
 NEXTCLOUD_WEBMAIL_DESKTOP='nextcloud-webmail.desktop'
 NEXTCLOUD_WEBMAIL_DESKTOP_PATH="${APPLICATIONS_DESKTOP_DIR}/${NEXTCLOUD_WEBMAIL_DESKTOP}"
-NEXTCLOUD_WEBMAIL_URI="https://$NEXTCLOUD_SERVER/apps/mail/compose?uri=%u"
+NEXTCLOUD_WEBMAIL_URI="https://$NEXTCLOUD_DOMAIN/apps/mail/compose?uri=%u"
 
 NEXTCLOUD_WEBMAIL_DESKTOP_INI=$(cat <<EOF
 [Desktop Entry]
@@ -123,6 +123,11 @@ remove_mimeapps_list_mailto_nextcloud() {
 
 
 if [ "$INSTALL" = "True" ]; then
+
+    if [ -z  "${NEXTCLOUD_DOMAIN}" ]; then
+        echo "ERROR: NEXTCLOUD_DOMAIN is empty"
+        exit 1
+    fi
 
     # Create a desktop entry for Nextcloud Webmail
     echo "${NEXTCLOUD_WEBMAIL_DESKTOP_INI}" > "${NEXTCLOUD_WEBMAIL_DESKTOP_PATH}"
