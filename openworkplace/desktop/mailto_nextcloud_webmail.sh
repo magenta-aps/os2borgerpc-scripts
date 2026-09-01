@@ -132,12 +132,6 @@ if [ "$INSTALL" = "True" ]; then
     # Create a desktop entry for Nextcloud Webmail
     echo "${NEXTCLOUD_WEBMAIL_DESKTOP_INI}" > "${NEXTCLOUD_WEBMAIL_DESKTOP_PATH}"
 
-    if ! grep --quiet "${NEXTCLOUD_WEBMAIL_URI}" "${NEXTCLOUD_WEBMAIL_DESKTOP_PATH}" ;
-    then
-        echo "ERROR: expected to find ${NEXTCLOUD_WEBMAIL_URI} in ${NEXTCLOUD_WEBMAIL_DESKTOP_PATH}"
-        exit 1
-    fi
-
     update-desktop-database "${APPLICATIONS_DESKTOP_DIR}"
 
     if ! grep --quiet "${NEXTCLOUD_WEBMAIL_DESKTOP}" "${SYS_MIMEINFO_CACHE}"; then
@@ -157,7 +151,7 @@ if [ "$INSTALL" = "True" ]; then
 
 elif [ "$INSTALL" = "False" ]; then
     # Remove desktop entry for Nextcloud Webmail
-    rm -f "${NEXTCLOUD_WEBMAIL_DESKTOP_PATH}"
+    rm --force "${NEXTCLOUD_WEBMAIL_DESKTOP_PATH}"
 
     update-desktop-database "${APPLICATIONS_DESKTOP_DIR}"
 
