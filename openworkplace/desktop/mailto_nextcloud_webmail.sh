@@ -71,54 +71,23 @@ SYS_MIMEAPPS_LIST='/etc/xdg/mimeapps.list'
 SYS_MIMEINFO_CACHE='/usr/share/applications/mimeinfo.cache'
 
 add_mimeapps_list_mailto_nextcloud() {
-    mkdir --parents "$(dirname "$SYS_MIMEAPPS_LIST")"
+    # mimeapps list file exists always in OWP with [Default applications] section
 
-    # no mimeapps list file exists
-    if [ ! -f "$SYS_MIMEAPPS_LIST" ]; then
-        printf '[Default Applications]\nx-scheme-handler/mailto=%s\n' "$NEXTCLOUD_WEBMAIL_DESKTOP" \
-               > "$SYS_MIMEAPPS_LIST"
+    # remove any mailto if exists
+    sed --in-place '/^x-scheme-handler\/mailto=/d' "$SYS_MIMEAPPS_LIST"
 
-    # mimeapps list file exists and has 'Default applications' section
-    elif grep --quiet '^\[Default Applications\]' "$SYS_MIMEAPPS_LIST"; then
-        if grep --quiet '^x-scheme-handler/mailto=' "$SYS_MIMEAPPS_LIST"; then
-            sed --in-place "s|^x-scheme-handler/mailto=.*|x-scheme-handler/mailto=$NEXTCLOUD_WEBMAIL_DESKTOP|" \
-                "$SYS_MIMEAPPS_LIST"
-        else
-            sed --in-place "/^\[Default Applications\]/a x-scheme-handler/mailto=$NEXTCLOUD_WEBMAIL_DESKTOP" \
-                "$SYS_MIMEAPPS_LIST"
-        fi
-
-    # mimeapps list file exists and has no 'Default applications' section
-    else
-        printf '\n[Default Applications]\nx-scheme-handler/mailto=%s\n' "$NEXTCLOUD_WEBMAIL_DESKTOP" \
-               >> "$SYS_MIMEAPPS_LIST"
-    fi
+    # add missing mailto nextcloud handler
+    sed --in-place "/^\[Default Applications\]/a x-scheme-handler/mailto=$NEXTCLOUD_WEBMAIL_DESKTOP" \
+        "$SYS_MIMEAPPS_LIST"
 }
 
 remove_mimeapps_list_mailto_nextcloud() {
-    [ -f "$SYS_MIMEAPPS_LIST" ] || return 0
-
-    # no mailto entry pointing to nextcloud
-    if ! grep --quiet "^x-scheme-handler/mailto=${NEXTCLOUD_WEBMAIL_DESKTOP}\$" "$SYS_MIMEAPPS_LIST"; then
-        return 0
-    fi
+    # mimeapps list file exists always in OWP with [Default applications] section
 
     # delete line with mailto entry pointing to nextcloud
     # this does _not_ re-install the possible mailto handler that did exist before this script was used
     # to add nextcloud web mail
     sed --in-place '/^x-scheme-handler\/mailto=/d' "$SYS_MIMEAPPS_LIST"
-
-    # drop [Default Applications] header if empty block
-    section_body=$(sed --quiet '/^\[Default Applications\]/,/^\[/{ /^\[Default Applications\]/d; /^\[/d; p }' \
-                               "$SYS_MIMEAPPS_LIST")
-    if [ -z "$(printf '%s' "$section_body" | tr --delete '[:space:]')" ]; then
-        sed --in-place '/^\[Default Applications\]/d' "$SYS_MIMEAPPS_LIST"
-    fi
-
-    # drop entire file if empty now
-    if [ -z "$(tr --delete '[:space:]' < "$SYS_MIMEAPPS_LIST")" ]; then
-        rm --force "$SYS_MIMEAPPS_LIST"
-    fi
 }
 
 
