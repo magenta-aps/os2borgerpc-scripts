@@ -245,7 +245,7 @@ if [ "$INSTALL" = "True" ]; then
 
   wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
   echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
-  apt-get update --assume-yes
+  apt-get update --assume-yes -qq
   # If the package manager is in an inconsistent state fix that first
   apt-get install --assume-yes --fix-broken
   apt-get install --assume-yes $PACKAGE

@@ -134,7 +134,7 @@ if [ "$INSTALL" = "True" ]; then
   wget --output-document - https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/microsoft-edge.gpg # Should have root:root 644 permissions
   echo 'deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main' > /etc/apt/sources.list.d/microsoft-edge.list
 
-  apt-get update --assume-yes
+  apt-get update --assume-yes -qq
   # If the package manager is in an inconsistent state fix that first
   apt-get install --assume-yes --fix-broken
   apt-get install --assume-yes $PACKAGE
