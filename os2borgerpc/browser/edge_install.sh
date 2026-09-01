@@ -24,6 +24,8 @@ INSTALL="$1"
 export DEBIAN_FRONTEND=noninteractive
 POLICY="/etc/opt/edge/policies/managed/os2borgerpc-defaults.json"
 HOMEPAGE_POLICY="/etc/opt/edge/policies/managed/os2borgerpc-homepage.json"
+SKELETON=".skjult"
+BROWSER_HOME="/home/$SKELETON/.config/microsoft-edge"
 
 setup_policies() {
   # DEVELOPER NOTES:
@@ -132,17 +134,24 @@ if [ "$INSTALL" = "True" ]; then
   wget --output-document - https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/microsoft-edge.gpg # Should have root:root 644 permissions
   echo 'deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main' > /etc/apt/sources.list.d/microsoft-edge.list
 
-  apt-get update --assume-yes
+  apt-get update --assume-yes -qq
   # If the package manager is in an inconsistent state fix that first
   apt-get install --assume-yes --fix-broken
   apt-get install --assume-yes $PACKAGE
 
   setup_policies
 
+  # 2026-08: Prevent popup on first run about a service agreement related to AVC:
+  #          https://www.google.com/chrome/terms/
+  #          Unfortunately it appears like there's no enterprise policy for this,
+  #          yet, which would be better
+  mkdir --parents "$BROWSER_HOME"
+  touch "$BROWSER_HOME/EULA Accepted"
+
   # TODO: Haven't added the same "don't check for updates" because ideally the policy AutoUpdateCheckPeriodMinutes
   # should handle that: https://learn.microsoft.com/en-us/deployedge/microsoft-edge-update-policies#autoupdatecheckperiodminutes
 else
   # Remove the browser. Leave the desktop files?
   apt-get remove --assume-yes $PACKAGE
-  rm --force $POLICY $HOMEPAGE_POLICY
+  rm --force --recursive $POLICY $HOMEPAGE_POLICY "$BROWSER_HOME"
 fi
