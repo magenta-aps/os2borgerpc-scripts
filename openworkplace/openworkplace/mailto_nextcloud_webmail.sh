@@ -56,14 +56,17 @@ EOF
 APPLICATIONS_DESKTOP_DIR='/usr/share/applications'
 NEXTCLOUD_WEBMAIL_DESKTOP='nextcloud-webmail.desktop'
 NEXTCLOUD_WEBMAIL_DESKTOP_PATH="${APPLICATIONS_DESKTOP_DIR}/${NEXTCLOUD_WEBMAIL_DESKTOP}"
-NEXTCLOUD_WEBMAIL_URI="https://$NEXTCLOUD_DOMAIN/apps/mail/compose?uri=%u"
+NEXTCLOUD_WEBMAIL_URI="https://$NEXTCLOUD_DOMAIN/apps/mail/compose?uri=\$1"
 
+# Notice indirection via 'sh -c', which is needed to expand parameter in URL
+# test with CLI command 'xdg-open "mailto:some@user.dk"'
+# desktop Exec creates 'https://$NEXTCLOUD_DOMAIN/apps/mail/compose?uri=mailto:some@user.dk'
 NEXTCLOUD_WEBMAIL_DESKTOP_INI=$(cat <<EOF
 [Desktop Entry]
 Name=Nextcloud Webmail
 Categories=Network;Email;
 GenericName=Mail Client
-Exec=xdg-open "${NEXTCLOUD_WEBMAIL_URI}"
+Exec=sh -c 'xdg-open "${NEXTCLOUD_WEBMAIL_URI}"' _ %u
 Terminal=false
 Type=Application
 MimeType=x-scheme-handler/mailto;
