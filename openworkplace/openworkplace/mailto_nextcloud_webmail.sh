@@ -15,11 +15,11 @@ export DEBIAN_FRONTEND=noninteractive
 DESCRIPTION=$(cat <<EOF
 Konfigurer global 'mailto:' handler for Nextcloud Webmail
 
-Skriptet sætter en desktop entry for Nextcloud Webmail, og konfigurerer den globale 'mailto:'
+Scriptet sætter en desktop entry for Nextcloud Webmail, og konfigurerer den globale 'mailto:'
 handler til at bruge denne Nextcloud Webmail desktop entry.
 
 Alle applikationer, der respekterer systemes MIME konfigurationer, vil åbne 'mailto:' URI's med den
-valgte Nextcloud Webmail domain. Det sker med systemets standard browser, som typisk er Firefox.
+valgte Nextcloud Webmail domain. Det sker med systemets standard-browser, der som udgangspunkt er Firefox.
 
 Ønsker man at skifte til en anden standard browser, kan man bruge script'et
 
@@ -101,7 +101,7 @@ remove_mimeapps_list_mailto_nextcloud() {
 if [ "$INSTALL" = "True" ]; then
 
     if [ -z  "${NEXTCLOUD_DOMAIN}" ]; then
-        echo "ERROR: NEXTCLOUD_DOMAIN is empty"
+        echo "ERROR: No NextCloud domain specified"
         exit 1
     fi
 
