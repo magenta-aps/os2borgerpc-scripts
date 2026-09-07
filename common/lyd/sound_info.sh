@@ -97,11 +97,15 @@ else # Legacy support: pulseaudio without pipewire
 
     header "INFO ON BORGERPC AUDIO CONFIG AND PULSEAUDIO CONFIG FILES"
 
-    text "Print contents of current borgerpc pulseaudio config file"
-    cat /etc/pulse/default.pa.d/os2borgerpc.pa
+    if [ -f /etc/pulse/default.pa.d/os2borgerpc.pa ]; then
+        text "Print contents of current borgerpc pulseaudio config file"
+        cat /etc/pulse/default.pa.d/os2borgerpc.pa
+    fi
 
-    text "Print contents of the previous borgerpc pulseaudio config file"
-    cat /etc/pulse/profile.pa.d/os2borgerpc.pa
+    if [ -f /etc/pulse/profile.pa.d/os2borgerpc.pa ]; then
+        text "Print contents of the previous borgerpc pulseaudio config file"
+        cat /etc/pulse/profile.pa.d/os2borgerpc.pa
+    fi
 
     text "Print the last lines of the main pulseaudio config file"
     # This file should include a line that makes it load all files from the dir /etc/pulse/profile.pa.d/
