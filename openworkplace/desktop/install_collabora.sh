@@ -15,9 +15,9 @@ export DEBIAN_FRONTEND=noninteractive
 
 
 # Resync the local package index from its remote counterpart
-apt-get update
+apt-get -qq update
 # Attempt to fix broken or interrupted installations
-apt-get --assume-yes --fix-broken install
+apt-get -qq --assume-yes --fix-broken install
 
 if [ "$INSTALL" = "True" ]; then
 
@@ -32,15 +32,13 @@ Suites: ./
 Signed-By: /usr/share/keyrings/collaboraonline-snapshot-keyring.gpg
 EOF
 
-    apt-get update
+    apt-get -qq update
 
-    apt-get --assume-yes install collaboraoffice-desktop
+    apt-get -qq --assume-yes install collaboraoffice-desktop
 else
-    apt-get --assume-yes remove collaboraoffice-desktop
+    apt-get -qq --assume-yes remove collaboraoffice-desktop
     # Remove packages only installed as dependencies, which are no longer dependencies
-    apt-get --assume-yes autoremove
+    apt-get -qq --assume-yes autoremove
     rm /etc/apt/sources.list.d/collaboraoffice.sources
-    apt-get update
+    apt-get -qq update
 fi
-
-

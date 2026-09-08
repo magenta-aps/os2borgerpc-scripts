@@ -20,7 +20,7 @@ LANG=$(grep "LANG=" $LOCALE_FILE | cut --delimiter "=" --fields 2 | cut --delimi
 # Stop Debconf from doing anything
 export DEBIAN_FRONTEND=noninteractive
 
-apt-get update > /dev/null
+apt-get -qq update
 
 # shellcheck disable=SC2046 # We want word-splitting here
-apt-get install --assume-yes $(check-language-support -l "$LANG")
+apt-get -qq --assume-yes install $(check-language-support -l "$LANG")

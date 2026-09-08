@@ -34,7 +34,7 @@ if [ "$INSTALL" = "True" ] ; then
 
   echo "Installing dependencies:"
   # shellcheck disable=SC2086  # We want word-splitting
-  apt-get install --assume-yes $DEPENDENCIES
+  apt-get -qq --assume-yes install $DEPENDENCIES
   # Idempotency/Cleanup: Delete the install dir first in case there are old versions of their CUPS driver lying around
   rm --recursive --force $INSTALL_DIR
   mkdir --parents $INSTALL_DIR

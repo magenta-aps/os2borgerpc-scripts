@@ -17,10 +17,10 @@ AD_ADMIN_PASSWORD="$4"
 
 export DEBIAN_FRONTEND=noninteractive
 
-apt-get update --quiet
+apt-get -qq update
 
 # Install necessary packages
-if ! apt-get install --assume-yes realmd sssd sssd-tools adcli; then
+if ! apt-get -qq --assume-yes install realmd sssd sssd-tools adcli; then
   echo "Failed to install necessary packages. Exiting."
   exit 1
 fi

@@ -48,34 +48,34 @@ hwclock --hctosys
 export DEBIAN_FRONTEND=noninteractive
 
 # Resync the local package index from its remote counterpart
-apt-get --assume-yes update
+apt-get -qq --assume-yes update
 
 # Attempt to fix errors in the package management system
 # shellcheck disable=SC2034
 for i in 1 2 3 4; do
   dpkg --configure -a || true
-  apt-get --assume-yes --fix-broken install || true
+  apt-get -qq --assume-yes --fix-broken install || true
 done
-dpkg --configure -a || apt-get --assume-yes --fix-broken install
-apt-get --assume-yes --fix-broken install || dpkg --configure -a
+dpkg --configure -a || apt-get -qq --assume-yes --fix-broken install
+apt-get -qq --assume-yes --fix-broken install || dpkg --configure -a
 
 # Remove unnecessary packages
-apt-get remove --assume-yes python3-dev 
+apt-get -qq --assume-yes remove python3-dev
 
 # Run available updates in preparation for the release-upgrade
-apt-get --assume-yes upgrade
+apt-get -qq --assume-yes upgrade
 
-apt-get --assume-yes dist-upgrade
+apt-get -qq --assume-yes dist-upgrade
 
 # Prepare to use pipx
 echo 'PIPX_BIN_DIR="/usr/local/bin"' >> /etc/environment
 echo 'PIPX_HOME="/root/.local/share/pipx"' >> /etc/environment
 
 # Remove packages only installed as dependencies, which are no longer dependencies
-apt-get --assume-yes autoremove
+apt-get -qq --assume-yes autoremove
 
 # Remove local repository of retrieved package files
-apt-get --assume-yes clean
+apt-get -qq --assume-yes clean
 
 # Update config for last full update
 # The output from "date --iso-8601='minutes'" has the format 2024-12-03T15:45+01:00

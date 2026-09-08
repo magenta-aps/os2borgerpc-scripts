@@ -72,8 +72,8 @@ else
 fi
 
 if [ "$ACTIVATE" = "True" ]; then
-  apt-get update --assume-yes
-  if ! apt-get install --assume-yes libpam-python; then
+  apt-get -qq update
+  if ! apt-get -qq --assume-yes install libpam-python; then
     echo "Error installing dependencies."
     exit 1
   fi

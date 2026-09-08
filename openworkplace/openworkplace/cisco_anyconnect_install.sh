@@ -23,10 +23,10 @@ if [ "$INSTALL" = "True" ]; then
   wget --output-document=$DEB_FILE --quiet $DEB_DOWNLOAD_URL
 
   # Install the program from the .deb file
-  apt-get update --quiet
-  apt-get install --assume-yes $DEB_FILE
+  apt-get -qq update
+  apt-get -qq --assume-yes install $DEB_FILE
   # Cleanup
   rm --force $DEB_FILE
 else
-  apt-get remove --assume-yes "cisco-secure-client-vpn"
+  apt-get -qq --assume-yes remove "cisco-secure-client-vpn"
 fi

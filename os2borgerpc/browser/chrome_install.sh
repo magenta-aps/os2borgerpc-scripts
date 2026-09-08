@@ -245,10 +245,10 @@ if [ "$INSTALL" = "True" ]; then
 
   wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
   echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
-  apt-get update --assume-yes -qq
+  apt-get -qq update
   # If the package manager is in an inconsistent state fix that first
-  apt-get install --assume-yes --fix-broken
-  apt-get install --assume-yes $PACKAGE
+  apt-get -qq --assume-yes install --fix-broken
+  apt-get -qq --assume-yes install $PACKAGE
 
   setup_policies
 
@@ -269,6 +269,6 @@ if [ "$INSTALL" = "True" ]; then
   dconf update # Extra insurance that the change takes effect
 else
   # Not removing the policies because Chromium may use them, and rerunning Chrome - Install overwrites them anyway.
-  apt-get remove --assume-yes $PACKAGE
+  apt-get -qq --assume-yes remove $PACKAGE
   rm --force --recursive "$BROWSER_HOME"
 fi

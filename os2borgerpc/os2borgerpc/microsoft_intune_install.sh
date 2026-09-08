@@ -32,10 +32,10 @@ if [ "$ACTIVATE" = "True" ]; then
         exit 1
     fi
     rm microsoft.gpg
-    apt-get update
-    apt-get install --assume-yes $PKG
+    apt-get -qq update
+    apt-get -qq --assume-yes install $PKG
 else
     # Not currently deleting the added source repo
-    apt-get remove --assume-yes $PKG
+    apt-get -qq --assume-yes remove $PKG
     rm /usr/share/keyrings/microsoft.gpg
 fi

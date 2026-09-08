@@ -22,8 +22,8 @@ dpkg -l at > /dev/null 2>&1
 HAS_AT=$?
 
 if [[ $HAS_AT == 1 ]]; then
-    apt-get update
-    apt-get install --assume-yes at
+    apt-get -qq update
+    apt-get -qq --assume-yes install at
 fi
 
 

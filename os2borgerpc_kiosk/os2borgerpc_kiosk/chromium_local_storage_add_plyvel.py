@@ -38,10 +38,17 @@ DB_PATH = DB_PATH_DIR + DB_NAME
 PLYVEL_APT_PKG_NAME = "python3-plyvel"
 PSUTIL_APT_PKG_NAME = "python3-psutil"
 
-print(check_output(["apt-get", "update"]))
+print(check_output(["apt-get", "-qq", "update"]))
 print(
     check_output(
-        ["apt-get", "install", "--assume-yes", PLYVEL_APT_PKG_NAME, PSUTIL_APT_PKG_NAME]
+        [
+            "apt-get",
+            "-qq",
+            "--assume-yes",
+            "install",
+            PLYVEL_APT_PKG_NAME,
+            PSUTIL_APT_PKG_NAME,
+        ]
     )
 )
 

@@ -23,7 +23,7 @@ PRINCH_VERSION_INSTALLED="$(dpkg --status princh-cloud-printer | grep Version | 
 [ -z "$PRINCH_VERSION_AVAILABLE" ] && printf "%s\n" "Failed to obtain the current Princh version from Princh's servers" && exit 1
 
 # Remove the older versions of Princh, ignore if not existing
-apt-get remove --assume-yes princh || true
+apt-get -qq --assume-yes remove princh || true
 # Remove their old PPA
 add-apt-repository --remove --yes ppa:princh/stable || true
 

@@ -128,7 +128,7 @@ if grep --quiet "zenity" "$PROGRAM_PATH"; then
   rm --force $SHORTCUT_LOCAL_PATH
   # Make sure terminal is correctly installed
   if [ ! -f "$PROGRAM_PATH" ] || [ ! -f "$PROGRAM_PATH.real" ]; then
-    apt-get install --reinstall --assume-yes gnome-terminal
+    apt-get -qq --assume-yes install --reinstall gnome-terminal
   fi
   # Deny access
   dpkg-statoverride --update --add root superuser 750 "$PROGRAM_PATH" || true
@@ -185,13 +185,13 @@ fi
 # This should prevent future popups regarding updates
 sed --in-place "s/Prompt=.*/Prompt=never/" $release_upgrades_file || true
 
-apt-get --assume-yes --fix-broken install || true
-apt-get --assume-yes install --upgrade python3-pip || true
+apt-get -qq --assume-yes --fix-broken install || true
+apt-get -qq --assume-yes install --upgrade python3-pip || true
 
 # Make sure that jobmanager can still find the client
 
 # Install the client via pipx
-apt-get --assume-yes install pipx || true
+apt-get -qq --assume-yes install pipx || true
 PIPX_ERRORS="False"
 PIPX_BIN_DIR="/usr/local/bin" PIPX_HOME="/root/.local/share/pipx" pipx install --force os2borgerpc-client || PIPX_ERRORS="True"
 
@@ -220,11 +220,11 @@ fi
 # Some packages might not be upgraded during the release upgrade
 # so we attempt to do so here
 export DEBIAN_FRONTEND=noninteractive
-apt-get --assume-yes update || true
-apt-get --assume-yes upgrade || true
-apt-get --assume-yes dist-upgrade || true
-apt-get --assume-yes autoremove || true
-apt-get --assume-yes clean || true
+apt-get -qq --assume-yes update || true
+apt-get -qq --assume-yes upgrade || true
+apt-get -qq --assume-yes dist-upgrade || true
+apt-get -qq --assume-yes autoremove || true
+apt-get -qq --assume-yes clean || true
 
 # Restart usb-monitor if it was stopped
 if [ -f "$LOCKDOWN_USB_FILE" ]; then

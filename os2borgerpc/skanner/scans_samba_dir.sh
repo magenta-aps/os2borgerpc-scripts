@@ -39,7 +39,7 @@ OUR_USER="user"
 SAMBA_USER="samba"
 
 if [ "$ACTIVATE" != "True" ]; then
-  apt-get purge --assume-yes samba samba-common-bin
+  apt-get -qq --assume-yes purge samba samba-common-bin
   rm --force --recursive "$SCAN_DIRECTORY_SOURCE" "$SCAN_DIRECTORY_DESTINATION" 2> /dev/null
   userdel $SAMBA_USER
   groupdel $SAMBA_USER
@@ -68,9 +68,9 @@ if [ "$ALLOW_NETBIOS" = "False" ]; then
    smb ports = 445"
 fi
 
-apt-get update --assume-yes
+apt-get -qq update
 # Note: This installation also creates a group named "sambashare". Not currently using that for anything
-apt-get install samba samba-common-bin --assume-yes
+apt-get -qq -assume-yes install samba samba-common-bin
 
 # Don't create home dir, add the user fully noninteractively, and don't allow login to the user
 groupadd --system $SAMBA_USER

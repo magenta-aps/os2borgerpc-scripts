@@ -23,5 +23,5 @@ update-locale LANG=da_DK.UTF-8
 
 
 # Update the time accordingly
-DEBIAN_FRONTEND=noninteractive apt-get install -y ntpdate
+DEBIAN_FRONTEND=noninteractive apt-get -qq --assume-yes install ntpdate
 ntpdate pool.ntp.org

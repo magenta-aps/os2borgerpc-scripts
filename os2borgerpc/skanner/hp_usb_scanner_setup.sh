@@ -9,8 +9,8 @@
 export DEBIAN_FRONTEND=noninteractive
 
 # Install the dependencies to run the interactive script noninteractively
-apt-get update --assume-yes
-apt-get install --assume-yes --fix-broken expect
+apt-get -qq update
+apt-get -qq --assume-yes install --fix-broken expect
 
 SCRIPT_PATH=/tmp/hp-plugin-setup.sh
 

@@ -9,5 +9,5 @@
 # Updates Sane scanner drivers. http://sane-project.org/
 
 add-apt-repository --yes ppa:sane-project/sane-release
-apt-get update
-apt install --assume-yes libsane
+apt-get -qq update
+apt-get -qq --assume-yes install libsane

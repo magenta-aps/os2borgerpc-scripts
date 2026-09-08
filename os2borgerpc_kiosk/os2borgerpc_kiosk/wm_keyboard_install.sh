@@ -55,8 +55,8 @@ if [ "$ACTIVATE" = "True" ]; then
   # ran a previous version of that, so keeping it here too
   # dbus-x11 is needed to set a setting required to make the onboard keyboard
   # work on 24.04, and is not installed by default on 24.04
-  apt-get update
-  apt-get install -y language-pack-da bspwm onboard lemonbar- dmenu- dbus-x11
+  apt-get -qq update
+  apt-get -qq --assume-yes install language-pack-da bspwm onboard lemonbar- dmenu- dbus-x11
 
   # We experienced a bug when running the script on 24.04, where the keyboard would appear
   # but crash when trying to interact with it. We have at the moment not found any other solution,
@@ -387,8 +387,8 @@ else # Go back to not using a wm or the onscreen keyboard
   # Don't stop execution if that is the case
   runuser -u $USER dbus-launch gsettings set org.onboard.keyboard long-press-delay 0.5 || true
 
-  apt-get remove --assume-yes bspwm onboard
-  apt-get autoremove --assume-yes
+  apt-get -qq --assume-yes remove bspwm onboard
+  apt-get -qq --assume-yes autoremove
 
   # Restore the original Compact layout in case it hasn't been deleted - ignore
   # errors if fx. the dir no longer exists.

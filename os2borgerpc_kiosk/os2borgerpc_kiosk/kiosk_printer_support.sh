@@ -9,5 +9,5 @@
 # Stop Debconf from interrupting when interacting with the package system
 export DEBIAN_FRONTEND=noninteractive
 
-apt-get update
-apt-get --assume-yes install cups
+apt-get -qq update
+apt-get -qq --assume-yes install cups

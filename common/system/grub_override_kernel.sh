@@ -47,9 +47,9 @@ else
   # If the kernel version isn't already installed: Attempt to install it
   if ! dpkg -l | grep ^ii | grep --quiet "$REQUESTED_KERNEL_VERSION"; then
     # Install the kernel version
-    apt-get update
+    apt-get -qq update
     # shellcheck disable=SC2086  # We want word-splitting
-    if ! apt-get install --assume-yes $PKGS; then
+    if ! apt-get -qq --assume-yes install $PKGS; then
       echo "Failed to install the specified kernel. Exiting."
       exit 1
     fi
