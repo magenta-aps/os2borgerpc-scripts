@@ -31,9 +31,6 @@ if ! grep --quiet "Dpkg::Lock" /etc/apt/apt.conf.d/local; then
 	Dpkg::Lock {Timeout "300";};
 EOF
 fi
-# TODO: Add these above, and maybe the conditional? - figure out the right syntax first of course
-# Dpkg::Progress-Fancy="0"
-# Dpkg::Use-Pty="0"
 
 # Stop Debconf from doing anything
 export DEBIAN_FRONTEND=noninteractive

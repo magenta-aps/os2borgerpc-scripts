@@ -15,7 +15,7 @@ APPNAMES="$2"
 export DEBIAN_FRONTEND=noninteractive
 
 # Resync the local package index from its remote counterpart
-apt-get -qq --assume-yes update
+apt-get -qq update
 # Attempt to fix broken or interrupted installations
 apt-get -qq --assume-yes --fix-broken install
 

@@ -46,7 +46,7 @@ fi
 # Make sure the terminal is correctly installed
 if [ ! -f "$PROGRAM_PATH" ] || [ ! -f "$PROGRAM_PATH.real" ]; then
   apt-get -qq update
-  apt-get -qq --assume-yes install--reinstall gnome-terminal
+  apt-get -qq --assume-yes install --reinstall gnome-terminal
 fi
 
 # Turns out this is unnecessary to hide the program from user's program list
