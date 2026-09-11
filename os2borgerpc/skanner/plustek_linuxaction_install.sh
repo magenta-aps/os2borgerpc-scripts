@@ -14,4 +14,4 @@ apt-get -qq update
 
 dpkg -i "$FILE"
 
-apt-get -qq --assume-yes --fix-broken install
+apt-get -qq --yes install --fix-broken

@@ -34,7 +34,7 @@ sed --in-place "\@$PERIODIC_REFRESH_SCRIPT@d" $XINITRC
 if [ "$ACTIVATE" = "True" ]; then
 
   apt-get -qq update
-  apt-get -qq --assume-yes install xdotool
+  apt-get -qq --yes install xdotool
 
   REFRESH_PERIOD_IN_SECS=$((REFRESH_PERIOD_IN_MINS * 60))
 

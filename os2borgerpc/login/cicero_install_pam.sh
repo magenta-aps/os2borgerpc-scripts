@@ -64,7 +64,7 @@ fi
 
 if [ "$ACTIVATE" = "True" ]; then
   apt-get -qq update
-  if ! apt-get -qq --assume-yes install libpam-python; then
+  if ! apt-get -qq --yes install libpam-python; then
     echo "Error installing dependencies."
     exit 1
   fi
@@ -305,5 +305,5 @@ else # Cleanup and remove the Cicero integration
 
   # Possibly remove libpam-python as we don't need it anymore
   # - at least this functionality no longer does
-  # apt-get -qq --assume-yes remove libpam-python
+  # apt-get -qq --yes remove libpam-python
 fi

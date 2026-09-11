@@ -29,7 +29,7 @@ sed -in-place '/pactl/d' $FILE
 
 if [ "$ACTIVATE" = "True" ]; then
     apt-get -qq update
-    apt-get -qq --assume-yes install pulseaudio
+    apt-get -qq --yes install pulseaudio
 else
-  apt-get -qq --assume-yes remove pulseaudio
+  apt-get -qq --yes remove pulseaudio
 fi

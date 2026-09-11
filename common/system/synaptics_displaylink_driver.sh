@@ -66,9 +66,9 @@ if [ "$INSTALL" = "True" ]; then
     wget --no-verbose "$DEB_KEYRING_URL" -O "$TMP_DEB_KEYRING"
     chmod 664 "$TMP_DEB_KEYRING"
 
-    apt-get -qq --assume-yes install --fix-broken "$TMP_DEB_KEYRING"
+    apt-get -qq --yes install --fix-broken "$TMP_DEB_KEYRING"
     apt-get -qq update
-    apt-get -qq --assume-yes install --fix-broken $DEB_PACKAGE_DRIVER
+    apt-get -qq --yes install --fix-broken $DEB_PACKAGE_DRIVER
     apt-cache policy $DEB_PACKAGE_KEYRING $DEB_PACKAGE_DRIVER
 
     rm --recursive --force "$TMP_DIR"
@@ -76,7 +76,7 @@ if [ "$INSTALL" = "True" ]; then
 elif [ "$INSTALL" = "False" ]; then
     echo "Removing Synaptics Displaylink debian package '$DEB_PACKAGE_DRIVER'"
 
-    apt-get -qq --assume-yes remove $DEB_PACKAGE_KEYRING $DEB_PACKAGE_DRIVER
+    apt-get -qq --yes remove $DEB_PACKAGE_KEYRING $DEB_PACKAGE_DRIVER
     apt-cache policy $DEB_PACKAGE_KEYRING $DEB_PACKAGE_DRIVER
 
 else

@@ -247,8 +247,8 @@ if [ "$INSTALL" = "True" ]; then
   echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
   apt-get -qq update
   # If the package manager is in an inconsistent state fix that first
-  apt-get -qq --assume-yes install --fix-broken
-  apt-get -qq --assume-yes install $PACKAGE
+  apt-get -qq --yes install --fix-broken
+  apt-get -qq --yes install $PACKAGE
 
   setup_policies
 
@@ -269,6 +269,6 @@ if [ "$INSTALL" = "True" ]; then
   dconf update # Extra insurance that the change takes effect
 else
   # Not removing the policies because Chromium may use them, and rerunning Chrome - Install overwrites them anyway.
-  apt-get -qq --assume-yes remove $PACKAGE
+  apt-get -qq --yes remove $PACKAGE
   rm --force --recursive "$BROWSER_HOME"
 fi

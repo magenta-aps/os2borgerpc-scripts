@@ -35,7 +35,7 @@ mkdir --parents "$(dirname "$SCRIPT_PATH")"
 if [ "$ACTIVATE" = "True" ]; then
 
   export DEBIAN_FRONTEND=noninteractive
-  apt-get -qq --assume-yes install xdotool
+  apt-get -qq --yes install xdotool
 
 cat << EOF > $SCRIPT_PATH
   #! /usr/bin/env sh

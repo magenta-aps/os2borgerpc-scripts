@@ -40,13 +40,13 @@ apt-get -qq update # Resync the local package index from its remote counterpart
 # Configure any packages which have been unpacked but not configured, as otherwise --fix-broken might fail
 # However, package configuration can also fail due to dependency issues that would be fixed by --fix-broken
 # so if the command fails, try to run --fix-broken
-dpkg --configure -a || apt-get -qq --assume-yes --fix-broken install
+dpkg --configure -a || apt-get -qq --yes install --fix-broken
 # Attempt to fix broken or interrupted installations
 # If this fails, try to configure any packages which have been unpacked but not configured
-apt-get -qq --assume-yes --fix-broken install || dpkg --configure -a
-apt-get -qq --assume-yes dist-upgrade # Upgrade all packages, and if needed remove packages preventing an upgrade
-apt-get -qq --assume-yes autoremove # Remove packages only installed as dependencies which are no longer dependencies
-apt-get -qq --assume-yes clean # Remove local repository of retrieved package files
+apt-get -qq --yes install --fix-broken || dpkg --configure -a
+apt-get -qq --yes dist-upgrade # Upgrade all packages, and if needed remove packages preventing an upgrade
+apt-get -qq --yes autoremove # Remove packages only installed as dependencies which are no longer dependencies
+apt-get -qq --yes clean # Remove local repository of retrieved package files
 
 # Update config for last full update
 # The output from "date --iso-8601='minutes'" has the format 2024-12-03T15:45+01:00

@@ -34,7 +34,7 @@ if [ "$FORCE_DUPLICATE_SCREENS" = "True" ]; then
   fi
 
   apt-get -qq update
-  apt-get -qq --assume-yes install $PKG_NAME
+  apt-get -qq --yes install $PKG_NAME
 
   cat << EOF > $AUTOSTART_DESKTOP_FILE
 [Desktop Entry]

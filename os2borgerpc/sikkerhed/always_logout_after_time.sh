@@ -45,7 +45,7 @@ fi
 # Install "at" if it isn't already
 if ! dpkg -l at > /dev/null 2>&1; then
     apt-get -qq update
-    apt-get -qq --assume-yes install at
+    apt-get -qq --yes install at
 fi
 
 cat <<- EOF > $AUTO_LOGOUT_SCHEDULE_SCRIPT

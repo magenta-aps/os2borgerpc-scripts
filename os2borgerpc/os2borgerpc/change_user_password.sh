@@ -27,7 +27,7 @@ if [ "$1" = "$2" ]; then
     # whois package contains mkpasswd
     if ! dpkg -l | grep --quiet whois; then
         apt-get -qq update
-        apt-get -qq --assume-yes install whois
+        apt-get -qq --yes install whois
     fi
 
     # change password

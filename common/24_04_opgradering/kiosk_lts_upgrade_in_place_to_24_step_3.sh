@@ -44,7 +44,7 @@ fi
 # Ensure that dbus-x11 is installed if they are using onboard keyboard
 ONBOARD_FILE="/usr/share/onboard/layouts/Compact_orig.onboard"
 if [ -f "$ONBOARD_FILE" ]; then
-  apt-get -qq --assume-yes install dbus-x11
+  apt-get -qq --yes install dbus-x11
 fi
 
 # Handle possible error state where the upgrade succeeded, but this script failed afterwards
@@ -89,15 +89,15 @@ if lsb_release -d | grep --quiet 22; then
   do-release-upgrade -f DistUpgradeViewNonInteractive >> /var/log/os2borgerpc_upgrade_2.log || true
 fi
 
-apt-get -qq --assume-yes --fix-broken install || true
-apt-get -qq --assume-yes install --upgrade python3-pip || true
-apt-get -qq --assume-yes autoremove || true
-apt-get -qq --assume-yes clean || true
+apt-get -qq --yes install --fix-broken || true
+apt-get -qq --yes install --upgrade python3-pip || true
+apt-get -qq --yes autoremove || true
+apt-get -qq --yes clean || true
 
 # Make sure that jobmanager can still find the client
 
 # Install the client via pipx
-apt-get -qq --assume-yes install pipx || true
+apt-get -qq --yes install pipx || true
 PIPX_ERRORS="False"
 PIPX_BIN_DIR="/usr/local/bin" PIPX_HOME="/root/.local/share/pipx" pipx install --force os2borgerpc-client || PIPX_ERRORS="True"
 

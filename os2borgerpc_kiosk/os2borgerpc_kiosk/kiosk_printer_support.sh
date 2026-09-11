@@ -10,4 +10,4 @@
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get -qq update
-apt-get -qq --assume-yes install cups
+apt-get -qq --yes install cups

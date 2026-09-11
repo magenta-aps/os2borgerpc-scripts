@@ -17,7 +17,7 @@ export DEBIAN_FRONTEND=noninteractive
 # Resync the local package index from its remote counterpart
 apt-get -qq update
 # Attempt to fix broken or interrupted installations
-apt-get -qq --assume-yes --fix-broken install
+apt-get -qq --yes install --fix-broken
 
 # On 24.04, Pinta can only be installed as a snap
 if lsb_release -d | grep --quiet 24 && echo "$APPNAMES" | grep --quiet pinta; then
@@ -33,13 +33,13 @@ fi
 # Install or remove the chosen package
 if [ "$INSTALL" = "True" ]; then
   # shellcheck disable=SC2086  # We want word-splitting to handle multiple apps
-  apt-get -qq --assume-yes install $APPNAMES
+  apt-get -qq --yes install $APPNAMES
   if [ "$PINTA_SNAP" = "True" ]; then
     snap install pinta
   fi
 else
   # shellcheck disable=SC2086  # We want word-splitting to handle multiple apps
-  apt-get -qq --assume-yes remove $APPNAMES
+  apt-get -qq --yes remove $APPNAMES
   if [ "$PINTA_SNAP" = "True" ]; then
     snap remove pinta
   fi
@@ -49,4 +49,4 @@ else
 fi
 
 # Remove packages only installed as dependencies, which are no longer dependencies
-apt-get -qq --assume-yes autoremove
+apt-get -qq --yes autoremove

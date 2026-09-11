@@ -82,7 +82,7 @@ if [ "$ACTIVATE" = "True" ]; then
   # Install some dependencies
 
   # Could also use cut or something so jq isn't needed
-  apt-get -qq --assume-yes install xdotool jq fonts-noto-color-emoji
+  apt-get -qq --yes install xdotool jq fonts-noto-color-emoji
 
   # Requirements: python gi
 
@@ -271,7 +271,7 @@ if [ "$ACTIVATE" = "True" ]; then
     echo "sleep 5 && $SCRIPTS_BASE_PATH/$FULLSCREEN_TOGGLE_SCRIPT &" >> "$BSPWM_CONFIG"
   fi
 else # CLEANUP
-  # apt-get -qq --assume-yes purge xdotool jq
+  # apt-get -qq --yes purge xdotool jq
   sed --in-place --expression "\,$BSPWM_ADD_BUTTON_SCRIPT,d" \
    --expression "/$FULLSCREEN_TOGGLE_SCRIPT/d" "$BSPWM_CONFIG"
 fi

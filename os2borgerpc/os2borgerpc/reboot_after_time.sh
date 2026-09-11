@@ -23,7 +23,7 @@ HAS_AT=$?
 
 if [[ $HAS_AT == 1 ]]; then
     apt-get -qq update
-    apt-get -qq --assume-yes install at
+    apt-get -qq --yes install at
 fi
 
 

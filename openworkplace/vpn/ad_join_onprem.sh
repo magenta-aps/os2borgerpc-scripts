@@ -20,7 +20,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get -qq update
 
 # Install necessary packages
-if ! apt-get -qq --assume-yes install realmd sssd sssd-tools adcli; then
+if ! apt-get -qq --yes install realmd sssd sssd-tools adcli; then
   echo "Failed to install necessary packages. Exiting."
   exit 1
 fi

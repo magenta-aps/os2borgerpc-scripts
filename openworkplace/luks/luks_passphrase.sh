@@ -89,7 +89,7 @@ EOF
 # Need jq for json LUKS dump parsing
 if ! jq --version > /dev/null; then
     apt-get -qq update
-    apt-get -qq --assume-yes install jq
+    apt-get -qq --yes install jq
 fi
 
 set_env_luks_slots() {

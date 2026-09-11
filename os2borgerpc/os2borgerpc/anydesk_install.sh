@@ -19,9 +19,9 @@ if [ "$INSTALL" = "True" ]; then
     echo "deb http://deb.anydesk.com/ all main" > $ANYDESK_APT_SOURCE
 
     apt-get -qq update
-    apt-get -qq --assume-yes install anydesk
+    apt-get -qq --yes install anydesk
 else
     # Note: Not currently removing the signing key
-    apt-get -qq --assume-yes remove anydesk
+    apt-get -qq --yes remove anydesk
     rm $ANYDESK_APT_SOURCE
 fi

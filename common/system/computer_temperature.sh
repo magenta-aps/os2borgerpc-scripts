@@ -12,7 +12,7 @@ HAS_ACPI=$?
 
 if [[ $HAS_ACPI == 1 ]]; then
     apt-get -qq update
-    apt-get -qq --assume-yes install acpi
+    apt-get -qq --yes install acpi
 fi
 
 # Aflæs temperaturen

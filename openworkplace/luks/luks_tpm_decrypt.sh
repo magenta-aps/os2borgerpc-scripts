@@ -156,11 +156,11 @@ set_env_luks
 # Needed packages: Ubuntu 2024.04 uses 'update-initramfs', and Ubuntu 2026.04 uses 'dracut' by default
 if ! which clevis > /dev/null; then
     apt-get -qq update
-    apt-get -qq --assume-yes install clevis clevis-tpm2 clevis-luks tpm2-tools
+    apt-get -qq --yes install clevis clevis-tpm2 clevis-luks tpm2-tools
     if which dracut > /dev/null; then
-        apt-get -qq --assume-yes install clevis-dracut
+        apt-get -qq --yes install clevis-dracut
     elif which update-initramfs > /dev/null; then
-        apt-get -qq --assume-yes install clevis-initramfs
+        apt-get -qq --yes install clevis-initramfs
     else
         echo "ERROR: did not find either 'dracut' or 'update-initramfs' for update of initramfs"
         cat /etc/os-release
@@ -171,7 +171,7 @@ fi
 # Need jq for json LUKS dump parsing
 if ! jq --version > /dev/null; then
     apt-get -qq update
-    apt-get -qq --assume-yes install jq
+    apt-get -qq --yes install jq
 fi
 
 # Trusted Platform Module 2.0 (TPM2) chip is functional ?

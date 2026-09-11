@@ -24,9 +24,9 @@ if [ "$INSTALL" = "True" ]; then
 
   # Install the program from the .deb file
   apt-get -qq update
-  apt-get -qq --assume-yes install $DEB_FILE
+  apt-get -qq --yes install $DEB_FILE
   # Cleanup
   rm --force $DEB_FILE
 else
-  apt-get -qq --assume-yes remove "cisco-secure-client-vpn"
+  apt-get -qq --yes remove "cisco-secure-client-vpn"
 fi

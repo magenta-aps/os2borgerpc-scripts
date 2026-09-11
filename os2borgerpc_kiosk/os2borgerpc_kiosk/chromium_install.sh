@@ -31,9 +31,9 @@ else
   VIDEO_DRIVERS=""
 fi
 
-apt-get -qq --assume-yes install xinit xserver-xorg-core x11-xserver-utils --no-install-recommends --no-install-suggests
+apt-get -qq --yes install xinit xserver-xorg-core x11-xserver-utils --no-install-recommends --no-install-suggests
 # shellcheck disable=SC2086  # We want word-splitting
-apt-get -qq --assume-yes install xdg-utils $VIDEO_DRIVERS xserver-xorg-input-all libleveldb-dev unclutter-xfixes xbindkeys
+apt-get -qq --yes install xdg-utils $VIDEO_DRIVERS xserver-xorg-input-all libleveldb-dev unclutter-xfixes xbindkeys
 
 # This section is a workaround to handle an error in Ubuntu server 22.04
 # that causes certain snap installs to trigger DNS problems on wifi.
@@ -89,7 +89,7 @@ printf '\n'
 
 # Chromium is only available as a snap and will also be installed as
 # a snap when using apt-get install
-LOG_OUTPUT=$(apt-get -qq --assume-yes install chromium-browser)
+LOG_OUTPUT=$(apt-get -qq --yes install chromium-browser)
 # Save exit status so we get the exit status of apt rather than from base64
 EXIT_STATUS=$?
 echo "$LOG_OUTPUT" | base64

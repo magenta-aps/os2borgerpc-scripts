@@ -23,4 +23,4 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get -qq update
 
 # shellcheck disable=SC2046 # We want word-splitting here
-apt-get -qq --assume-yes install $(check-language-support -l "$LANG")
+apt-get -qq --yes install $(check-language-support -l "$LANG")

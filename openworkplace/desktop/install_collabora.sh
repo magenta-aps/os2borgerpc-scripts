@@ -17,7 +17,7 @@ export DEBIAN_FRONTEND=noninteractive
 # Resync the local package index from its remote counterpart
 apt-get -qq update
 # Attempt to fix broken or interrupted installations
-apt-get -qq --assume-yes --fix-broken install
+apt-get -qq --yes install --fix-broken
 
 if [ "$INSTALL" = "True" ]; then
 
@@ -34,11 +34,11 @@ EOF
 
     apt-get -qq update
 
-    apt-get -qq --assume-yes install collaboraoffice-desktop
+    apt-get -qq --yes install collaboraoffice-desktop
 else
-    apt-get -qq --assume-yes remove collaboraoffice-desktop
+    apt-get -qq --yes remove collaboraoffice-desktop
     # Remove packages only installed as dependencies, which are no longer dependencies
-    apt-get -qq --assume-yes autoremove
+    apt-get -qq --yes autoremove
     rm /etc/apt/sources.list.d/collaboraoffice.sources
     apt-get -qq update
 fi

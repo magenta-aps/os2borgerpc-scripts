@@ -92,7 +92,7 @@ fi
 LOGOUT_TIMER_CONF="/usr/share/gnome-shell/extensions/$EXTENSION_NAME/config.json"
 
 if [ "$ACTIVATE" = "True" ]; then
-	apt-get -qq --assume-yes install jq
+	apt-get -qq --yes install jq
 
 	# Fetch and install gnome extension
 	wget $EXTENSION_GIT_URL

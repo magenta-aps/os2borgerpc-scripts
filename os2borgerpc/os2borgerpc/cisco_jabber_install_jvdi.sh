@@ -17,13 +17,13 @@ if dpkg -l "cisco-jvdi-client" > /dev/null; then
     echo "#############################################################"
     echo "# Removing already installed Cisco Jabber and configuration #"
     echo "#############################################################"
-    apt-get -qq --assume-yes purge cisco-jvdi-client
+    apt-get -qq --yes purge cisco-jvdi-client
 fi
 
 echo "############################"
 echo "# Installing Cisco Jabber. #"
 echo "############################"
 apt-get -qq update
-apt-get -qq --assume-yes install -f "$file"
+apt-get -qq --yes install -f "$file"
 rm "$file"
-apt-get -qq --assume-yes autoremove
+apt-get -qq --yes autoremove

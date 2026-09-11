@@ -23,7 +23,7 @@ then
     echo "##########################################################"
     echo "# Removing already installed icaclient and configuration #"
     echo "##########################################################"
-    apt-get -qq --assume-yes purge icaclient
+    apt-get -qq --yes purge icaclient
     rm --recursive $ICA_DIR
     rm $MIMEAPPSLIST_DIR"/mimeapps.list"
     rm $SHADOW_DIR"/Skrivebord/wfica.desktop"
@@ -42,18 +42,18 @@ echo "#########################"
 export DEBIAN_FRONTEND="noninteractive"
 debconf-set-selections <<< "icaclient app_protection/install_app_protection select yes"
 debconf-show icaclient 2>&1
-apt-get -qq --assume-yes --option DPkg::Lock::Timeout=900 install --fix-broken "$DEB_FILE" --allow-unauthenticated
+apt-get -qq --yes --option DPkg::Lock::Timeout=900 install --fix-broken "$DEB_FILE" --allow-unauthenticated
 rm "$DEB_FILE"
 
 apt-get -qq update
-apt-get -qq --assume-yes --option Dpkg::Options::="--force-confdef" --option Dpkg::Options::="--force-confold" --with-new-pkgs upgrade
-apt-get -qq --assume-yes autoremove
+apt-get -qq --yes --option Dpkg::Options::="--force-confdef" --option Dpkg::Options::="--force-confold" --with-new-pkgs upgrade
+apt-get -qq --yes autoremove
 
 # AcceptEULA agreement
 mkdir $ICA_DIR && touch "$ICA_DIR/.eula_accepted"
 
 # Handle end-user being prompted with error reports
-apt-get -qq --assume-yes purge apport
+apt-get -qq --yes purge apport
 
 # Remove user 'citrixlog' from login screen
 usermod --shell /usr/sbin/nologin citrixlog

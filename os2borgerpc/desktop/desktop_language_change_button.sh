@@ -116,7 +116,7 @@ for LANG in "${LANG_ARRAY[@]}"; do
 done
 export DEBIAN_FRONTEND=noninteractive # Stop Debconf from doing anything
 # shellcheck disable=SC2086 # We want word-splitting here
-apt-get -qq --assume-yes install $PACKAGE_LIST
+apt-get -qq --yes install $PACKAGE_LIST
 
 # Make necessary changes to user-cleanup, ensure idempotency
 if ! grep --quiet $LANGUAGE_CHANGE_SCRIPT $USER_CLEANUP; then
@@ -209,7 +209,7 @@ MISSING_LANGUAGE_SUPPORT=\$(check-language-support -l "\$CHOSEN_LANGUAGE")
 INSTALL_ERROR="False"
 if [ ! -z "\$MISSING_LANGUAGE_SUPPORT" ]; then
   apt-get -qq update
-  apt-get -qq --assume-yes install \$MISSING_LANGUAGE_SUPPORT || INSTALL_ERROR="True"
+  apt-get -qq --yes install \$MISSING_LANGUAGE_SUPPORT || INSTALL_ERROR="True"
 fi
 
 export DISPLAY=\$(who | grep -w '$USERNAME' | sed -rn 's/.*\((:[0-9]*)\).*/\1/p')

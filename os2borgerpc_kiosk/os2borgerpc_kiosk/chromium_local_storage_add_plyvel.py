@@ -44,7 +44,7 @@ print(
         [
             "apt-get",
             "-qq",
-            "--assume-yes",
+            "--yes",
             "install",
             PLYVEL_APT_PKG_NAME,
             PSUTIL_APT_PKG_NAME,

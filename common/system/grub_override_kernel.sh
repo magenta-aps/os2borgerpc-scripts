@@ -49,7 +49,7 @@ else
     # Install the kernel version
     apt-get -qq update
     # shellcheck disable=SC2086  # We want word-splitting
-    if ! apt-get -qq --assume-yes install $PKGS; then
+    if ! apt-get -qq --yes install $PKGS; then
       echo "Failed to install the specified kernel. Exiting."
       exit 1
     fi

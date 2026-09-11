@@ -10,4 +10,4 @@
 
 add-apt-repository --yes ppa:sane-project/sane-release
 apt-get -qq update
-apt-get -qq --assume-yes install libsane
+apt-get -qq --yes install libsane

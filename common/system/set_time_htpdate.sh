@@ -23,7 +23,7 @@ if [ "$(lsb_release --release --short | cut --delimiter '.' --fields 1)" -ge 24 
 fi
 
 apt-get -qq update
-apt-get -qq --assume-yes install htpdate "$HWCLOCK_PACKAGE"
+apt-get -qq --yes install htpdate "$HWCLOCK_PACKAGE"
 
 # Ensure that the htpdate service is disabled in case the script times out before htpdate is removed
 systemctl disable --now htpdate
@@ -58,7 +58,7 @@ systemctl enable --now systemd-timesyncd
 
 # Clean up and remove htpdate, as otherwise it leaves a service running which continually syncs time
 # via htpdate
-apt-get -qq --assume-yes remove htpdate
+apt-get -qq --yes remove htpdate
 
 if [ -z "$SUCCESS" ]; then
     echo "Synchronisation failed with all the listed servers"

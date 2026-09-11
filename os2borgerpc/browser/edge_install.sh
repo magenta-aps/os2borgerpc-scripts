@@ -136,8 +136,8 @@ if [ "$INSTALL" = "True" ]; then
 
   apt-get -qq update
   # If the package manager is in an inconsistent state fix that first
-  apt-get -qq --assume-yes install --fix-broken
-  apt-get -qq --assume-yes install $PACKAGE
+  apt-get -qq --yes install --fix-broken
+  apt-get -qq --yes install $PACKAGE
 
   setup_policies
 
@@ -152,6 +152,6 @@ if [ "$INSTALL" = "True" ]; then
   # should handle that: https://learn.microsoft.com/en-us/deployedge/microsoft-edge-update-policies#autoupdatecheckperiodminutes
 else
   # Remove the browser. Leave the desktop files?
-  apt-get -qq --assume-yes remove $PACKAGE
+  apt-get -qq --yes remove $PACKAGE
   rm --force --recursive $POLICY $HOMEPAGE_POLICY "$BROWSER_HOME"
 fi
