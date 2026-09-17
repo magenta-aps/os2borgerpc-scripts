@@ -19,6 +19,8 @@ fi
 # Log output in English, please. More useable as search terms when debugging.
 export LANG=en_US.UTF-8
 export DEBIAN_FRONTEND=noninteractive
+USR="chrome"
+BROWSER_HOME="/home/$USR/snap/chromium/common/chromium/"
 
 apt-get update --assume-yes
 
@@ -91,6 +93,17 @@ LOG_OUTPUT=$(apt-get install --assume-yes chromium-browser)
 # Save exit status so we get the exit status of apt rather than from base64
 EXIT_STATUS=$?
 echo "$LOG_OUTPUT" | base64
+
+# 2026-08: Prevent popup on first run about a service agreement related to AVC:
+#          https://www.google.com/chrome/terms/
+#          Unfortunately it appears like there's no enterprise policy for this,
+#          yet, which would be better
+mkdir --parents "$BROWSER_HOME"
+touch "$BROWSER_HOME/EULA Accepted"
+# Make the permissions match what they're supposed to
+chown --recursive $USR:$USR /home/$USR/snap
+chmod 700 /home/chrome/snap /home/chrome/snap/chromium/common/chromium
+chmod 664 "$BROWSER_HOME/EULA Accepted"
 
 CHROMIUM_POLICY_FILE="/var/snap/chromium/current/policies/managed/os2borgerpc-defaults.json"
 mkdir --parents "$(dirname "$CHROMIUM_POLICY_FILE")"
