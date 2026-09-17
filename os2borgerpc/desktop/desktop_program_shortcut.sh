@@ -57,8 +57,9 @@ if [ "$ADD" = "True" ]; then
   else
     ORIGINAL_FILE=$APT_DESKTOP_FILE_PATH/$PROGRAM.desktop
   fi
+  LOCAL_FILE_COPY="/home/.skjult/.local/share/applications/$(basename "$ORIGINAL_FILE")"
   # Check that the program actually exists and exit if it doesn't
-  if [ ! -f "$ORIGINAL_FILE" ]; then
+  if [ ! -f "$ORIGINAL_FILE" ] && [ ! -f "$LOCAL_FILE_COPY" ]; then
     echo "The chosen program name did not match any installed programs. Exiting."
     exit 1
   fi
@@ -66,7 +67,6 @@ if [ "$ADD" = "True" ]; then
   rm --force "$SHADOW_DESKTOP/$(basename "$ORIGINAL_FILE")"
 
   # Ensure that the local copy exists
-  LOCAL_FILE_COPY="/home/.skjult/.local/share/applications/$(basename "$ORIGINAL_FILE")"
   mkdir --parents "$(dirname "$LOCAL_FILE_COPY")"
   if [ ! -f "$LOCAL_FILE_COPY" ]; then
     cp "$ORIGINAL_FILE" "$LOCAL_FILE_COPY"
