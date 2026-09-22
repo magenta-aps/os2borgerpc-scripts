@@ -36,7 +36,6 @@ runuser -u user xdg-user-dirs-update
 DESKTOP=$(basename "$(runuser -u user xdg-user-dir DESKTOP)")
 
 SHADOW_DESKTOP="/home/.skjult/$DESKTOP"
-USER_DESKTOP="/home/user/$DESKTOP"
 SNAP_DESKTOP_FILE_PATH="/var/lib/snapd/desktop/applications"
 APT_DESKTOP_FILE_PATH="/usr/share/applications"
 
@@ -57,16 +56,16 @@ if [ "$ADD" = "True" ]; then
   else
     ORIGINAL_FILE=$APT_DESKTOP_FILE_PATH/$PROGRAM.desktop
   fi
+  LOCAL_FILE_COPY="/home/.skjult/.local/share/applications/$(basename "$ORIGINAL_FILE")"
   # Check that the program actually exists and exit if it doesn't
-  if [ ! -f "$ORIGINAL_FILE" ]; then
+  if [ ! -f "$ORIGINAL_FILE" ] && [ ! -f "$LOCAL_FILE_COPY" ]; then
     echo "The chosen program name did not match any installed programs. Exiting."
     exit 1
   fi
-  # Remove it first as it may be a copy and not symlink (ln --force can't overwrite regular files)
+  # Remove it first to prevent possible conflicts
   rm --force "$SHADOW_DESKTOP/$(basename "$ORIGINAL_FILE")"
 
   # Ensure that the local copy exists
-  LOCAL_FILE_COPY="/home/.skjult/.local/share/applications/$(basename "$ORIGINAL_FILE")"
   mkdir --parents "$(dirname "$LOCAL_FILE_COPY")"
   if [ ! -f "$LOCAL_FILE_COPY" ]; then
     cp "$ORIGINAL_FILE" "$LOCAL_FILE_COPY"
@@ -80,10 +79,20 @@ if [ "$ADD" = "True" ]; then
     sed --in-place "s@Icon=.*@Icon=/snap/firefox/current/default256.png@" "$LOCAL_FILE_COPY"
   fi
 
-  ln --symbolic --force "$LOCAL_FILE_COPY" "$SHADOW_DESKTOP"/
+  cp "$LOCAL_FILE_COPY" "$SHADOW_DESKTOP"/
 else
   if [ -f "$SHADOW_DESKTOP/${PROGRAM}_$PROGRAM.desktop" ]; then
     PROGRAM=${PROGRAM}_$PROGRAM
   fi
-  rm --force "$SHADOW_DESKTOP/$PROGRAM.desktop" "$USER_DESKTOP/$PROGRAM.desktop" 2> /dev/null
+  rm --force "$SHADOW_DESKTOP/$PROGRAM.desktop"
+
+  # Remove the local shortcuts for all users
+  USER_HOME_DIRS=$(ls /home/)
+  for DIR in $USER_HOME_DIRS; do
+    rm --force "/home/$DIR/$DESKTOP/$PROGRAM.desktop" 2> /dev/null
+  done
+
+  # rm --force still returns exit code 1 if the folder is immutable
+  # so we make sure to exit with exit code 0
+  exit 0
 fi
