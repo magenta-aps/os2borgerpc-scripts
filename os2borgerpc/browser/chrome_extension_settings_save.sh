@@ -15,6 +15,7 @@ POLICY="/etc/opt/chrome/policies/managed/os2borgerpc-defaults.json"
 SKELETON=".skjult"
 CHROME_PROFILE_PATH="/home/$SKELETON/.config/google-chrome/Default"
 EXTENSION_SETTINGS_PATH="/home/user/.config/google-chrome/Default/Local Extension Settings"
+COOKIES_PATH="/home/user/.config/google-chrome/Default/Cookies"
 
 set -x
 
@@ -26,7 +27,8 @@ if [ ! -f "$POLICY" ]; then
 fi
 
 if [ "$ACTIVATE" = "False" ]; then
-  rm --recursive --force "$CHROME_PROFILE_PATH/Local Extension Settings" "$EXTENSION_SETTINGS_PATH"
+  rm --recursive --force "$CHROME_PROFILE_PATH/Local Extension Settings" "$CHROME_PROFILE_PATH/Cookies" \
+  "$EXTENSION_SETTINGS_PATH" "$COOKIES_PATH"
   echo "Deleted the saved extension settings."
   exit 0
 fi
@@ -42,6 +44,7 @@ elif [ ! -d "$EXTENSION_SETTINGS_PATH" ]; then
 else
   mkdir --parents "$CHROME_PROFILE_PATH"
   cp --recursive "$EXTENSION_SETTINGS_PATH" "$CHROME_PROFILE_PATH/"
+  cp "$COOKIES_PATH" "$CHROME_PROFILE_PATH/"
   chown --recursive root:root "$CHROME_PROFILE_PATH/"
   echo "The extension settings have been saved. It is now fine to log out."
 fi
