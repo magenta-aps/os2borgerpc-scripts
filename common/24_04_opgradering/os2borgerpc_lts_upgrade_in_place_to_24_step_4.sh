@@ -42,7 +42,7 @@ if [ -f "$TMP_ROOTCRON" ]; then
 fi
 
 # Reset jobmanager timeout to default value
-set_os2borgerpc_config job_timeout 900
+set_os2borgerpc_config job_timeout 1800
 
 os2borgerpc_push_config_keys job_timeout
 
