@@ -17,10 +17,10 @@ fi
 
 PKG="linux-generic-hwe-$(lsb_release --release --short)"
 
-apt-get update > /dev/null
+apt-get -qq update
 
 if [ "$ACTIVATE" = "True" ]; then
-  apt-get install --assume-yes "$PKG"
+  apt-get -qq --yes install "$PKG"
 else
-  apt-get remove --assume-yes "$PKG"
+  apt-get -qq --yes remove "$PKG"
 fi

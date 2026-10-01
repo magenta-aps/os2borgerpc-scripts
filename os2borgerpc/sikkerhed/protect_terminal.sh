@@ -25,7 +25,7 @@ SKEL=".skjult"
 SHORTCUT_LOCAL_PATH="/home/$SKEL/.local/share/applications/$SHORTCUT_NAME"
 
 # Also remove the gnome extension that can start gnome terminal, don't stop execution if it fails
-apt-get remove --assume-yes nautilus-extension-gnome-terminal || true
+apt-get -qq --yes remove nautilus-extension-gnome-terminal || true
 
 
 ### BACKWARDS COMPATIBILITY - cleanup after the previous script versions ###
@@ -45,8 +45,8 @@ fi
 
 # Make sure the terminal is correctly installed
 if [ ! -f "$PROGRAM_PATH" ] || [ ! -f "$PROGRAM_PATH.real" ]; then
-  apt-get update
-  apt-get install --reinstall --assume-yes gnome-terminal
+  apt-get -qq update
+  apt-get -qq --yes install --reinstall gnome-terminal
 fi
 
 # Turns out this is unnecessary to hide the program from user's program list

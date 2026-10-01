@@ -11,8 +11,8 @@ dpkg -l acpi > /dev/null 2>&1
 HAS_ACPI=$?
 
 if [[ $HAS_ACPI == 1 ]]; then
-    apt-get update -q
-    apt-get install -q -y acpi
+    apt-get -qq update
+    apt-get -qq --yes install acpi
 fi
 
 # Aflæs temperaturen

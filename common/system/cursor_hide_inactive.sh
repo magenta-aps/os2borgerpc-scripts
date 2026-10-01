@@ -36,13 +36,13 @@ if [ "$ACTIVATE" = "False" ]; then
   fi
 
   pkill unclutter
-  apt-get --assume-yes remove $PROGRAM
+  apt-get -qq --yes remove $PROGRAM
   exit 0
 fi
 
 # Install the program
-apt-get update --assume-yes
-apt-get install --assume-yes $PROGRAM
+apt-get -qq update
+apt-get -qq --yes install $PROGRAM
 
 if [ -n "$IS_KIOSK" ]; then
     # 3 i means: Insert on line 3

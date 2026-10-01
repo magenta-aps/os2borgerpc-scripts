@@ -83,7 +83,7 @@ INSTALLED_DEBIAN_VERSION=$(dpkg --list "$DEBIAN_NAME" | grep "$DEBIAN_NAME" | gr
 export DEBIAN_FRONTEND=noninteractive
 
 # Resync the local package index from its remote counterpart
-apt-get update > /dev/null
+apt-get -qq update
 
 if [ "$INSTALL" = "False" ]; then
     echo "Removing manually installed Omnissa Horizon config files from directory '$ETC_OMNISSA_DIR'"
@@ -104,7 +104,7 @@ if [ "$INSTALL" = "False" ]; then
         echo "Omnissa Horizon Debian package '$DEBIAN_NAME' is not installed";
     else
         echo "Removing Omnissa Horizon Debian package '$DEBIAN_NAME'";
-        if apt-get remove --assume-yes "$DEBIAN_NAME";
+        if apt-get -qq --yes remove "$DEBIAN_NAME";
         then
             echo "Omnissa Horizon Debian package '$DEBIAN_NAME' sucessfully removed";
         else
@@ -116,7 +116,7 @@ if [ "$INSTALL" = "False" ]; then
     echo "Not removing Av1, H264, and HEVC media codecs packages ${DEBIAN_NAME_EXTRA_1} ${DEBIAN_NAME_EXTRA_2}"
 
     # Remove packages only installed as dependencies, which are no longer dependencies
-    apt-get --assume-yes autoremove
+    apt-get -qq --yes autoremove
 
     exit 0
 fi
@@ -125,7 +125,7 @@ fi
 # this installs ./usr/bin/horizon-client among others
 
 echo "Installing extra Debian packages for Av1, H264, and HEVC media codecs: ${DEBIAN_NAME_EXTRA_1} ${DEBIAN_NAME_EXTRA_2}"
-apt-get --assume-yes install "$DEBIAN_NAME_EXTRA_1" "$DEBIAN_NAME_EXTRA_2"
+apt-get -qq --yes install "$DEBIAN_NAME_EXTRA_1" "$DEBIAN_NAME_EXTRA_2"
 
 if [ "$DEBIAN_VERSION" = "$INSTALLED_DEBIAN_VERSION" ]; then
     echo "Omnissa Horizon Debian package '$DEBIAN_NAME' version '$INSTALLED_DEBIAN_VERSION' is already installed";

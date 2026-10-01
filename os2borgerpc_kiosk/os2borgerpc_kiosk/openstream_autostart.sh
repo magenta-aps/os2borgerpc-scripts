@@ -85,15 +85,15 @@ if [ -z "$PC_UID" ]; then
 fi
 
 # Install Chromium and a minimal X
-apt-get update > /dev/null
+apt-get -qq update
 
-apt-get install --assume-yes xinit xserver-xorg-core x11-xserver-utils --no-install-recommends --no-install-suggests
+apt-get -qq --yes install xinit xserver-xorg-core x11-xserver-utils --no-install-recommends --no-install-suggests
 # shellcheck disable=SC2086  # We want word-splitting
-apt-get install --assume-yes xdg-utils $VIDEO_DRIVERS xserver-xorg-input-all libleveldb-dev unclutter-xfixes xbindkeys
+apt-get -qq --yes install xdg-utils $VIDEO_DRIVERS xserver-xorg-input-all libleveldb-dev unclutter-xfixes xbindkeys
 
 # Chromium is only available as a snap and will also be installed as
 # a snap when using apt-get install
-LOG_OUTPUT=$(apt-get install --assume-yes chromium-browser)
+LOG_OUTPUT=$(apt-get -qq --yes install chromium-browser)
 # Save exit status so we get the exit status of apt rather than from base64
 EXIT_STATUS=$?
 echo "$LOG_OUTPUT" | base64

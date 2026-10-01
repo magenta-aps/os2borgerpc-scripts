@@ -79,10 +79,10 @@ WAYLAND_FILE_2="/usr/share/wayland-sessions/ubuntu.desktop"
 WAYLAND_HIDDEN_FILE_2="/usr/share/wayland-sessions/hidden/ubuntu.desktop"
 
 export DEBIAN_FRONTEND=noninteractive
-apt-get update
+apt-get -qq update
 
 if [ "$CHOSEN_DM" = "lightdm" ]; then
-  if ! apt-get --assume-yes install lightdm; then
+  if ! apt-get -qq --yes install lightdm; then
     echo "Installing lightdm failed. Exiting."
     exit 1
   fi
@@ -160,7 +160,7 @@ EOF
   # Maintain numlock settings
   if [ -f $GDM_NUMLOCK_POLICY ]; then
     if [ ! -f "/usr/bin/numlockx" ]; then
-      if ! apt-get -yqq install numlockx; then
+      if ! apt-get -qq --yes install numlockx; then
         echo "Installing numlockx failed. Exiting."
         exit 1
       fi
@@ -226,7 +226,7 @@ EOF
     sed --in-place "/include common-account/i# OS2borgerPC custom login\nauth [success=1 default=ignore] pam_succeed_if.so user != user\nauth required pam_python.so $OTHER_PAM_PYTHON_MODULE" $LIGHTDM_PAM_FILE
   fi
 
-  if ! apt-get --assume-yes remove gdm3; then
+  if ! apt-get -qq --yes remove gdm3; then
     echo "Removing gdm failed. Exiting."
     exit 1
   fi
@@ -234,7 +234,7 @@ EOF
   echo "/usr/sbin/lightdm" > $DEFAULT_DM_FILE
 
 elif [ "$CHOSEN_DM" = "gdm" ]; then
-  if ! apt-get --assume-yes install gdm3; then
+  if ! apt-get -qq --yes install gdm3; then
     echo "Installing gdm failed. Exiting."
     exit 1
   fi
@@ -387,7 +387,7 @@ EOF
     sed --in-place "/include common-account/i# OS2borgerPC custom login\nauth [success=1 default=ignore] pam_succeed_if.so user != user\nauth required pam_python.so $OTHER_PAM_PYTHON_MODULE" $GDM_PAM_FILE
   fi
 
-  if ! apt-get --assume-yes remove lightdm; then
+  if ! apt-get -qq --yes remove lightdm; then
     echo "Removing lightdm failed. Exiting."
     exit 1
   fi

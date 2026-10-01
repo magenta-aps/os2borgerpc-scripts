@@ -39,11 +39,11 @@ fi
 NEW_CLIENT="/root/.local/share/pipx/venvs/os2borgerpc-client/lib/python3.12/site-packages/os2borgerpc/client/jobmanager.py"
 if [ -f $NEW_CLIENT ]; then
   rm -rf /usr/local/lib/python3.10/
-  apt-get --assume-yes remove --purge python3.10-minimal || true
+  apt-get -qq --yes remove --purge python3.10-minimal || true
 fi
 
 # Remove any dependencies of the old version of python that are no longer used
-apt-get --assume-yes autoremove
+apt-get -qq --yes autoremove
 
 # Set danish timezone and language
 timedatectl set-timezone Europe/Copenhagen
@@ -54,7 +54,7 @@ update-locale LANG=da_DK.UTF-8
 
 # Update the time accordingly
 export DEBIAN_FRONTEND=noninteractive
-apt-get install --assume-yes ntpdate
+apt-get -qq --yes install ntpdate
 # It's not a big deal if the time sync fails, which it sometimes does for no apparent reason
 ntpdate pool.ntp.org || true
 

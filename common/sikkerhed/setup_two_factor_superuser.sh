@@ -36,8 +36,8 @@ export DEBIAN_FRONTEND=noninteractive
 #  --rate-time 30 --emergency-codes 1 2>/dev/null
 if [ "$ACTIVATE" = "True" ]; then
 
-  apt-get update --assume-yes
-  apt-get install --assume-yes libpam-google-authenticator
+  apt-get -qq update
+  apt-get -qq --yes install libpam-google-authenticator
 
   # Make PAM require two factor for the superuser, both for direct login and su
   if ! grep -q "pam_google_authenticator" $PAM_CONFIG; then
@@ -93,5 +93,5 @@ else
   sed --regexp-extended --in-place "/$PAM_TEXT2/d" $PAM_CONFIG
 
   # Uninstall the two factor authenticator
-  apt-get remove --assume-yes libpam-google-authenticator
+  apt-get -qq --yes remove libpam-google-authenticator
 fi

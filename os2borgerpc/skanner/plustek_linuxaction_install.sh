@@ -10,8 +10,8 @@ set -x
 
 FILE=$1
 
-apt-get --assume-yes update
+apt-get -qq update
 
 dpkg -i "$FILE"
 
-apt-get --assume-yes --fix-broken install
+apt-get -qq --yes install --fix-broken

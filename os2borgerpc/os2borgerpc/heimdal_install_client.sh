@@ -34,7 +34,7 @@ if [ "$ACTIVATE" = "True" ]; then
     rm $HEIMDAL_SCRIPT_NAME
 else
     echo "Attempting to remove Heimdal"
-    apt-get purge heimdal --assume-yes
+    apt-get -qq --yes purge heimdal
     # It seems the service isn't uninstalled by the above, so disable and stop it
     systemctl disable --now heimdal-clienthost
     rm /usr/share/keyrings/heimdal-keyring.gpg /etc/apt/sources.list.d/heimdal.list

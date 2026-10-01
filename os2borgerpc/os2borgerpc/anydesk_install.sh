@@ -18,10 +18,10 @@ if [ "$INSTALL" = "True" ]; then
     wget -qO - https://keys.anydesk.com/repos/DEB-GPG-KEY | apt-key add -
     echo "deb http://deb.anydesk.com/ all main" > $ANYDESK_APT_SOURCE
 
-    apt-get update
-    apt-get install --assume-yes anydesk
+    apt-get -qq update
+    apt-get -qq --yes install anydesk
 else
     # Note: Not currently removing the signing key
-    apt-get remove --assume-yes anydesk
+    apt-get -qq --yes remove anydesk
     rm $ANYDESK_APT_SOURCE
 fi

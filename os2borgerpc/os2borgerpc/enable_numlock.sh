@@ -60,8 +60,8 @@ EOF
   else # lightdm is used as the display manager
 
     if [ ! -f "/usr/bin/numlockx" ]; then
-      apt-get update -qq > /dev/null
-      apt-get -yqq install numlockx
+      apt-get -qq update
+      apt-get -qq --yes install numlockx
     fi
 
     mkdir --parents "$(dirname $LIGHTDM_SCRIPT)"
@@ -86,7 +86,7 @@ EOF
   echo "Added the numlock policy as: $POLICY"
 else
   if [ -f "/usr/bin/numlockx" ]; then
-    apt-get remove -yqq numlockx
+    apt-get -qq --yes remove numlockx
   fi
   rm --force "$POLICY" "$POLICY_LOCK" "$LIGHTDM_SCRIPT" "$GDM_DCONF_FILE" "$GDM_DCONF_LOCK_FILE"
 fi

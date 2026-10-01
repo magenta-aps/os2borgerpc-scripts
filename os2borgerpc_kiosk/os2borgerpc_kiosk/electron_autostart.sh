@@ -75,11 +75,11 @@ fi
 
 # Make sure that we have support for X
 # libfuse2 and libasound2t64 are required to start AppImages
-apt-get update --assume-yes
-apt-get install --assume-yes xinit xserver-xorg-core x11-xserver-utils --no-install-recommends --no-install-suggests
+apt-get -qq update
+apt-get -qq --yes install xinit xserver-xorg-core x11-xserver-utils --no-install-recommends --no-install-suggests
 # We want word-splitting here
 # shellcheck disable=SC2086
-apt-get install --assume-yes xdg-utils xbindkeys libfuse2 libasound2t64 $ARCHITECTURE_DEPS
+apt-get -qq --yes install xdg-utils xbindkeys libfuse2 libasound2t64 $ARCHITECTURE_DEPS
 
 # Get the computer UID, fail if we can't (though this should never happen)
 PC_UID=$(get_os2borgerpc_config uid)

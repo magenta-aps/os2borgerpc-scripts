@@ -30,7 +30,7 @@ if [ "$1" != "" ] && [ "$1" != "false" ] && [ "$1" != "falsk" ]; then
 		# Check (quietly) that the unattended-upgrades package is installed, and
 		# install it if it isn't
 		if ! dpkg -s unattended-upgrades > /dev/null 2>&1; then
-			apt-get --assume-yes install unattended-upgrades
+			apt-get -qq --yes install unattended-upgrades
 		fi
 
 		# Start building the configuration file with two settings, one for
