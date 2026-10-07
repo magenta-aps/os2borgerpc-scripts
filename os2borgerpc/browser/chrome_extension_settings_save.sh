@@ -33,6 +33,11 @@ if [ "$ACTIVATE" = "False" ]; then
   exit 0
 fi
 
+# Install sqlite3 needed to modify the copied cookies database
+apt-get -qq update
+apt-get -qq --yes install --fix-broken  # Attempt to fix possible apt errors
+apt-get -qq --yes install sqlite3
+
 if grep --quiet "ForceEphemeral" "$POLICY"; then
   sed --in-place "/ForceEphemeral/d" $POLICY
   echo "First run complete. Next, please log out on the target computer and log in as citizen."
@@ -44,7 +49,14 @@ elif [ ! -d "$EXTENSION_SETTINGS_PATH" ]; then
 else
   mkdir --parents "$CHROME_PROFILE_PATH"
   cp --recursive "$EXTENSION_SETTINGS_PATH" "$CHROME_PROFILE_PATH/"
-  cp "$COOKIES_PATH" "$CHROME_PROFILE_PATH/"
+  # Only copy cookies file if the expected table exists
+  if sqlite3 "$COOKIES_PATH" '.tables' | grep --quiet "^cookies "; then
+    # Delete all cookies not related to Appwriter Cloud before copying cookies file
+    # Copy the file if the delete succeeds
+    if sqlite3 "$COOKIES_PATH" 'delete from cookies where host_key != ".lingapps.dk"'; then
+      cp "$COOKIES_PATH" "$CHROME_PROFILE_PATH/"
+    fi
+  fi
   chown --recursive root:root "$CHROME_PROFILE_PATH/"
   echo "The extension settings have been saved. It is now fine to log out."
 fi
