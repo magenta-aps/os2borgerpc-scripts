@@ -14,12 +14,13 @@ HORIZON_MANDATORY_CONFIG_FILE="$2" # mandatory if INSTALL != False
 HORIZON_DEFAULT_CONFIG_FILE="$3"   # optional in any case
 
 # UPDATE VENDOR DEBIAN PACKAGE METADATA HERE
+# Omnissa Horizon Client deb package for 64-bit Linux 2026-08-24 version 2606 size 180.32 MB
 DOWNLOADS="https://customerconnect.omnissa.com/downloads/info/slug/virtual_desktop_and_apps/omnissa_horizon_clients/8"
-DEBIAN_DEB="Omnissa-Horizon-Client-2512-8.17.0-20187591429.x64.deb"
+DEBIAN_DEB="Omnissa-Horizon-Client-2606-8.19.0-32216036411.x64.deb"
 DEBIAN_NAME="omnissa-horizon-client"
-DEBIAN_SHA256SUM="578c16795a79fea19f1c951a9890d9f4fe9c886a9505d23d0448efa9c8f98d8c"
-DEBIAN_URL="https://download3.omnissa.com/software/CART26FQ4_LIN64_DEBPKG_2512/$DEBIAN_DEB"
-DEBIAN_VERSION="2512-8.17.0-20187591429"
+DEBIAN_SHA256SUM="7ad50a9a4ad641b3b6985126ff005c34da29641ff59752437fb109851199d0ee"
+DEBIAN_URL="https://download3.omnissa.com/software/CART27FQ2_LIN64_DEBPKG_2606/$DEBIAN_DEB"
+DEBIAN_VERSION="2606-8.19.0-32216036411"
 
 # Omnissa Horizon config files installation pathes from vendor instructions
 # When Omnissa Horizon client starts up, configuration settings are processed from various locations
