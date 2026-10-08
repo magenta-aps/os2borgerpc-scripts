@@ -162,10 +162,9 @@ else
 fi
 
 echo "Installing Omnissa Horizon desktop launcher '$HORIZON_DESKTOP_LINK_SKJULT'"
-# ln can't overwrite existing files so we make sure to delete them first
-rm --force "$HORIZON_DESKTOP_LINK_SKJULT" "$HORIZON_DESKTOP_LINK_USER"
+rm --force "$HORIZON_DESKTOP_LINK_USER"
 mkdir --parents "$(dirname "$HORIZON_DESKTOP_LINK_SKJULT")"
-ln --symbolic "$GLOBAL_HORIZON_FILE" "$HORIZON_DESKTOP_LINK_SKJULT"
+cp "$GLOBAL_HORIZON_FILE" "$HORIZON_DESKTOP_LINK_SKJULT"
 
 echo "Installing Omnissa Horizon desktop x-scheme-handler"
 # Make sure the mime file exists
