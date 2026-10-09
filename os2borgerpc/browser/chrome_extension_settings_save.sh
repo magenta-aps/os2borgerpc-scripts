@@ -49,13 +49,10 @@ elif [ ! -d "$EXTENSION_SETTINGS_PATH" ]; then
 else
   mkdir --parents "$CHROME_PROFILE_PATH"
   cp --recursive "$EXTENSION_SETTINGS_PATH" "$CHROME_PROFILE_PATH/"
-  # Only copy cookies file if the expected table exists
-  if sqlite3 "$COOKIES_PATH" '.tables' | grep --quiet "^cookies "; then
-    # Delete all cookies not related to Appwriter Cloud before copying cookies file
-    # Copy the file if the delete succeeds
-    if sqlite3 "$COOKIES_PATH" 'delete from cookies where host_key != ".lingapps.dk"'; then
-      cp "$COOKIES_PATH" "$CHROME_PROFILE_PATH/"
-    fi
+  # Delete all cookies not related to Appwriter Cloud before copying cookies file
+  # Copy the file if the delete succeeds
+  if sqlite3 "$COOKIES_PATH" 'delete from cookies where host_key != ".lingapps.dk"'; then
+    cp "$COOKIES_PATH" "$CHROME_PROFILE_PATH/"
   fi
   chown --recursive root:root "$CHROME_PROFILE_PATH/"
   echo "The extension settings have been saved. It is now fine to log out."
